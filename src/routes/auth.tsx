@@ -147,7 +147,17 @@ function AuthPage() {
 
         {/* Right — sign in */}
         <section className="order-1 flex items-center justify-center px-6 pb-10 pt-10 sm:px-10 lg:order-2 lg:px-16 lg:py-16">
-          <div className="w-full max-w-[26rem] glass rounded-3xl p-8 sm:p-10 animate-fade-up">
+          <div className="w-full max-w-[26rem] space-y-8">
+            <div className="flex min-w-0 items-center gap-3 animate-fade-in lg:hidden">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-border bg-surface">
+                <Camera className="h-[18px] w-[18px] text-gold" />
+              </span>
+              <span className="truncate text-sm font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                JH7 <span className="text-foreground">Gestão Fotográfica</span>
+              </span>
+            </div>
+
+            <div className="glass rounded-3xl p-8 sm:p-10 animate-fade-up">
             <div className="space-y-2">
               <h2 className="text-3xl">Bem-vindo de volta</h2>
               <p className="text-sm leading-relaxed text-muted-foreground">
@@ -264,6 +274,7 @@ function AuthPage() {
                 Conheça os planos
               </Link>
             </p>
+            </div>
           </div>
         </section>
       </div>
