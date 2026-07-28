@@ -130,6 +130,61 @@ export default function EmpresasList() {
           </Button>
         </header>
 
+        <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(15rem,100%),1fr))]">
+          <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.25rem)]">
+            <h3 className="text-sm font-semibold text-muted-foreground">Empresas cadastradas</h3>
+            <p
+              className="mt-2 text-[clamp(1.75rem,6vw,2rem)] font-bold leading-tight"
+              style={{ color: "var(--panel-accent)" }}
+            >
+              {resumo.total}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.25rem)]">
+            <h3 className="text-sm font-semibold text-muted-foreground">Ativos x Inativos</h3>
+            <div className="mt-2 flex items-baseline gap-3">
+              <p
+                className="text-[clamp(1.75rem,6vw,2rem)] font-bold leading-tight"
+                style={{ color: "var(--panel-accent)" }}
+              >
+                {resumo.ativos}
+              </p>
+              <span className="text-muted-foreground">/</span>
+              <p className="text-[clamp(1.5rem,5vw,1.75rem)] font-bold leading-tight text-muted-foreground">
+                {resumo.inativos}
+              </p>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">ativos / inativos</p>
+          </div>
+
+          <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.25rem)]">
+            <h3 className="text-sm font-semibold text-muted-foreground">Últimos 6 meses</h3>
+            <div className="mt-2 h-[88px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={resumo.meses} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
+                  <XAxis
+                    dataKey="mes"
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "hsl(var(--muted) / 0.3)" }}
+                    contentStyle={{
+                      background: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: 8,
+                      fontSize: 12,
+                    }}
+                  />
+                  <Bar dataKey="total" fill="var(--panel-accent)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
         <Input
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
