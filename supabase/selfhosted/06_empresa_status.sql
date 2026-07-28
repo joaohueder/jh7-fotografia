@@ -53,12 +53,12 @@ begin
     raise exception 'Informe uma nota com pelo menos 5 caracteres';
   end if;
 
-  select status into v_atual from public.empresas where id = p_id;
+  select status::text into v_atual from public.empresas where id = p_id;
   if not found then
     raise exception 'Empresa não encontrada';
   end if;
 
-  update public.empresas set status = p_status where id = p_id;
+  update public.empresas set status = p_status::public.empresa_status where id = p_id;
 
   insert into public.empresa_status_historico
     (empresa_id, status_anterior, status_novo, nota, alterado_por)
