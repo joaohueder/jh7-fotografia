@@ -294,8 +294,14 @@ export default function EmpresaForm() {
 
     try {
       if (editing) {
-        await update.mutateAsync({ id: id!, empresa: payload, contatos: lista, password: senha });
-        toast.success("Empresa atualizada.");
+        const trocarSenha = Boolean(senha) && Boolean(confirmar) && senhaOk && confirmarOk;
+        await update.mutateAsync({
+          id: id!,
+          empresa: payload,
+          contatos: lista,
+          password: trocarSenha ? senha : undefined,
+        });
+        toast.success(trocarSenha ? "Empresa e senha atualizadas." : "Empresa atualizada.");
       } else {
         await create.mutateAsync({
           empresa: payload,
