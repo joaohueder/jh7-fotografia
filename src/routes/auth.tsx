@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { ArrowRight, Camera, Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,12 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+const HIGHLIGHTS = [
+  "Agenda unificada de ensaios e eventos",
+  "Clientes, contratos e pagamentos sob controle",
+  "Galerias e entregas organizadas por projeto",
+  "Visão financeira do seu negócio fotográfico",
+];
 
 function AuthPage() {
   const { user, isLoading, signIn } = useAuth();
@@ -70,174 +76,207 @@ function AuthPage() {
     navigate({ to: "/dashboard", replace: true });
   }
 
-
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-6 w-6 animate-spin text-gold" />
       </div>
     );
   }
 
   return (
-    <div className="grid min-h-screen w-full grid-cols-1 lg:grid-cols-2">
-      {/* Left column — system explanation */}
-      <div className="relative order-1 flex flex-col justify-between bg-primary p-8 text-primary-foreground lg:order-1 lg:p-12">
-        <div className="relative z-10">
-          <div className="flex items-center gap-2">
-            <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary-foreground/10">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-6 w-6"
-              >
-                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
-                <circle cx="12" cy="13" r="3" />
-              </svg>
-            </div>
-            <span className="text-lg font-semibold">JH7 Gestão Fotográfica</span>
-          </div>
-        </div>
+    <div className="relative min-h-screen overflow-hidden bg-background">
+      {/* Ambient light */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{ background: "var(--gradient-halo)" }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-40 bottom-[-12rem] h-[32rem] w-[32rem] rounded-full opacity-[0.07] blur-3xl"
+        style={{ background: "var(--gradient-gold)" }}
+      />
 
-        <div className="relative z-10 my-8 max-w-md">
-          <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
-            Gerencie seu estúdio com clareza
-          </h1>
-          <p className="mt-4 text-base leading-relaxed opacity-90 lg:text-lg">
-            Tudo o que você precisa para organizar sessões, acompanhar clientes,
-            controlar agendas e entregar projetos no prazo — em um só lugar.
-          </p>
+      <div className="relative grid min-h-screen grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
+        {/* Left — brand narrative */}
+        <section className="relative order-2 flex flex-col justify-between gap-10 px-6 pb-12 pt-4 sm:px-10 lg:order-1 lg:gap-16 lg:px-16 lg:py-16">
+          <header className="order-first flex min-w-0 items-center gap-3 animate-fade-in max-lg:hidden">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-border bg-surface">
+              <Camera className="h-[18px] w-[18px] text-gold" />
+            </span>
+            <span className="truncate text-sm font-medium tracking-[0.14em] uppercase text-muted-foreground">
+              JH7 <span className="text-foreground">Gestão Fotográfica</span>
+            </span>
+          </header>
 
-          <ul className="mt-8 space-y-4 text-sm opacity-90">
-            <li className="flex items-start gap-3">
-              <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary-foreground" />
-              <span>Agenda unificada de ensaios e eventos</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary-foreground" />
-              <span>Controle de clientes, contratos e pagamentos</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary-foreground" />
-              <span>Galerias e entregas organizadas por projeto</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary-foreground" />
-              <span>Visão financeira do seu negócio fotográfico</span>
-            </li>
-          </ul>
-        </div>
-
-        <div className="relative z-10 text-xs opacity-70">
-          © {new Date().getFullYear()} JH7 Gestão Fotográfica. Todos os direitos reservados.
-        </div>
-
-        {/* Decorative gradient overlay */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary-foreground/5 via-transparent to-black/10" />
-      </div>
-
-      {/* Right column — login form */}
-      <div className="order-2 flex items-center justify-center p-6 lg:order-2 lg:p-12">
-        <div className="w-full max-w-sm space-y-6">
-          <div className="space-y-2 text-center">
-            <h2 className="text-2xl font-semibold tracking-tight">Bem-vindo de volta</h2>
-            <p className="text-sm text-muted-foreground">
-              Entre com sua conta para acessar o sistema.
+          <div className="max-w-xl stagger">
+            <p className="text-xs font-medium uppercase tracking-[0.28em] text-gold/80">
+              Plataforma para estúdios
             </p>
+
+            <h1 className="mt-6 text-[clamp(2.75rem,6vw,4.5rem)] leading-[0.98]">
+              Gerencie seu estúdio
+              <br />
+              com <em className="text-gradient-gold not-italic italic">clareza</em>
+            </h1>
+
+            <p className="mt-6 max-w-md text-[15px] leading-[1.75] text-muted-foreground">
+              Sessões, clientes, contratos e entregas em um único fluxo — pensado
+              para fotógrafos que tratam o próprio negócio com o mesmo cuidado
+              que tratam a luz.
+            </p>
+
+            <ul className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-border bg-border/60">
+              {HIGHLIGHTS.map((item) => (
+                <li
+                  key={item}
+                  className="group flex items-center gap-4 bg-surface/70 px-5 py-4 text-sm text-foreground/85 transition-colors duration-300 hover:bg-surface-elevated"
+                >
+                  <span className="h-1 w-6 shrink-0 rounded-full bg-gold/45 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:w-10 group-hover:bg-gold" />
+                  <span className="min-w-0">{item}</span>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <form onSubmit={handleEmailSignIn} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">E-mail</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="voce@estudio.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-                required
-                className="h-11"
-              />
+          <p className="text-xs tracking-wide text-muted-foreground/70 animate-fade-in">
+            © {new Date().getFullYear()} JH7 Gestão Fotográfica
+          </p>
+        </section>
+
+        {/* Right — sign in */}
+        <section className="order-1 flex items-center justify-center px-6 pb-10 pt-10 sm:px-10 lg:order-2 lg:px-16 lg:py-16">
+          <div className="w-full max-w-[26rem] space-y-8">
+            <div className="flex min-w-0 items-center gap-3 animate-fade-in lg:hidden">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-border bg-surface">
+                <Camera className="h-[18px] w-[18px] text-gold" />
+              </span>
+              <span className="truncate text-sm font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                JH7 <span className="text-foreground">Gestão Fotográfica</span>
+              </span>
             </div>
 
+            <div className="glass rounded-3xl p-8 sm:p-10 animate-fade-up">
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <div className="relative">
+              <h2 className="text-3xl">Bem-vindo de volta</h2>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Entre com sua conta para acessar o sistema.
+              </p>
+            </div>
+
+            <form onSubmit={handleEmailSignIn} className="mt-8 space-y-6">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="email"
+                  className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground"
+                >
+                  E-mail
+                </Label>
                 <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="current-password"
+                  id="email"
+                  type="email"
+                  placeholder="voce@estudio.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
                   required
-                  className="h-11 pr-10"
+                  className="h-12 rounded-xl border-border bg-background/40 px-4 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:border-gold/50 focus-visible:bg-background/70"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="password"
+                  className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground"
+                >
+                  Senha
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                    required
+                    className="h-12 rounded-xl border-border bg-background/40 px-4 pr-12 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:border-gold/50 focus-visible:bg-background/70"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors duration-300 hover:bg-accent hover:text-foreground"
+                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <Checkbox
+                    id="remember"
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => setRememberMe(checked === true)}
+                    className="data-[state=checked]:border-gold data-[state=checked]:bg-gold data-[state=checked]:text-primary-foreground"
+                  />
+                  <Label
+                    htmlFor="remember"
+                    className="text-[13px] font-normal text-muted-foreground"
+                  >
+                    Ficar logado por 30 dias
+                  </Label>
+                </div>
                 <button
                   type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  className="shrink-0 text-[13px] text-muted-foreground transition-colors duration-300 hover:text-gold"
+                  onClick={() => {
+                    // Password recovery flow will be implemented later.
+                  }}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  Esqueceu a senha?
                 </button>
               </div>
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="remember"
-                  checked={rememberMe}
-                  onCheckedChange={(checked) => setRememberMe(checked === true)}
-                />
-                <Label htmlFor="remember" className="text-sm font-normal">
-                  Ficar logado por 30 dias
-                </Label>
-              </div>
-              <button
-                type="button"
-                className="text-sm text-primary underline-offset-4 hover:underline"
-                onClick={() => {
-                  // Password recovery flow will be implemented later.
-                }}
-              >
-                Esqueceu a senha?
-              </button>
-            </div>
-
-            {formError && (
-              <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {formError}
-              </div>
-            )}
-
-            <Button type="submit" className="h-11 w-full" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Entrando...
-                </>
-              ) : (
-                "Acessar o sistema"
+              {formError && (
+                <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive animate-fade-up">
+                  {formError}
+                </div>
               )}
-            </Button>
-          </form>
 
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="group h-12 w-full rounded-xl bg-primary text-[15px] font-medium text-primary-foreground shadow-[var(--shadow-gold)] transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 disabled:opacity-70"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Entrando...
+                  </>
+                ) : (
+                  <>
+                    Acessar o sistema
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1" />
+                  </>
+                )}
+              </Button>
+            </form>
 
-          <p className="text-center text-sm text-muted-foreground">
-            Ainda não tem conta?{" "}
-            <Link to="/" className="text-primary underline-offset-4 hover:underline">
-              Conheça os planos
-            </Link>
-          </p>
-        </div>
+            <p className="mt-8 text-center text-sm text-muted-foreground">
+              Ainda não tem conta?{" "}
+              <Link
+                to="/"
+                className="text-gold underline-offset-4 transition-colors duration-300 hover:text-gold-soft hover:underline"
+              >
+                Conheça os planos
+              </Link>
+            </p>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
