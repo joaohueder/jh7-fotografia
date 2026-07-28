@@ -209,7 +209,7 @@ function AuthPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors duration-300 hover:bg-accent hover:text-foreground"
+                    className="tap-target absolute right-1 top-1/2 grid -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors duration-300 hover:bg-accent hover:text-foreground"
                     aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -217,24 +217,25 @@ function AuthPage() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-                <div className="flex min-w-0 items-center gap-2.5">
+              {/* Empilha em telas estreitas; alvos de toque de 44px em ambos */}
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                <div className="flex min-h-[var(--tap)] min-w-0 items-center gap-2.5">
                   <Checkbox
                     id="remember"
                     checked={rememberMe}
                     onCheckedChange={(checked) => setRememberMe(checked === true)}
-                    className="data-[state=checked]:border-gold data-[state=checked]:bg-gold data-[state=checked]:text-primary-foreground"
+                    className="h-5 w-5 data-[state=checked]:border-gold data-[state=checked]:bg-gold data-[state=checked]:text-primary-foreground"
                   />
                   <Label
                     htmlFor="remember"
-                    className="text-[13px] font-medium text-foreground/75"
+                    className="cursor-pointer text-[0.8125rem] font-medium leading-snug text-foreground/75"
                   >
                     Ficar logado por 30 dias
                   </Label>
                 </div>
                 <button
                   type="button"
-                  className="shrink-0 text-[13px] font-semibold text-muted-foreground transition-colors duration-300 hover:text-gold"
+                  className="flex min-h-[var(--tap)] shrink-0 items-center text-[0.8125rem] font-semibold text-muted-foreground transition-colors duration-300 hover:text-gold"
                   onClick={() => {
                     // Password recovery flow will be implemented later.
                   }}
@@ -242,6 +243,7 @@ function AuthPage() {
                   Esqueceu a senha?
                 </button>
               </div>
+
 
               {formError && (
                 <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive animate-fade-up">
