@@ -807,35 +807,131 @@ export default function EmpresaForm() {
               </Field>
             </Section>
 
-            <Section title="Observações">
-              <Field label="Observações" span>
-                <Textarea
-                  value={form.observacoes ?? ""}
-                  onChange={(e) => set("observacoes", e.target.value)}
-                  rows={4}
-                  className="text-base"
-                />
-              </Field>
-            </Section>
+            {showStep(4) && (
+              <Section title="Observações">
+                <Field label="Observações" span>
+                  <Textarea
+                    value={form.observacoes ?? ""}
+                    onChange={(e) => set("observacoes", e.target.value)}
+                    rows={4}
+                    className="text-base"
+                  />
+                </Field>
+              </Section>
+            )}
 
-            <div className="flex flex-wrap gap-3">
-              <Button
-                type="submit"
-                className="tap-target"
-                disabled={saving || checkingEmail || (!editing && !acessoOk)}
-              >
-                {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                {editing ? "Salvar alterações" : "Criar empresa"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="tap-target"
-                onClick={() => navigate("/sa/empresas")}
-              >
-                Cancelar
-              </Button>
-            </div>
+            {!editing && step === RESUMO && (
+              <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
+                <h2 className="mb-4 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  Resumo
+                </h2>
+                <div className="grid gap-[clamp(1rem,3vw,1.5rem)] [grid-template-columns:repeat(auto-fit,minmax(min(18rem,100%),1fr))]">
+                  <ResumoBloco
+                    titulo="Dados da empresa"
+                    itens={[
+                      ["Razão social", form.razao_social],
+                      ["Nome fantasia", form.nome_fantasia],
+                      ["CPF/CNPJ", form.cnpj],
+                      ["Status", form.status === "ATIVO" ? "Ativo" : "Inativo"],
+                      [
+                        "Endereço",
+                        [form.endereco, form.numero, form.bairro, form.cidade, form.uf]
+                          .filter(Boolean)
+                          .join(", "),
+                      ],
+                      ["CEP", form.cep],
+                    ]}
+                  />
+                  <ResumoBloco
+                    titulo="Responsável"
+                    itens={[
+                      ["Nome", form.resp_nome],
+                      ["CPF", form.resp_cpf],
+                      ["Nascimento", form.resp_nascimento],
+                      ["WhatsApp", form.resp_whatsapp],
+                      ["E-mail", form.resp_email],
+                    ]}
+                  />
+                  <ResumoBloco
+                    titulo="Contato da empresa"
+                    itens={[
+                      ["WhatsApp", form.contato_whatsapp],
+                      ["E-mail", form.contato_email],
+                      [
+                        "Outros contatos",
+                        contatos
+                          .filter((c) => c.valor.trim())
+                          .map((c) => `${c.tipo}: ${c.valor}`)
+                          .join(" · "),
+                      ],
+                    ]}
+                  />
+                  <ResumoBloco
+                    titulo="Acesso ao sistema"
+                    itens={[
+                      ["E-mail", email],
+                      ["Senha", senha ? "••••••••" : ""],
+                    ]}
+                  />
+                  <ResumoBloco titulo="Observações" itens={[["Observações", form.observacoes]]} />
+                </div>
+              </section>
+            )}
+
+            {editing || step === RESUMO ? (
+              <div className="flex flex-wrap gap-3">
+                {!editing ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="tap-target"
+                    onClick={() => setStep((s) => s - 1)}
+                  >
+                    Voltar
+                  </Button>
+                ) : null}
+                <Button
+                  type="submit"
+                  className="tap-target"
+                  disabled={saving || checkingEmail || (!editing && !acessoOk)}
+                >
+                  {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  {editing ? "Salvar alterações" : "Criar empresa"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="tap-target"
+                  onClick={() => navigate("/sa/empresas")}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="tap-target"
+                  disabled={step === 0}
+                  onClick={() => setStep((s) => Math.max(0, s - 1))}
+                >
+                  Voltar
+                </Button>
+                <Button type="button" className="tap-target" onClick={() => void avancar()}>
+                  {checkingEmail ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Próximo
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="tap-target"
+                  onClick={() => navigate("/sa/empresas")}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            )}
           </form>
         )}
       </div>
