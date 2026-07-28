@@ -1,34 +1,13 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { usePageMeta } from "@/hooks/use-page-meta";
+import { Link } from "react-router-dom";
 import { Camera, Calendar, Users, Folder, ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "JH7 Gestão Fotográfica — Gestão para Estúdios Fotográficos" },
-      {
-        name: "description",
-        content:
-          "JH7 Gestão Fotográfica é o SaaS completo para gestão de estúdios fotográficos e fotógrafos independentes.",
-      },
-      {
-        property: "og:title",
-        content: "JH7 Gestão Fotográfica — Gestão para Estúdios Fotográficos",
-      },
-      {
-        property: "og:description",
-        content:
-          "Organize sessões, clientes, agendas, entregas e finanças em um só lugar.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: LandingPage,
-});
 
 function LandingPage() {
+
+  usePageMeta("JH7 Gestão Fotográfica — Gestão para Estúdios Fotográficos", "JH7 Gestão Fotográfica é o SaaS completo para gestão de estúdios fotográficos e fotógrafos independentes.");
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="border-b">
@@ -107,3 +86,5 @@ function Feature({
     </div>
   );
 }
+
+export default LandingPage;

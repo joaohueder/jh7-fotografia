@@ -1,4 +1,5 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { usePageMeta } from "@/hooks/use-page-meta";
+import { useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ArrowRight, Camera, Eye, EyeOff, Loader2 } from "lucide-react";
 
@@ -8,17 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 
-export const Route = createFileRoute("/auth")({
-  head: () => ({
-    meta: [
-      { title: "Entrar — JH7 Gestão Fotográfica" },
-      { name: "description", content: "Acesse sua conta do JH7 Gestão Fotográfica." },
-      { property: "og:title", content: "Entrar — JH7 Gestão Fotográfica" },
-      { property: "og:description", content: "Acesse sua conta do JH7 Gestão Fotográfica." },
-    ],
-  }),
-  component: AuthPage,
-});
 
 const HIGHLIGHTS = [
   "Agenda unificada de ensaios e eventos",
@@ -28,6 +18,8 @@ const HIGHLIGHTS = [
 ];
 
 function AuthPage() {
+
+  usePageMeta("Entrar — JH7 Gestão Fotográfica", "Acesse sua conta do JH7 Gestão Fotográfica.");
   const { user, isLoading, signIn } = useAuth();
   const navigate = useNavigate();
 
@@ -40,7 +32,7 @@ function AuthPage() {
 
   useEffect(() => {
     if (!isLoading && user) {
-      navigate({ to: "/dashboard", replace: true });
+      navigate("/dashboard", { replace: true });
     }
   }, [user, isLoading, navigate]);
 
@@ -73,7 +65,7 @@ function AuthPage() {
       localStorage.removeItem("auth_email");
     }
 
-    navigate({ to: "/dashboard", replace: true });
+    navigate("/dashboard", { replace: true });
   }
 
   if (isLoading) {
@@ -282,3 +274,5 @@ function AuthPage() {
     </div>
   );
 }
+
+export default AuthPage;

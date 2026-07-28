@@ -1,4 +1,5 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { usePageMeta } from "@/hooks/use-page-meta";
+import { Link, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { LogOut } from "lucide-react";
 
@@ -6,19 +7,10 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 
 
-export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({
-    meta: [
-      { title: "Dashboard — JH7 Gestão Fotográfica" },
-      { name: "description", content: "Visão geral do seu estúdio fotográfico." },
-      { property: "og:title", content: "Dashboard — JH7 Gestão Fotográfica" },
-      { property: "og:description", content: "Visão geral do seu estúdio fotográfico." },
-    ],
-  }),
-  component: DashboardPage,
-});
 
 function DashboardPage() {
+
+  usePageMeta("Dashboard — JH7 Gestão Fotográfica", "Visão geral do seu estúdio fotográfico.");
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -27,7 +19,7 @@ function DashboardPage() {
     await queryClient.cancelQueries();
     queryClient.clear();
     await signOut();
-    navigate({ to: "/auth", replace: true });
+    navigate("/auth", { replace: true });
   }
 
 
@@ -75,3 +67,5 @@ function DashboardPage() {
     </div>
   );
 }
+
+export default DashboardPage;
