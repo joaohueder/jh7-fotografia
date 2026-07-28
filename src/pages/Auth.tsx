@@ -77,18 +77,19 @@ function AuthPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background">
-      {/* Ambient light */}
+    <div className="relative min-h-screen bg-background">
+      {/* Ambient light — cobre toda a viewport, além do container de 1200px */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none fixed inset-0 z-0"
         style={{ background: "var(--gradient-halo)" }}
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-40 bottom-[-12rem] h-[32rem] w-[32rem] rounded-full opacity-[0.07] blur-3xl"
+        className="pointer-events-none fixed -right-40 bottom-[-12rem] z-0 h-[32rem] w-[32rem] rounded-full opacity-[0.07] blur-3xl"
         style={{ background: "var(--gradient-gold)" }}
       />
+
 
       <div className="relative grid min-h-screen grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
         {/* Left — brand narrative */}
