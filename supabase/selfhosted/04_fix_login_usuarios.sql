@@ -19,7 +19,7 @@ set
   phone_change_token       = coalesce(phone_change_token, ''),
   reauthentication_token   = coalesce(reauthentication_token, ''),
   email_confirmed_at       = coalesce(email_confirmed_at, now()),
-  confirmed_at             = coalesce(confirmed_at, email_confirmed_at, now()),
+  -- confirmed_at é coluna gerada nas versões novas do Supabase: NÃO atualizar
   aud                      = coalesce(nullif(aud, ''), 'authenticated'),
   role                     = coalesce(nullif(role, ''), 'authenticated'),
   is_sso_user              = coalesce(is_sso_user, false),
