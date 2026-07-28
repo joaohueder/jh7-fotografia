@@ -807,6 +807,7 @@ export default function EmpresaForm() {
                 />
               </Field>
             </Section>
+            )}
 
             {showStep(4) && (
               <Section title="Observações">
