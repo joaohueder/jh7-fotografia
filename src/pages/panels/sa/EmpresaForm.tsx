@@ -398,9 +398,10 @@ export default function EmpresaForm() {
     setStep((s) => Math.min(RESUMO, s + 1));
   }
 
-  async function handleSubmit(ev: React.FormEvent) {
-    ev.preventDefault();
+  async function handleSubmit(ev?: React.FormEvent) {
+    ev?.preventDefault();
     if (!editing && step !== RESUMO) return;
+
 
 
     if (!form.razao_social.trim() || !form.nome_fantasia.trim() || !form.cnpj.trim()) {
