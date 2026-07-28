@@ -333,6 +333,10 @@ export default function EmpresaForm() {
         toast.error("CPF/CNPJ inválido.");
         return;
       }
+      if (!cnpjChecked) {
+        await validarCnpj();
+        if (errors.cnpj) return;
+      }
     }
     if (step === 1) {
       if (!form.resp_nome.trim()) {
