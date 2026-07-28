@@ -877,6 +877,7 @@ export default function EmpresaForm() {
             <Section title="Acesso ao sistema (usuário administrador)">
               <Field
                 label="E-mail"
+                required={!editing}
                 error={errors.email}
                 hint={
                   editing
