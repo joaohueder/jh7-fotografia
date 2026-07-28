@@ -18,7 +18,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div className="min-h-screen bg-background" />;
+    return <div className="min-h-dvh bg-background" />;
   }
 
   if (!user) {
