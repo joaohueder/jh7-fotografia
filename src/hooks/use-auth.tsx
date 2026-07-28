@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useState, useCallback, type React
 import type { User, Session } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/selfhosted/client";
-import { lovable } from "@/integrations/lovable";
 
 interface AuthContextValue {
   user: User | null;
@@ -10,7 +9,6 @@ interface AuthContextValue {
   isLoading: boolean;
   error: Error | null;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signInWithGoogle: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<{ error: Error | null }>;
 }
 
@@ -54,24 +52,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: null };
   }, []);
 
-  const signInWithGoogle = useCallback(async () => {
-    setError(null);
-    try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
-      if (result.error) {
-        setError(result.error);
-        return { error: result.error };
-      }
-      return { error: null };
-    } catch (e) {
-      const err = e instanceof Error ? e : new Error(String(e));
-      setError(err);
-      return { error: err };
-    }
-  }, []);
-
   const signOut = useCallback(async () => {
     setError(null);
     const { error: signOutError } = await supabase.auth.signOut();
@@ -81,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, isLoading, error, signIn, signInWithGoogle, signOut }}
+      value={{ user, session, isLoading, error, signIn, signOut }}
     >
       {children}
     </AuthContext.Provider>
