@@ -112,6 +112,41 @@ function Field({
   );
 }
 
+/** Bloco de leitura usado no resumo final do cadastro em etapas. */
+function ResumoBloco({
+  titulo,
+  itens,
+}: {
+  titulo: string;
+  itens: [string, string | null | undefined][];
+}) {
+  return (
+    <div className="space-y-2">
+      <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+        {titulo}
+      </h3>
+      <dl className="space-y-1.5">
+        {itens.map(([label, valor]) => (
+          <div key={label} className="flex flex-wrap gap-x-2 text-sm">
+            <dt className="text-muted-foreground">{label}:</dt>
+            <dd className="min-w-0 break-words font-medium">{valor?.trim() ? valor : "—"}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
+const STEPS = [
+  "Dados da empresa",
+  "Responsável",
+  "Contato",
+  "Acesso",
+  "Observações",
+  "Resumo",
+] as const;
+const RESUMO = STEPS.length - 1;
+
 type Errors = Record<string, string | null>;
 
 export default function EmpresaForm() {
@@ -136,6 +171,10 @@ export default function EmpresaForm() {
   const [errors, setErrors] = useState<Errors>({});
   const [checkingEmail, setCheckingEmail] = useState(false);
   const [emailChecked, setEmailChecked] = useState(false);
+  const [step, setStep] = useState(0);
+
+  /** Na edição todas as seções aparecem; na criação, uma por etapa. */
+  const showStep = (index: number) => editing || step === index;
 
   useEffect(() => {
     if (!data) return;
@@ -246,8 +285,57 @@ export default function EmpresaForm() {
     ? true
     : Boolean(email.trim()) && !errors.email && emailChecked && senhaOk && confirmarOk;
 
+  /** Valida a etapa atual antes de liberar o avanço. */
+  async function avancar() {
+    if (step === 0) {
+      if (!form.razao_social.trim() || !form.nome_fantasia.trim() || !form.cnpj.trim()) {
+        toast.error("Razão social, nome fantasia e CPF/CNPJ são obrigatórios.");
+        return;
+      }
+      if (!isValidCpfCnpj(form.cnpj)) {
+        setError("cnpj", "CPF/CNPJ inválido");
+        toast.error("CPF/CNPJ inválido.");
+        return;
+      }
+    }
+    if (step === 1) {
+      if (!form.resp_nome.trim()) {
+        toast.error("Informe o nome do responsável.");
+        return;
+      }
+      if (form.resp_cpf && !isValidCpf(form.resp_cpf)) {
+        toast.error("CPF do responsável inválido.");
+        return;
+      }
+    }
+    if (step === 2) {
+      if (contatos.some((c) => validateContato(c.tipo, c.valor))) {
+        toast.error("Verifique os contatos adicionais.");
+        return;
+      }
+    }
+    if (step === 3) {
+      if (!emailChecked) await validarEmailAcesso();
+      if (!email.trim() || !isValidEmail(email)) {
+        toast.error("Informe um e-mail de acesso válido.");
+        return;
+      }
+      if (!senhaOk) {
+        toast.error("A senha deve ter pelo menos 8 caracteres.");
+        return;
+      }
+      if (!confirmarOk) {
+        toast.error("As senhas não conferem.");
+        return;
+      }
+    }
+    setStep((s) => Math.min(RESUMO, s + 1));
+  }
+
   async function handleSubmit(ev: React.FormEvent) {
     ev.preventDefault();
+    if (!editing && step !== RESUMO) return;
+
 
     if (!form.razao_social.trim() || !form.nome_fantasia.trim() || !form.cnpj.trim()) {
       toast.error("Razão social, nome fantasia e CPF/CNPJ são obrigatórios.");
@@ -339,12 +427,59 @@ export default function EmpresaForm() {
           </div>
         </header>
 
+        {!editing && (
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+              {STEPS.map((label, i) => (
+                <span
+                  key={label}
+                  className="inline-flex items-center gap-2 font-semibold"
+                  style={{
+                    color:
+                      i === step
+                        ? "var(--panel-accent)"
+                        : i < step
+                          ? "hsl(var(--foreground))"
+                          : "hsl(var(--muted-foreground))",
+                  }}
+                >
+                  <span
+                    className="inline-flex h-6 w-6 items-center justify-center rounded-full border text-[11px]"
+                    style={{
+                      borderColor: i <= step ? "var(--panel-accent)" : "hsl(var(--border))",
+                      background:
+                        i === step
+                          ? "color-mix(in oklab, var(--panel-accent) 16%, transparent)"
+                          : undefined,
+                    }}
+                  >
+                    {i + 1}
+                  </span>
+                  <span className="hidden sm:inline">{label}</span>
+                </span>
+              ))}
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{
+                  width: `${((step + 1) / STEPS.length) * 100}%`,
+                  background: "var(--panel-accent)",
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+
+
         {editing && isLoading ? (
           <div className="flex items-center gap-2 text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" /> Carregando…
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
+            {showStep(0) && (
             <Section title="Dados da empresa">
               <Field label="Razão social">
                 <Input
@@ -450,7 +585,9 @@ export default function EmpresaForm() {
                 />
               </Field>
             </Section>
+            )}
 
+            {showStep(1) && (
             <Section title="Dados do responsável">
               <Field label="Nome">
                 <Input
@@ -578,7 +715,9 @@ export default function EmpresaForm() {
                 />
               </Field>
             </Section>
+            )}
 
+            {showStep(2) && (
             <Section title="Contato da empresa">
               <Field label="WhatsApp" error={errors.contato_whatsapp}>
                 <Input
@@ -726,7 +865,9 @@ export default function EmpresaForm() {
                 )}
               </div>
             </Section>
+            )}
 
+            {showStep(3) && (
             <Section title="Acesso ao sistema (usuário administrador)">
               <Field
                 label="E-mail"
@@ -806,36 +947,133 @@ export default function EmpresaForm() {
                 />
               </Field>
             </Section>
+            )}
 
-            <Section title="Observações">
-              <Field label="Observações" span>
-                <Textarea
-                  value={form.observacoes ?? ""}
-                  onChange={(e) => set("observacoes", e.target.value)}
-                  rows={4}
-                  className="text-base"
-                />
-              </Field>
-            </Section>
+            {showStep(4) && (
+              <Section title="Observações">
+                <Field label="Observações" span>
+                  <Textarea
+                    value={form.observacoes ?? ""}
+                    onChange={(e) => set("observacoes", e.target.value)}
+                    rows={4}
+                    className="text-base"
+                  />
+                </Field>
+              </Section>
+            )}
 
-            <div className="flex flex-wrap gap-3">
-              <Button
-                type="submit"
-                className="tap-target"
-                disabled={saving || checkingEmail || (!editing && !acessoOk)}
-              >
-                {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                {editing ? "Salvar alterações" : "Criar empresa"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="tap-target"
-                onClick={() => navigate("/sa/empresas")}
-              >
-                Cancelar
-              </Button>
-            </div>
+            {!editing && step === RESUMO && (
+              <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
+                <h2 className="mb-4 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  Resumo
+                </h2>
+                <div className="grid gap-[clamp(1rem,3vw,1.5rem)] [grid-template-columns:repeat(auto-fit,minmax(min(18rem,100%),1fr))]">
+                  <ResumoBloco
+                    titulo="Dados da empresa"
+                    itens={[
+                      ["Razão social", form.razao_social],
+                      ["Nome fantasia", form.nome_fantasia],
+                      ["CPF/CNPJ", form.cnpj],
+                      ["Status", form.status === "ATIVO" ? "Ativo" : "Inativo"],
+                      [
+                        "Endereço",
+                        [form.endereco, form.numero, form.bairro, form.cidade, form.uf]
+                          .filter(Boolean)
+                          .join(", "),
+                      ],
+                      ["CEP", form.cep],
+                    ]}
+                  />
+                  <ResumoBloco
+                    titulo="Responsável"
+                    itens={[
+                      ["Nome", form.resp_nome],
+                      ["CPF", form.resp_cpf],
+                      ["Nascimento", form.resp_nascimento],
+                      ["WhatsApp", form.resp_whatsapp],
+                      ["E-mail", form.resp_email],
+                    ]}
+                  />
+                  <ResumoBloco
+                    titulo="Contato da empresa"
+                    itens={[
+                      ["WhatsApp", form.contato_whatsapp],
+                      ["E-mail", form.contato_email],
+                      [
+                        "Outros contatos",
+                        contatos
+                          .filter((c) => c.valor.trim())
+                          .map((c) => `${c.tipo}: ${c.valor}`)
+                          .join(" · "),
+                      ],
+                    ]}
+                  />
+                  <ResumoBloco
+                    titulo="Acesso ao sistema"
+                    itens={[
+                      ["E-mail", email],
+                      ["Senha", senha ? "••••••••" : ""],
+                    ]}
+                  />
+                  <ResumoBloco titulo="Observações" itens={[["Observações", form.observacoes]]} />
+                </div>
+              </section>
+            )}
+
+            {editing || step === RESUMO ? (
+              <div className="flex flex-wrap gap-3">
+                {!editing ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="tap-target"
+                    onClick={() => setStep((s) => s - 1)}
+                  >
+                    Voltar
+                  </Button>
+                ) : null}
+                <Button
+                  type="submit"
+                  className="tap-target"
+                  disabled={saving || checkingEmail || (!editing && !acessoOk)}
+                >
+                  {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  {editing ? "Salvar alterações" : "Criar empresa"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="tap-target"
+                  onClick={() => navigate("/sa/empresas")}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="tap-target"
+                  disabled={step === 0}
+                  onClick={() => setStep((s) => Math.max(0, s - 1))}
+                >
+                  Voltar
+                </Button>
+                <Button type="button" className="tap-target" onClick={() => void avancar()}>
+                  {checkingEmail ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Próximo
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="tap-target"
+                  onClick={() => navigate("/sa/empresas")}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            )}
           </form>
         )}
       </div>
