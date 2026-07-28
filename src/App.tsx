@@ -6,7 +6,10 @@ import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/selfhosted/client";
 import LandingPage from "@/pages/Landing";
 import AuthPage from "@/pages/Auth";
-import DashboardPage from "@/pages/Dashboard";
+import SaDashboard from "@/pages/panels/SaDashboard";
+import AdminDashboard from "@/pages/panels/AdminDashboard";
+import UsuarioDashboard from "@/pages/panels/UsuarioDashboard";
+import { RoleRedirect, RequireRole } from "@/components/role-routing";
 import NotFoundPage from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,7 +59,37 @@ export default function App() {
               path="/dashboard"
               element={
                 <RequireAuth>
-                  <DashboardPage />
+                  <RoleRedirect />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/sa/dashboard"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["sa_admin"]}>
+                    <SaDashboard />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <AdminDashboard />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/usuario/dashboard"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["usuario"]}>
+                    <UsuarioDashboard />
+                  </RequireRole>
                 </RequireAuth>
               }
             />
