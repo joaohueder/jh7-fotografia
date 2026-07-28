@@ -187,7 +187,7 @@ export default function EmpresasList() {
                     dataKey="mes"
                     tickLine={false}
                     axisLine={false}
-                    tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                    tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
                   />
                   <Tooltip
                     cursor={{ fill: "hsl(var(--muted) / 0.25)" }}
