@@ -177,6 +177,8 @@ export default function EmpresaForm() {
   const [errors, setErrors] = useState<Errors>({});
   const [checkingEmail, setCheckingEmail] = useState(false);
   const [emailChecked, setEmailChecked] = useState(false);
+  const [checkingCnpj, setCheckingCnpj] = useState(false);
+  const [cnpjChecked, setCnpjChecked] = useState(false);
   const [step, setStep] = useState(0);
 
   /** Na edição todas as seções aparecem; na criação, uma por etapa. */
