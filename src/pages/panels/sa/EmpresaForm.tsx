@@ -7,6 +7,7 @@ import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { SA_MENU } from "@/pages/panels/sa/menu";
 import {
+  checkCnpjExists,
   checkEmailExists,
   lookupCep,
   useCreateEmpresa,
