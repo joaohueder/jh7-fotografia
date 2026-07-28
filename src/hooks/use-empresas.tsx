@@ -68,19 +68,22 @@ export function useEmpresa(id: string | undefined) {
     queryKey: ["empresa", id],
     enabled: Boolean(id),
     queryFn: async () => {
-      const [empresaRes, contatosRes] = await Promise.all([
+      const [empresaRes, contatosRes, emailRes] = await Promise.all([
         db.from("empresas").select("*").eq("id", id!).single(),
         db.from("empresa_contatos").select("*").eq("empresa_id", id!).order("created_at"),
+        db.rpc("sa_empresa_admin_email", { p_id: id! }),
       ]);
       if (empresaRes.error) throw empresaRes.error;
       if (contatosRes.error) throw contatosRes.error;
       return {
         empresa: empresaRes.data as Empresa,
         contatos: (contatosRes.data ?? []) as EmpresaContato[],
+        adminEmail: (emailRes.data as string | null) ?? null,
       };
     },
   });
 }
+
 
 export function useCreateEmpresa() {
   const qc = useQueryClient();
