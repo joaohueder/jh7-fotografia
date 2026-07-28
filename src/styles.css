@@ -46,6 +46,9 @@
   --color-ring-offset-background: var(--background);
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
+  --color-brand-orange: var(--gold);
+  --color-brand-green: var(--brand-green);
+  --color-brand-green-soft: var(--brand-green-soft);
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface-elevated);
   --color-chart-1: var(--chart-1);
@@ -70,56 +73,65 @@
 :root {
   --radius: 0.75rem;
 
-  --background: oklch(0.145 0.006 70);
-  --foreground: oklch(0.968 0.006 85);
+  --background: oklch(0.135 0.004 60);
+  --foreground: oklch(0.975 0.002 90);
 
-  --surface: oklch(0.185 0.007 70);
-  --surface-elevated: oklch(0.225 0.008 72);
+  --surface: oklch(0.175 0.005 60);
+  --surface-elevated: oklch(0.215 0.006 60);
 
-  --card: oklch(0.185 0.007 70);
-  --card-foreground: oklch(0.968 0.006 85);
-  --popover: oklch(0.185 0.007 70);
-  --popover-foreground: oklch(0.968 0.006 85);
+  --card: oklch(0.175 0.005 60);
+  --card-foreground: oklch(0.975 0.002 90);
+  --popover: oklch(0.175 0.005 60);
+  --popover-foreground: oklch(0.975 0.002 90);
 
-  --gold: oklch(0.8 0.115 84);
-  --gold-soft: oklch(0.89 0.075 88);
+  /* Brand: orange (primary) + green (secondary accent), from the JH7 mark */
+  --gold: oklch(0.705 0.192 45);
+  --gold-soft: oklch(0.8 0.15 62);
+  --brand-green: oklch(0.72 0.19 148);
+  --brand-green-soft: oklch(0.82 0.15 150);
 
-  --primary: oklch(0.8 0.115 84);
-  --primary-foreground: oklch(0.19 0.02 75);
+  --primary: oklch(0.705 0.192 45);
+  --primary-foreground: oklch(0.16 0.01 45);
 
-  --secondary: oklch(0.235 0.008 72);
-  --secondary-foreground: oklch(0.968 0.006 85);
+  --secondary: oklch(0.225 0.006 60);
+  --secondary-foreground: oklch(0.975 0.002 90);
 
-  --muted: oklch(0.235 0.008 72);
-  --muted-foreground: oklch(0.7 0.011 82);
+  --muted: oklch(0.225 0.006 60);
+  --muted-foreground: oklch(0.705 0.008 70);
 
-  --accent: oklch(0.27 0.012 76);
-  --accent-foreground: oklch(0.968 0.006 85);
+  --accent: oklch(0.26 0.008 60);
+  --accent-foreground: oklch(0.975 0.002 90);
 
-  --destructive: oklch(0.63 0.2 25);
-  --destructive-foreground: oklch(0.98 0.005 85);
+  --destructive: oklch(0.6 0.21 27);
+  --destructive-foreground: oklch(0.98 0.003 90);
 
   --border: oklch(1 0 0 / 9%);
   --input: oklch(1 0 0 / 8%);
-  --ring: oklch(0.8 0.115 84 / 55%);
+  --ring: oklch(0.705 0.192 45 / 55%);
 
-  --chart-1: oklch(0.8 0.115 84);
-  --chart-2: oklch(0.72 0.09 60);
-  --chart-3: oklch(0.62 0.06 40);
-  --chart-4: oklch(0.86 0.07 96);
-  --chart-5: oklch(0.55 0.04 70);
+  --chart-1: oklch(0.705 0.192 45);
+  --chart-2: oklch(0.72 0.19 148);
+  --chart-3: oklch(0.8 0.15 62);
+  --chart-4: oklch(0.82 0.15 150);
+  --chart-5: oklch(0.62 0.03 60);
 
-  --sidebar: oklch(0.165 0.006 70);
-  --sidebar-foreground: oklch(0.968 0.006 85);
-  --sidebar-primary: oklch(0.8 0.115 84);
-  --sidebar-primary-foreground: oklch(0.19 0.02 75);
-  --sidebar-accent: oklch(0.235 0.008 72);
-  --sidebar-accent-foreground: oklch(0.968 0.006 85);
+  --sidebar: oklch(0.155 0.004 60);
+  --sidebar-foreground: oklch(0.975 0.002 90);
+  --sidebar-primary: oklch(0.705 0.192 45);
+  --sidebar-primary-foreground: oklch(0.16 0.01 45);
+  --sidebar-accent: oklch(0.225 0.006 60);
+  --sidebar-accent-foreground: oklch(0.975 0.002 90);
   --sidebar-border: oklch(1 0 0 / 9%);
-  --sidebar-ring: oklch(0.8 0.115 84 / 55%);
+  --sidebar-ring: oklch(0.705 0.192 45 / 55%);
 
   /* Depth & light */
   --gradient-gold: linear-gradient(135deg, var(--gold-soft), var(--gold));
+  --gradient-brand: linear-gradient(
+    120deg,
+    var(--brand-green),
+    var(--gold-soft) 55%,
+    var(--gold)
+  );
   --gradient-surface: linear-gradient(
     160deg,
     color-mix(in oklab, var(--surface) 92%, transparent),
@@ -127,7 +139,12 @@
   );
   --gradient-halo: radial-gradient(
     120% 90% at 15% 10%,
-    color-mix(in oklab, var(--gold) 16%, transparent),
+    color-mix(in oklab, var(--gold) 18%, transparent),
+    transparent 55%
+  ),
+  radial-gradient(
+    90% 70% at 90% 90%,
+    color-mix(in oklab, var(--brand-green) 12%, transparent),
     transparent 60%
   );
   --shadow-soft: 0 1px 2px oklch(0 0 0 / 0.4), 0 8px 24px -12px oklch(0 0 0 / 0.55);
