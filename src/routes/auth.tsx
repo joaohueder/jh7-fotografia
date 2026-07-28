@@ -111,21 +111,22 @@ function AuthPage() {
           </header>
 
           <div className="max-w-xl stagger">
-            <p className="text-xs font-medium uppercase tracking-[0.28em] text-gold/80">
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-gold">
               Plataforma para estúdios
             </p>
 
-            <h1 className="mt-6 text-[clamp(2.75rem,6vw,4.5rem)] leading-[0.98]">
+            <h1 className="mt-6 text-[clamp(2.5rem,5vw,3.75rem)] leading-[1.05]">
               Gerencie seu estúdio
               <br />
-              com <em className="text-gradient-gold not-italic italic">clareza</em>
+              com <span className="text-gradient-gold">clareza</span>
             </h1>
 
-            <p className="mt-6 max-w-md text-[15px] leading-[1.75] text-muted-foreground">
+            <p className="mt-6 max-w-md text-base leading-[1.7] text-foreground/70">
               Sessões, clientes, contratos e entregas em um único fluxo — pensado
               para fotógrafos que tratam o próprio negócio com o mesmo cuidado
               que tratam a luz.
             </p>
+
 
             <ul className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-border bg-border/60">
               {HIGHLIGHTS.map((item) => (
