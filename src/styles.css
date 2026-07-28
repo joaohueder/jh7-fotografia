@@ -21,8 +21,8 @@
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
 
-  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
-  --font-sans: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -172,18 +172,41 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    font-feature-settings: "cv11", "ss01";
-    letter-spacing: -0.005em;
+    font-weight: 450;
+    font-optical-sizing: auto;
+    letter-spacing: 0;
+    word-spacing: 0.02em;
+    line-height: 1.65;
   }
 
   h1,
   h2,
-  h3 {
+  h3,
+  h4 {
     font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: -0.02em;
-    line-height: 1.08;
+    font-weight: 600;
+    letter-spacing: -0.028em;
+    line-height: 1.12;
   }
+
+  h1 {
+    font-weight: 700;
+    letter-spacing: -0.035em;
+  }
+
+  label,
+  button {
+    font-weight: 600;
+  }
+
+  input,
+  textarea,
+  select {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    letter-spacing: -0.004em;
+  }
+
 
   ::selection {
     background: color-mix(in oklab, var(--gold) 35%, transparent);
