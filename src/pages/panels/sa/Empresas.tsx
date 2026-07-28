@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Building2, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { Building2, Loader2, Pencil, Plus, Power, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
@@ -10,11 +10,14 @@ import { SA_MENU } from "@/pages/panels/sa/menu";
 import {
   useEmpresas,
   useDeleteEmpresa,
+  useSetEmpresaStatus,
   fetchEmpresaDependencias,
   type Empresa,
 } from "@/hooks/use-empresas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
 
 function StatusBadge({ status }: { status: Empresa["status"] }) {
   const ativo = status === "ATIVO";
