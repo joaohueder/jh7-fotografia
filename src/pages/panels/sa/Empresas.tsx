@@ -187,6 +187,7 @@ export default function EmpresasList() {
             </div>
           </div>
         </div>
+        )}
 
         {vazio ? null : (
           <Input
