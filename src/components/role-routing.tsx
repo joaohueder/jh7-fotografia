@@ -24,7 +24,7 @@ export function usePrimaryRole() {
 /** Redireciona o usuário para o painel do seu tipo. */
 export function RoleRedirect() {
   const { role, isLoading } = usePrimaryRole();
-  if (isLoading) return <div className="min-h-screen bg-background" />;
+  if (isLoading) return <div className="min-h-dvh bg-background" />;
   return <Navigate to={panelPathForRole(role)} replace />;
 }
 
@@ -37,10 +37,10 @@ export function RequireRole({
   children: React.ReactNode;
 }) {
   const { role, isLoading } = usePrimaryRole();
-  if (isLoading) return <div className="min-h-screen bg-background" />;
+  if (isLoading) return <div className="min-h-dvh bg-background" />;
   if (!role) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
+      <div className="flex min-h-dvh items-center justify-center bg-background px-[var(--gutter)] text-center">
         <p className="max-w-md text-muted-foreground">
           Sua conta ainda não possui um tipo de acesso definido. Fale com o administrador.
         </p>

@@ -70,14 +70,22 @@ function AuthPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-dvh items-center justify-center bg-background">
         <Loader2 className="h-6 w-6 animate-spin text-gold" />
       </div>
     );
   }
 
+  /*
+   * Hierarquia visual:
+   *  - Mobile/tablet: coluna única, cartão de login centrado e legível (max 26rem),
+   *    narrativa da marca oculta para não empurrar o formulário abaixo da dobra.
+   *  - Desktop (lg+): grid bidimensional 2 colunas — narrativa | formulário.
+   *  Fundo decorativo é `fixed` e `pointer-events-none`: cobre a viewport inteira
+   *  sem participar do fluxo nem gerar scroll horizontal.
+   */
   return (
-    <div className="relative min-h-screen bg-background">
+    <div className="relative min-h-dvh bg-background">
       {/* Ambient light — cobre toda a viewport, além do container de 1200px */}
       <div
         aria-hidden
@@ -86,35 +94,35 @@ function AuthPage() {
       />
       <div
         aria-hidden
-        className="pointer-events-none fixed -right-40 bottom-[-12rem] z-0 h-[32rem] w-[32rem] rounded-full opacity-[0.07] blur-3xl"
+        className="pointer-events-none fixed bottom-[-8rem] right-[-8rem] z-0 h-[min(32rem,70vw)] w-[min(32rem,70vw)] rounded-full opacity-[0.07] blur-3xl"
         style={{ background: "var(--gradient-gold)" }}
       />
 
 
-      <div className="relative z-10 grid min-h-screen grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
-        {/* Left — brand narrative */}
-        <section className="relative order-2 hidden flex-col justify-between gap-10 px-6 pb-12 pt-4 sm:px-10 lg:flex lg:order-1 lg:gap-16 lg:px-16 lg:py-16">
+      <div className="relative z-10 grid min-h-dvh grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
+        {/* Left — brand narrative (somente desktop) */}
+        <section className="relative order-2 hidden flex-col justify-between gap-10 px-[var(--gutter)] pb-12 pt-4 lg:order-1 lg:flex lg:gap-16 lg:py-16">
           <header className="order-first flex min-w-0 items-center gap-3 animate-fade-in">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-border bg-surface">
-              <Camera className="h-[18px] w-[18px] text-gold" />
+              <Camera className="h-[1.125rem] w-[1.125rem] text-gold" />
             </span>
-            <span className="truncate text-[13px] font-bold tracking-[0.16em] uppercase text-muted-foreground">
+            <span className="truncate text-[0.8125rem] font-bold tracking-[0.16em] uppercase text-muted-foreground">
               JH7 <span className="text-foreground">Gestão Fotográfica</span>
             </span>
           </header>
 
           <div className="max-w-xl stagger">
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-gold">
+            <p className="text-[0.6875rem] font-bold uppercase tracking-[0.24em] text-gold">
               Plataforma para estúdios
             </p>
 
-            <h1 className="mt-6 text-[clamp(2.5rem,5vw,3.75rem)] leading-[1.05]">
+            <h1 className="mt-6 text-[clamp(2.25rem,4vw+0.5rem,3.75rem)] leading-[1.05]">
               Gerencie seu estúdio
               <br />
               com <span className="text-gradient-gold">clareza</span>
             </h1>
 
-            <p className="mt-6 max-w-md text-base leading-[1.7] text-foreground/70">
+            <p className="mt-6 max-w-[38ch] text-[clamp(0.9375rem,0.4vw+0.85rem,1.0625rem)] leading-[1.7] text-foreground/70">
               Sessões, clientes, contratos e entregas em um único fluxo — pensado
               para fotógrafos que tratam o próprio negócio com o mesmo cuidado
               que tratam a luz.
@@ -125,7 +133,7 @@ function AuthPage() {
               {HIGHLIGHTS.map((item) => (
                 <li
                   key={item}
-                  className="group flex items-center gap-4 bg-surface/70 px-5 py-4 text-[15px] font-medium text-foreground/85 transition-colors duration-300 hover:bg-surface-elevated"
+                  className="group flex items-center gap-4 bg-surface/70 px-5 py-4 text-[0.9375rem] font-medium text-foreground/85 transition-colors duration-300 hover:bg-surface-elevated"
                 >
                   <span className="h-1 w-6 shrink-0 rounded-full bg-gold/45 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:w-10 group-hover:bg-gold" />
                   <span className="min-w-0">{item}</span>
@@ -140,24 +148,25 @@ function AuthPage() {
         </section>
 
         {/* Right — sign in */}
-        <section className="order-1 flex items-center justify-center px-6 pb-10 pt-10 sm:px-10 lg:order-2 lg:px-16 lg:py-16">
+        <section className="order-1 flex items-center justify-center px-[var(--gutter)] py-[clamp(1.5rem,6vw,4rem)] lg:order-2">
           <div className="w-full max-w-[26rem] space-y-8">
             <div className="flex min-w-0 items-center gap-3 animate-fade-in lg:hidden">
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-border bg-surface">
-                <Camera className="h-[18px] w-[18px] text-gold" />
+                <Camera className="h-[1.125rem] w-[1.125rem] text-gold" />
               </span>
-              <span className="truncate text-[13px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+              <span className="truncate text-[0.8125rem] font-bold uppercase tracking-[0.16em] text-muted-foreground">
                 JH7 <span className="text-foreground">Gestão Fotográfica</span>
               </span>
             </div>
 
-            <div className="glass rounded-3xl p-8 sm:p-10 animate-fade-up">
+            <div className="glass rounded-3xl p-[clamp(1.25rem,5vw,2.5rem)] animate-fade-up">
             <div className="space-y-2">
-              <h2 className="text-[1.75rem]">Bem-vindo de volta</h2>
-              <p className="text-[15px] leading-relaxed text-muted-foreground">
+              <h2 className="text-[clamp(1.375rem,4vw,1.75rem)]">Bem-vindo de volta</h2>
+              <p className="text-[0.9375rem] leading-relaxed text-muted-foreground">
                 Entre com sua conta para acessar o sistema.
               </p>
             </div>
+
 
             <form onSubmit={handleEmailSignIn} className="mt-8 space-y-6">
               <div className="space-y-2">
@@ -200,7 +209,7 @@ function AuthPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors duration-300 hover:bg-accent hover:text-foreground"
+                    className="tap-target absolute right-1 top-1/2 grid -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors duration-300 hover:bg-accent hover:text-foreground"
                     aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -208,24 +217,25 @@ function AuthPage() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-                <div className="flex min-w-0 items-center gap-2.5">
+              {/* Empilha em telas estreitas; alvos de toque de 44px em ambos */}
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                <div className="flex min-h-[var(--tap)] min-w-0 items-center gap-2.5">
                   <Checkbox
                     id="remember"
                     checked={rememberMe}
                     onCheckedChange={(checked) => setRememberMe(checked === true)}
-                    className="data-[state=checked]:border-gold data-[state=checked]:bg-gold data-[state=checked]:text-primary-foreground"
+                    className="h-5 w-5 data-[state=checked]:border-gold data-[state=checked]:bg-gold data-[state=checked]:text-primary-foreground"
                   />
                   <Label
                     htmlFor="remember"
-                    className="text-[13px] font-medium text-foreground/75"
+                    className="cursor-pointer text-[0.8125rem] font-medium leading-snug text-foreground/75"
                   >
                     Ficar logado por 30 dias
                   </Label>
                 </div>
                 <button
                   type="button"
-                  className="shrink-0 text-[13px] font-semibold text-muted-foreground transition-colors duration-300 hover:text-gold"
+                  className="flex min-h-[var(--tap)] shrink-0 items-center text-[0.8125rem] font-semibold text-muted-foreground transition-colors duration-300 hover:text-gold"
                   onClick={() => {
                     // Password recovery flow will be implemented later.
                   }}
@@ -233,6 +243,7 @@ function AuthPage() {
                   Esqueceu a senha?
                 </button>
               </div>
+
 
               {formError && (
                 <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive animate-fade-up">
