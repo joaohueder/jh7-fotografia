@@ -125,6 +125,30 @@ export default function EmpresasList() {
     }
   }
 
+  function abrirStatus(empresa: Empresa) {
+    setNota("");
+    setAlvoStatus(empresa);
+  }
+
+  async function confirmarStatus() {
+    if (!alvoStatus) return;
+    if (nota.trim().length < 5) {
+      toast.error("Informe uma nota com pelo menos 5 caracteres.");
+      return;
+    }
+    const novo = alvoStatus.status === "ATIVO" ? "INATIVO" : "ATIVO";
+    try {
+      await setStatus.mutateAsync({ id: alvoStatus.id, status: novo, nota: nota.trim() });
+      toast.success(novo === "ATIVO" ? "Empresa ativada." : "Empresa inativada.");
+      setAlvoStatus(null);
+      setNota("");
+    } catch (err) {
+      toast.error((err as Error).message);
+    }
+  }
+
+
+
   return (
     <PanelLayout accent="sa" menu={SA_MENU}>
       <div className="space-y-[clamp(1.25rem,4vw,2rem)]">
