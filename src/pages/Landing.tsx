@@ -11,7 +11,7 @@ function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="border-b">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+        <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6">
           <div className="flex items-center gap-2">
             <div className="grid h-8 w-8 place-items-center rounded-md bg-primary text-primary-foreground">
               <Camera className="h-4 w-4" />
@@ -30,7 +30,7 @@ function LandingPage() {
       </header>
 
       <main className="flex-1">
-        <section className="mx-auto max-w-6xl px-6 py-20 text-center lg:py-32">
+        <section className="mx-auto max-w-[1200px] px-6 py-20 text-center lg:py-32">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
             O SaaS para estúdios fotográficos
           </h1>
@@ -49,7 +49,7 @@ function LandingPage() {
         </section>
 
         <section className="border-t bg-muted/40">
-          <div className="mx-auto max-w-6xl px-6 py-20">
+          <div className="mx-auto max-w-[1200px] px-6 py-20">
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               <Feature icon={Calendar} title="Agenda" desc="Controle de ensaios e eventos." />
               <Feature icon={Users} title="Clientes" desc="Cadastro e histórico completo." />

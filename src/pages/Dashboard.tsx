@@ -27,7 +27,7 @@ function DashboardPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="border-b">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
+        <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6">
           <Link to="/" className="font-semibold">
             JH7 Gestão Fotográfica
           </Link>
@@ -42,7 +42,7 @@ function DashboardPage() {
       </header>
 
       <main className="flex-1 px-6 py-10">
-        <div className="mx-auto max-w-5xl space-y-8">
+        <div className="mx-auto max-w-[1200px] space-y-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
             <p className="text-muted-foreground">Visão geral do seu estúdio.</p>
