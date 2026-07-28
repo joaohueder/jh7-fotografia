@@ -132,7 +132,8 @@ export default function EmpresasList() {
         </header>
 
         {/* Indicadores: apenas em telas médias/grandes (ocultos no mobile). */}
-        <div className="hidden gap-3 md:grid [grid-template-columns:repeat(auto-fit,minmax(min(15rem,100%),1fr))]" hidden={vazio}>
+        {!vazio && (
+        <div className="hidden gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(15rem,100%),1fr))] md:grid">
           <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.25rem)]">
             <h3 className="text-sm font-semibold text-muted-foreground">Empresas cadastradas</h3>
             <p
