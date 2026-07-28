@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — Lumina Studio" },
+      { title: "Dashboard — JH7 Gestão Fotográfica" },
       { name: "description", content: "Visão geral do seu estúdio fotográfico." },
-      { property: "og:title", content: "Dashboard — Lumina Studio" },
+      { property: "og:title", content: "Dashboard — JH7 Gestão Fotográfica" },
       { property: "og:description", content: "Visão geral do seu estúdio fotográfico." },
     ],
   }),
@@ -24,7 +24,7 @@ function DashboardPage() {
       <header className="border-b">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
           <Link to="/" className="font-semibold">
-            Lumina Studio
+            JH7 Gestão Fotográfica
           </Link>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">{user?.email}</span>
