@@ -91,7 +91,7 @@ function AuthPage() {
       />
 
 
-      <div className="relative grid min-h-screen grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
+      <div className="relative z-10 grid min-h-screen grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
         {/* Left — brand narrative */}
         <section className="relative order-2 hidden flex-col justify-between gap-10 px-6 pb-12 pt-4 sm:px-10 lg:flex lg:order-1 lg:gap-16 lg:px-16 lg:py-16">
           <header className="order-first flex min-w-0 items-center gap-3 animate-fade-in">
