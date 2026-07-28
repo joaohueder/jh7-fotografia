@@ -468,6 +468,65 @@ export default function EmpresasList() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog
+        open={Boolean(alvoStatus)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setAlvoStatus(null);
+            setNota("");
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {alvoStatus?.status === "ATIVO" ? "Inativar empresa" : "Ativar empresa"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {alvoStatus?.status === "ATIVO"
+                ? `A empresa "${alvoStatus?.nome_fantasia}" ficará inativa. Descreva o motivo desta alteração.`
+                : `A empresa "${alvoStatus?.nome_fantasia}" voltará a ficar ativa. Descreva o motivo desta alteração.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="space-y-2">
+            <Label htmlFor="nota-status">
+              Nota <span style={{ color: "var(--panel-accent)" }}>*</span>
+            </Label>
+            <Textarea
+              id="nota-status"
+              value={nota}
+              onChange={(ev) => setNota(ev.target.value)}
+              placeholder="Ex.: contrato encerrado em 01/2026 por solicitação do cliente."
+              rows={3}
+              className="text-base"
+            />
+            <p className="text-xs text-muted-foreground">
+              A nota é obrigatória (mínimo 5 caracteres) e fica registrada no histórico da empresa.
+            </p>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel className="tap-target">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="tap-target"
+              onClick={(ev) => {
+                ev.preventDefault();
+                void confirmarStatus();
+              }}
+              disabled={setStatus.isPending || nota.trim().length < 5}
+            >
+              {setStatus.isPending
+                ? "Salvando…"
+                : alvoStatus?.status === "ATIVO"
+                  ? "Inativar"
+                  : "Ativar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </PanelLayout>
   );
 }
