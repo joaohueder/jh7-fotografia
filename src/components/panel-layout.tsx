@@ -202,7 +202,7 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
       <footer className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/90 backdrop-blur">
         <div className="container-page flex h-[var(--app-footer-h)] items-center justify-between gap-3 text-xs text-muted-foreground">
           <span className="truncate">© {new Date().getFullYear()} JH7 Gestão Fotográfica</span>
-          <span className="hidden truncate xs:inline sm:inline" style={{ color: "var(--panel-accent)" }}>
+          <span className="hidden truncate sm:inline" style={{ color: "var(--panel-accent)" }}>
             {theme.label}
           </span>
         </div>
