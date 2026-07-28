@@ -727,6 +727,7 @@ export default function EmpresaForm() {
                 )}
               </div>
             </Section>
+            )}
 
             {showStep(3) && (
             <Section title="Acesso ao sistema (usuário administrador)">
