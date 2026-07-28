@@ -1142,7 +1142,9 @@ export default function EmpresaForm() {
                   </Button>
                 ) : null}
                 <Button
-                  type="submit"
+                  type="button"
+                  onClick={() => void handleSubmit()}
+
                   className="tap-target"
                   disabled={saving || checkingEmail || (!editing && !acessoOk)}
                 >
