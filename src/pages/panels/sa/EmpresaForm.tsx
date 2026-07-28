@@ -494,7 +494,7 @@ export default function EmpresaForm() {
                   required
                 />
               </Field>
-              <Field label="Nome fantasia">
+              <Field label="Nome fantasia" required>
                 <Input
                   value={form.nome_fantasia}
                   onChange={(e) => set("nome_fantasia", e.target.value)}
