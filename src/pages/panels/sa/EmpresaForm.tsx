@@ -907,6 +907,7 @@ export default function EmpresaForm() {
               </Field>
               <Field
                 label={editing ? "Nova senha (opcional)" : "Senha"}
+                required={!editing}
                 error={senha && !senhaOk ? "Mínimo de 8 caracteres" : null}
               >
                 <div className="flex gap-2">
