@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
 import type { User, Session } from "@supabase/supabase-js";
 
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/selfhosted/client";
 import { lovable } from "@/integrations/lovable";
 
 interface AuthContextValue {
