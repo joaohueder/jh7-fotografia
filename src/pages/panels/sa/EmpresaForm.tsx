@@ -594,7 +594,7 @@ export default function EmpresaForm() {
 
             {showStep(1) && (
             <Section title="Dados do responsável">
-              <Field label="Nome">
+              <Field label="Nome" required>
                 <Input
                   value={form.resp_nome}
                   onChange={(e) => set("resp_nome", e.target.value)}
