@@ -319,11 +319,29 @@
     transform 0.4s var(--ease-silk),
     box-shadow 0.4s var(--ease-silk),
     border-color 0.4s var(--ease-silk);
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-elegant);
+  /* Hover só em ponteiros reais — evita "hover preso" após o toque */
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-elegant);
+    }
   }
 }
+
+/* Container fluido padrão do app: gutter escala com a viewport */
+@utility container-page {
+  width: 100%;
+  max-width: 75rem;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Alvo de toque mínimo 44x44px (WCAG 2.5.5) */
+@utility tap-target {
+  min-height: var(--tap);
+  min-width: var(--tap);
+}
+
 
 @utility stagger {
   & > * {
