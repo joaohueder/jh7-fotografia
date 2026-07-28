@@ -735,7 +735,7 @@ export default function EmpresaForm() {
               >
                 <Input
                   type="email"
-                  value={editing ? (data?.empresa.resp_email ?? email) : email}
+                  value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
                     setEmailChecked(false);
@@ -743,8 +743,9 @@ export default function EmpresaForm() {
                   }}
                   onBlur={() => void validarEmailAcesso()}
                   disabled={editing}
+                  readOnly={editing}
                   autoComplete="off"
-                  className="h-11 text-base"
+                  className="h-11 text-base disabled:opacity-100"
                   required={!editing}
                 />
               </Field>
