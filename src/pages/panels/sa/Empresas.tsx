@@ -187,10 +187,10 @@ export default function EmpresasList() {
                     dataKey="mes"
                     tickLine={false}
                     axisLine={false}
-                    tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                    tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
                   />
                   <Tooltip
-                    cursor={{ fill: "hsl(var(--muted) / 0.25)" }}
+                    cursor={{ fill: "color-mix(in oklab, var(--muted) 25%, transparent)" }}
                     content={({ active, payload }) => {
                       if (!active || !payload?.length) return null;
                       const value = payload[0].value as number;
@@ -198,8 +198,8 @@ export default function EmpresasList() {
                         <div
                           className="rounded-lg border px-2.5 py-1.5 text-xs shadow-lg"
                           style={{
-                            background: "hsl(var(--card))",
-                            borderColor: "hsl(var(--border))",
+                            background: "var(--card)",
+                            borderColor: "var(--border)",
                           }}
                         >
                           <span className="font-semibold" style={{ color: "var(--brand-green)" }}>
