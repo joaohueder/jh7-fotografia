@@ -204,7 +204,7 @@ function AuthPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
                 <div className="flex min-w-0 items-center gap-2.5">
                   <Checkbox
                     id="remember"
@@ -214,14 +214,14 @@ function AuthPage() {
                   />
                   <Label
                     htmlFor="remember"
-                    className="min-w-0 truncate text-sm font-normal text-muted-foreground"
+                    className="text-[13px] font-normal text-muted-foreground"
                   >
                     Ficar logado por 30 dias
                   </Label>
                 </div>
                 <button
                   type="button"
-                  className="shrink-0 text-sm text-muted-foreground transition-colors duration-300 hover:text-gold"
+                  className="shrink-0 text-[13px] text-muted-foreground transition-colors duration-300 hover:text-gold"
                   onClick={() => {
                     // Password recovery flow will be implemented later.
                   }}
