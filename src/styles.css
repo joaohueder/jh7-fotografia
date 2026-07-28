@@ -179,6 +179,14 @@
     line-height: 1.65;
   }
 
+  /* Largura máxima global do site: 1200px, centralizado */
+  #root {
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+  }
+
+
   h1,
   h2,
   h3,
