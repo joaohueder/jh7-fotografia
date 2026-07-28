@@ -502,7 +502,7 @@ export default function EmpresaForm() {
                   required
                 />
               </Field>
-              <Field label="CPF / CNPJ" error={errors.cnpj}>
+              <Field label="CPF / CNPJ" required error={errors.cnpj}>
                 <Input
                   value={form.cnpj}
                   onChange={(e) => set("cnpj", maskCpfCnpj(e.target.value))}
