@@ -405,6 +405,24 @@ export default function EmpresasList() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            title={e.status === "ATIVO" ? "Inativar empresa" : "Ativar empresa"}
+                            aria-label={`${e.status === "ATIVO" ? "Inativar" : "Ativar"} ${e.nome_fantasia}`}
+                            onClick={() => abrirStatus(e)}
+                          >
+                            <Power
+                              className="h-4 w-4"
+                              style={{
+                                color:
+                                  e.status === "ATIVO"
+                                    ? "var(--panel-accent)"
+                                    : "hsl(var(--muted-foreground))",
+                              }}
+                            />
+                          </Button>
+                          <Button
+
+                            variant="ghost"
+                            size="icon"
                             aria-label={`Excluir ${e.nome_fantasia}`}
                             onClick={() => abrirExclusao(e)}
                           >
