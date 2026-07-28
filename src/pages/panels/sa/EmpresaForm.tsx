@@ -472,8 +472,11 @@ export default function EmpresaForm() {
 
     const payload: EmpresaPayload = {
       ...form,
+      // Nunca enviar status vazio (o banco usa enum e recusa "").
+      status: form.status === "INATIVO" ? "INATIVO" : "ATIVO",
       resp_nascimento: form.resp_nascimento || null,
     };
+
     const lista = contatos.filter((c) => c.valor.trim());
 
     try {
