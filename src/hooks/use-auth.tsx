@@ -33,7 +33,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
-      setUser(newSession?.user ?? null);
+      // Só troca a referência do usuário quando ele realmente muda,
+      // evitando re-renders/refetch ao voltar para a aba (TOKEN_REFRESHED).
+      setUser((prev) => {
+        const next = newSession?.user ?? null;
+        if (prev?.id === next?.id) return prev;
+        return next;
+      });
     });
 
     return () => {

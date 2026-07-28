@@ -18,6 +18,7 @@ const db = supabase as unknown as SupabaseClient;
 
 export function useRoles() {
   const { user, isLoading: authLoading } = useAuth();
+  const userId = user?.id ?? null;
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -25,7 +26,7 @@ export function useRoles() {
     let mounted = true;
 
     if (authLoading) return;
-    if (!user) {
+    if (!userId) {
       setRoles([]);
       setIsLoading(false);
       return;
@@ -34,7 +35,7 @@ export function useRoles() {
     setIsLoading(true);
     db.from("user_roles")
       .select("role")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .then(({ data }) => {
         if (!mounted) return;
         setRoles(((data ?? []) as { role: AppRole }[]).map((r) => r.role));
@@ -44,7 +45,7 @@ export function useRoles() {
     return () => {
       mounted = false;
     };
-  }, [user, authLoading]);
+  }, [userId, authLoading]);
 
   const hasRole = (role: AppRole) => roles.includes(role);
 

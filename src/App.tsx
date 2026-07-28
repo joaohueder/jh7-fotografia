@@ -12,7 +12,16 @@ import UsuarioDashboard from "@/pages/panels/UsuarioDashboard";
 import { RoleRedirect, RequireRole } from "@/components/role-routing";
 import NotFoundPage from "@/pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Evita recarregar a tela ao voltar para a aba do navegador
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      staleTime: 5 * 60 * 1000,
+    },
+  },
+});
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -36,7 +45,7 @@ function AuthEvents() {
       if (event === "SIGNED_OUT") {
         queryClient.clear();
         navigate("/auth", { replace: true });
-      } else if (event === "SIGNED_IN" || event === "USER_UPDATED") {
+      } else if (event === "USER_UPDATED") {
         queryClient.invalidateQueries();
       }
     });
