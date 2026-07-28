@@ -7,6 +7,7 @@ import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { SA_MENU } from "@/pages/panels/sa/menu";
 import {
+  checkCnpjExists,
   checkEmailExists,
   lookupCep,
   useCreateEmpresa,
@@ -176,6 +177,8 @@ export default function EmpresaForm() {
   const [errors, setErrors] = useState<Errors>({});
   const [checkingEmail, setCheckingEmail] = useState(false);
   const [emailChecked, setEmailChecked] = useState(false);
+  const [checkingCnpj, setCheckingCnpj] = useState(false);
+  const [cnpjChecked, setCnpjChecked] = useState(false);
   const [step, setStep] = useState(0);
 
   /** Na edição todas as seções aparecem; na criação, uma por etapa. */
@@ -274,6 +277,36 @@ export default function EmpresaForm() {
     }
   }
 
+  async function validarCnpj(): Promise<boolean> {
+    const value = form.cnpj;
+    setCnpjChecked(false);
+    if (!value.trim()) {
+      setError("cnpj", "Informe o CPF ou CNPJ");
+      return false;
+    }
+    if (!isValidCpfCnpj(value)) {
+      setError("cnpj", "CPF/CNPJ inválido");
+      return false;
+    }
+    setError("cnpj", null);
+    setCheckingCnpj(true);
+    try {
+      const exists = await checkCnpjExists(value, editing ? id : undefined);
+      if (exists) {
+        setError("cnpj", "Já existe uma empresa cadastrada com este CPF/CNPJ");
+        return false;
+      }
+      setError("cnpj", null);
+      setCnpjChecked(true);
+      return true;
+    } catch (err) {
+      setError("cnpj", (err as Error).message);
+      return false;
+    } finally {
+      setCheckingCnpj(false);
+    }
+  }
+
   function gerarSenha() {
     const nova = generatePassword();
     setSenha(nova);
@@ -301,6 +334,10 @@ export default function EmpresaForm() {
         setError("cnpj", "CPF/CNPJ inválido");
         toast.error("CPF/CNPJ inválido.");
         return;
+      }
+      if (!cnpjChecked) {
+        const ok = await validarCnpj();
+        if (!ok) return;
       }
     }
     if (step === 1) {
@@ -375,6 +412,11 @@ export default function EmpresaForm() {
       toast.error("CPF/CNPJ inválido.");
       return;
     }
+    if (!cnpjChecked) {
+      const ok = await validarCnpj();
+      if (!ok) return;
+    }
+
     if (!form.resp_nome.trim()) {
       toast.error("Informe o nome do responsável.");
       return;
@@ -553,22 +595,20 @@ export default function EmpresaForm() {
               <Field label="CPF / CNPJ" required error={errors.cnpj}>
                 <Input
                   value={form.cnpj}
-                  onChange={(e) => set("cnpj", maskCpfCnpj(e.target.value))}
-                  onBlur={() =>
-                    setError(
-                      "cnpj",
-                      !form.cnpj.trim()
-                        ? "Informe o CPF ou CNPJ"
-                        : isValidCpfCnpj(form.cnpj)
-                          ? null
-                          : "CPF/CNPJ inválido",
-                    )
-                  }
+                  onChange={(e) => {
+                    set("cnpj", maskCpfCnpj(e.target.value));
+                    setCnpjChecked(false);
+                    if (errors.cnpj) setError("cnpj", null);
+                  }}
+                  onBlur={() => void validarCnpj()}
                   placeholder="000.000.000-00 ou 00.000.000/0000-00"
                   inputMode="numeric"
                   className="h-11 text-base"
                   required
                 />
+                {checkingCnpj && (
+                  <p className="text-xs text-muted-foreground">Verificando CPF/CNPJ…</p>
+                )}
               </Field>
               <Field label="Status">
                 <Select

@@ -139,6 +139,16 @@ export async function checkEmailExists(email: string) {
   return Boolean(data);
 }
 
+/** Verifica se o CPF/CNPJ já está cadastrado para outra empresa. */
+export async function checkCnpjExists(cnpj: string, ignoreId?: string) {
+  const { data, error } = await db.rpc("sa_cnpj_exists", {
+    p_cnpj: cnpj,
+    p_ignore_id: ignoreId || null,
+  });
+  if (error) throw error;
+  return Boolean(data);
+}
+
 /** Checa dependências antes de excluir (usuários vinculados à empresa). */
 export async function fetchEmpresaDependencias(id: string) {
   const { data, error } = await db.rpc("sa_empresa_dependencias", { p_id: id });
