@@ -165,6 +165,7 @@ export default function EmpresaForm() {
         descricao: c.descricao ?? "",
       })),
     );
+    setEmail(data.adminEmail ?? empresa.resp_email ?? "");
   }, [data]);
 
   function set<K extends keyof EmpresaPayload>(key: K, value: EmpresaPayload[K]) {
