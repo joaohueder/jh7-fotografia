@@ -88,12 +88,14 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 function Field({
   label,
+  required,
   span,
   error,
   hint,
   children,
 }: {
   label: string;
+  required?: boolean;
   span?: boolean;
   error?: string | null;
   hint?: string;
@@ -101,7 +103,10 @@ function Field({
 }) {
   return (
     <div className={span ? "space-y-2 md:col-span-full" : "space-y-2"}>
-      <Label className="text-sm">{label}</Label>
+      <Label className="text-sm">
+        {label}
+        {required ? <span className="ml-0.5 text-destructive">*</span> : null}
+      </Label>
       {children}
       {error ? (
         <p className="text-xs font-medium text-destructive">{error}</p>
