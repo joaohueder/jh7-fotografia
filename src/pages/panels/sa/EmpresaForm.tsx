@@ -584,22 +584,20 @@ export default function EmpresaForm() {
               <Field label="CPF / CNPJ" required error={errors.cnpj}>
                 <Input
                   value={form.cnpj}
-                  onChange={(e) => set("cnpj", maskCpfCnpj(e.target.value))}
-                  onBlur={() =>
-                    setError(
-                      "cnpj",
-                      !form.cnpj.trim()
-                        ? "Informe o CPF ou CNPJ"
-                        : isValidCpfCnpj(form.cnpj)
-                          ? null
-                          : "CPF/CNPJ inválido",
-                    )
-                  }
+                  onChange={(e) => {
+                    set("cnpj", maskCpfCnpj(e.target.value));
+                    setCnpjChecked(false);
+                    if (errors.cnpj) setError("cnpj", null);
+                  }}
+                  onBlur={() => void validarCnpj()}
                   placeholder="000.000.000-00 ou 00.000.000/0000-00"
                   inputMode="numeric"
                   className="h-11 text-base"
                   required
                 />
+                {checkingCnpj && (
+                  <p className="text-xs text-muted-foreground">Verificando CPF/CNPJ…</p>
+                )}
               </Field>
               <Field label="Status">
                 <Select
