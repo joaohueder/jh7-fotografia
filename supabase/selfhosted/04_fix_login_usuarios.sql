@@ -35,7 +35,6 @@ where confirmation_token is null
    or phone_change_token is null
    or reauthentication_token is null
    or email_confirmed_at is null
-   or confirmed_at is null
    or aud is null or aud = ''
    or role is null or role = ''
    or is_sso_user is null
