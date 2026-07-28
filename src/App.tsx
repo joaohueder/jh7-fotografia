@@ -86,6 +86,37 @@ export default function App() {
               }
             />
             <Route
+              path="/sa/empresas"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["sa_admin"]}>
+                    <EmpresasList />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/sa/empresas/nova"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["sa_admin"]}>
+                    <EmpresaForm />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/sa/empresas/:id"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["sa_admin"]}>
+                    <EmpresaForm />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+            <Route
               path="/admin/dashboard"
               element={
                 <RequireAuth>
