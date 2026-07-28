@@ -602,12 +602,13 @@ export default function EmpresaForm() {
                   required
                 />
               </Field>
-              <Field label="Data de nascimento">
+              <Field label="Data de nascimento" required>
                 <Input
                   type="date"
                   value={form.resp_nascimento ?? ""}
                   onChange={(e) => set("resp_nascimento", e.target.value)}
                   className="h-11 text-base"
+                  required
                 />
               </Field>
               <Field label="CPF" error={errors.resp_cpf}>
