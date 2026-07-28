@@ -943,6 +943,7 @@ export default function EmpresaForm() {
               </Field>
               <Field
                 label="Confirmar senha"
+                required={!editing}
                 error={confirmar && !confirmarOk ? "As senhas não conferem" : null}
               >
                 <Input
