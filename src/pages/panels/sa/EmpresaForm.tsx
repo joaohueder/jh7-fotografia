@@ -171,6 +171,10 @@ export default function EmpresaForm() {
   const [errors, setErrors] = useState<Errors>({});
   const [checkingEmail, setCheckingEmail] = useState(false);
   const [emailChecked, setEmailChecked] = useState(false);
+  const [step, setStep] = useState(0);
+
+  /** Na edição todas as seções aparecem; na criação, uma por etapa. */
+  const showStep = (index: number) => editing || step === index;
 
   useEffect(() => {
     if (!data) return;
