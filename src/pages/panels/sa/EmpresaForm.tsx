@@ -726,11 +726,13 @@ export default function EmpresaForm() {
                 label="E-mail"
                 error={errors.email}
                 hint={
-                  checkingEmail
-                    ? "Verificando disponibilidade…"
-                    : emailChecked
-                      ? "E-mail disponível."
-                      : undefined
+                  editing
+                    ? "E-mail do usuário administrador (não editável)."
+                    : checkingEmail
+                      ? "Verificando disponibilidade…"
+                      : emailChecked
+                        ? "E-mail disponível."
+                        : undefined
                 }
               >
                 <Input
