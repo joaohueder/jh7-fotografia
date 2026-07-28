@@ -1,12 +1,13 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { SA_MENU } from "@/pages/panels/sa/menu";
 import {
+  checkEmailExists,
   lookupCep,
   useCreateEmpresa,
   useEmpresa,
@@ -15,6 +16,21 @@ import {
   type EmpresaPayload,
   type EmpresaStatus,
 } from "@/hooks/use-empresas";
+import {
+  CONTATO_TIPOS,
+  generatePassword,
+  isValidCep,
+  isValidCpf,
+  isValidCpfCnpj,
+  isValidEmail,
+  isValidPhone,
+  maskCep,
+  maskContato,
+  maskCpf,
+  maskCpfCnpj,
+  maskPhone,
+  validateContato,
+} from "@/lib/br-masks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -73,19 +89,30 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 function Field({
   label,
   span,
+  error,
+  hint,
   children,
 }: {
   label: string;
   span?: boolean;
+  error?: string | null;
+  hint?: string;
   children: ReactNode;
 }) {
   return (
     <div className={span ? "space-y-2 md:col-span-full" : "space-y-2"}>
       <Label className="text-sm">{label}</Label>
       {children}
+      {error ? (
+        <p className="text-xs font-medium text-destructive">{error}</p>
+      ) : hint ? (
+        <p className="text-xs text-muted-foreground">{hint}</p>
+      ) : null}
     </div>
   );
 }
+
+type Errors = Record<string, string | null>;
 
 export default function EmpresaForm() {
   const { id } = useParams<{ id: string }>();
@@ -105,11 +132,15 @@ export default function EmpresaForm() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [confirmar, setConfirmar] = useState("");
+  const [showSenha, setShowSenha] = useState(false);
+  const [errors, setErrors] = useState<Errors>({});
+  const [checkingEmail, setCheckingEmail] = useState(false);
+  const [emailChecked, setEmailChecked] = useState(false);
 
   useEffect(() => {
     if (!data) return;
     const { empresa, contatos: lista } = data;
-    setForm({
+    const filled = {
       ...EMPTY,
       ...Object.fromEntries(
         Object.keys(EMPTY).map((k) => [
@@ -117,18 +148,49 @@ export default function EmpresaForm() {
           (empresa as unknown as Record<string, unknown>)[k] ?? "",
         ]),
       ),
-    } as EmpresaPayload);
-    setContatos(lista.map((c) => ({ tipo: c.tipo, valor: c.valor, descricao: c.descricao ?? "" })));
+    } as EmpresaPayload;
+    setForm({
+      ...filled,
+      cnpj: maskCpfCnpj(filled.cnpj),
+      cep: maskCep(filled.cep ?? ""),
+      resp_cep: maskCep(filled.resp_cep ?? ""),
+      resp_cpf: maskCpf(filled.resp_cpf ?? ""),
+      resp_whatsapp: maskPhone(filled.resp_whatsapp ?? ""),
+      contato_whatsapp: maskPhone(filled.contato_whatsapp ?? ""),
+    });
+    setContatos(
+      lista.map((c) => ({
+        tipo: CONTATO_TIPOS.includes(c.tipo as never) ? c.tipo : "Telefone",
+        valor: maskContato(c.tipo, c.valor),
+        descricao: c.descricao ?? "",
+      })),
+    );
   }, [data]);
 
   function set<K extends keyof EmpresaPayload>(key: K, value: EmpresaPayload[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
+  const setError = useCallback((key: string, msg: string | null) => {
+    setErrors((prev) => ({ ...prev, [key]: msg }));
+  }, []);
+
   async function buscarCep(prefix: "" | "resp_") {
     const cep = (prefix === "" ? form.cep : form.resp_cep) ?? "";
+    if (!cep.trim()) {
+      setError(`${prefix}cep`, null);
+      return;
+    }
+    if (!isValidCep(cep)) {
+      setError(`${prefix}cep`, "CEP deve ter 8 dígitos");
+      return;
+    }
+    setError(`${prefix}cep`, null);
     const found = await lookupCep(cep);
-    if (!found) return;
+    if (!found) {
+      setError(`${prefix}cep`, "CEP não encontrado");
+      return;
+    }
     setForm((prev) => ({
       ...prev,
       [`${prefix}endereco`]: found.endereco,
@@ -138,27 +200,86 @@ export default function EmpresaForm() {
     }));
   }
 
+  async function validarEmailAcesso() {
+    const value = email.trim();
+    setEmailChecked(false);
+    if (!value) {
+      setError("email", "Informe o e-mail de acesso");
+      return;
+    }
+    if (!isValidEmail(value)) {
+      setError("email", "E-mail inválido");
+      return;
+    }
+    setError("email", null);
+    if (editing) return;
+    setCheckingEmail(true);
+    try {
+      const exists = await checkEmailExists(value);
+      if (exists) {
+        setError("email", "Já existe um usuário com este e-mail");
+      } else {
+        setError("email", null);
+        setEmailChecked(true);
+      }
+    } catch (err) {
+      setError("email", (err as Error).message);
+    } finally {
+      setCheckingEmail(false);
+    }
+  }
+
+  function gerarSenha() {
+    const nova = generatePassword();
+    setSenha(nova);
+    setConfirmar(nova);
+    setShowSenha(true);
+    setError("senha", null);
+    setError("confirmar", null);
+    toast.success("Senha gerada. Copie-a antes de salvar.");
+  }
+
+  const senhaOk = senha.length >= 8;
+  const confirmarOk = Boolean(confirmar) && senha === confirmar;
+  const acessoOk = editing
+    ? true
+    : Boolean(email.trim()) && !errors.email && emailChecked && senhaOk && confirmarOk;
+
   async function handleSubmit(ev: React.FormEvent) {
     ev.preventDefault();
 
     if (!form.razao_social.trim() || !form.nome_fantasia.trim() || !form.cnpj.trim()) {
-      toast.error("Razão social, nome fantasia e CNPJ são obrigatórios.");
+      toast.error("Razão social, nome fantasia e CPF/CNPJ são obrigatórios.");
+      return;
+    }
+    if (!isValidCpfCnpj(form.cnpj)) {
+      setError("cnpj", "CPF/CNPJ inválido");
+      toast.error("CPF/CNPJ inválido.");
       return;
     }
     if (!form.resp_nome.trim()) {
       toast.error("Informe o nome do responsável.");
       return;
     }
-    if (senha || confirmar || !editing) {
-      if (!editing && !email.trim()) {
-        toast.error("Informe o e-mail de acesso ao sistema.");
-        return;
-      }
-      if (senha.length < 8) {
+    if (form.resp_cpf && !isValidCpf(form.resp_cpf)) {
+      toast.error("CPF do responsável inválido.");
+      return;
+    }
+    const contatoInvalido = contatos.find((c) => validateContato(c.tipo, c.valor));
+    if (contatoInvalido) {
+      toast.error("Verifique os contatos adicionais.");
+      return;
+    }
+    if (!editing && !acessoOk) {
+      toast.error("Preencha e valide e-mail, senha e confirmação de senha.");
+      return;
+    }
+    if (editing && (senha || confirmar)) {
+      if (!senhaOk) {
         toast.error("A senha deve ter pelo menos 8 caracteres.");
         return;
       }
-      if (senha !== confirmar) {
+      if (!confirmarOk) {
         toast.error("As senhas não conferem.");
         return;
       }
@@ -234,10 +355,21 @@ export default function EmpresaForm() {
                   required
                 />
               </Field>
-              <Field label="CNPJ">
+              <Field label="CPF / CNPJ" error={errors.cnpj}>
                 <Input
                   value={form.cnpj}
-                  onChange={(e) => set("cnpj", e.target.value)}
+                  onChange={(e) => set("cnpj", maskCpfCnpj(e.target.value))}
+                  onBlur={() =>
+                    setError(
+                      "cnpj",
+                      !form.cnpj.trim()
+                        ? "Informe o CPF ou CNPJ"
+                        : isValidCpfCnpj(form.cnpj)
+                          ? null
+                          : "CPF/CNPJ inválido",
+                    )
+                  }
+                  placeholder="000.000.000-00 ou 00.000.000/0000-00"
                   inputMode="numeric"
                   className="h-11 text-base"
                   required
@@ -257,11 +389,12 @@ export default function EmpresaForm() {
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="CEP">
+              <Field label="CEP" error={errors.cep}>
                 <Input
                   value={form.cep ?? ""}
-                  onChange={(e) => set("cep", e.target.value)}
+                  onChange={(e) => set("cep", maskCep(e.target.value))}
                   onBlur={() => void buscarCep("")}
+                  placeholder="00000-000"
                   inputMode="numeric"
                   className="h-11 text-base"
                 />
@@ -328,19 +461,31 @@ export default function EmpresaForm() {
                   className="h-11 text-base"
                 />
               </Field>
-              <Field label="CPF">
+              <Field label="CPF" error={errors.resp_cpf}>
                 <Input
                   value={form.resp_cpf ?? ""}
-                  onChange={(e) => set("resp_cpf", e.target.value)}
+                  onChange={(e) => set("resp_cpf", maskCpf(e.target.value))}
+                  onBlur={() =>
+                    setError(
+                      "resp_cpf",
+                      !form.resp_cpf?.trim()
+                        ? null
+                        : isValidCpf(form.resp_cpf)
+                          ? null
+                          : "CPF inválido",
+                    )
+                  }
+                  placeholder="000.000.000-00"
                   inputMode="numeric"
                   className="h-11 text-base"
                 />
               </Field>
-              <Field label="CEP">
+              <Field label="CEP" error={errors.resp_cep}>
                 <Input
                   value={form.resp_cep ?? ""}
-                  onChange={(e) => set("resp_cep", e.target.value)}
+                  onChange={(e) => set("resp_cep", maskCep(e.target.value))}
                   onBlur={() => void buscarCep("resp_")}
+                  placeholder="00000-000"
                   inputMode="numeric"
                   className="h-11 text-base"
                 />
@@ -388,38 +533,80 @@ export default function EmpresaForm() {
                   className="h-11 text-base uppercase"
                 />
               </Field>
-              <Field label="WhatsApp">
+              <Field label="WhatsApp" error={errors.resp_whatsapp}>
                 <Input
                   value={form.resp_whatsapp ?? ""}
-                  onChange={(e) => set("resp_whatsapp", e.target.value)}
+                  onChange={(e) => set("resp_whatsapp", maskPhone(e.target.value))}
+                  onBlur={() =>
+                    setError(
+                      "resp_whatsapp",
+                      !form.resp_whatsapp?.trim()
+                        ? null
+                        : isValidPhone(form.resp_whatsapp)
+                          ? null
+                          : "Telefone inválido",
+                    )
+                  }
+                  placeholder="(00) 00000-0000"
                   inputMode="tel"
                   className="h-11 text-base"
                 />
               </Field>
-              <Field label="E-mail">
+              <Field label="E-mail" error={errors.resp_email}>
                 <Input
                   type="email"
                   value={form.resp_email ?? ""}
                   onChange={(e) => set("resp_email", e.target.value)}
+                  onBlur={() =>
+                    setError(
+                      "resp_email",
+                      !form.resp_email?.trim()
+                        ? null
+                        : isValidEmail(form.resp_email)
+                          ? null
+                          : "E-mail inválido",
+                    )
+                  }
                   className="h-11 text-base"
                 />
               </Field>
             </Section>
 
             <Section title="Contatos">
-              <Field label="WhatsApp">
+              <Field label="WhatsApp" error={errors.contato_whatsapp}>
                 <Input
                   value={form.contato_whatsapp ?? ""}
-                  onChange={(e) => set("contato_whatsapp", e.target.value)}
+                  onChange={(e) => set("contato_whatsapp", maskPhone(e.target.value))}
+                  onBlur={() =>
+                    setError(
+                      "contato_whatsapp",
+                      !form.contato_whatsapp?.trim()
+                        ? null
+                        : isValidPhone(form.contato_whatsapp)
+                          ? null
+                          : "Telefone inválido",
+                    )
+                  }
+                  placeholder="(00) 00000-0000"
                   inputMode="tel"
                   className="h-11 text-base"
                 />
               </Field>
-              <Field label="E-mail">
+              <Field label="E-mail" error={errors.contato_email}>
                 <Input
                   type="email"
                   value={form.contato_email ?? ""}
                   onChange={(e) => set("contato_email", e.target.value)}
+                  onBlur={() =>
+                    setError(
+                      "contato_email",
+                      !form.contato_email?.trim()
+                        ? null
+                        : isValidEmail(form.contato_email)
+                          ? null
+                          : "E-mail inválido",
+                    )
+                  }
                   className="h-11 text-base"
                 />
               </Field>
@@ -433,7 +620,10 @@ export default function EmpresaForm() {
                     size="sm"
                     className="tap-target"
                     onClick={() =>
-                      setContatos((prev) => [...prev, { tipo: "", valor: "", descricao: "" }])
+                      setContatos((prev) => [
+                        ...prev,
+                        { tipo: "WhatsApp", valor: "", descricao: "" },
+                      ])
                     }
                   >
                     <Plus className="mr-2 h-4 w-4" /> Adicionar
@@ -444,92 +634,160 @@ export default function EmpresaForm() {
                   <p className="text-sm text-muted-foreground">Nenhum contato adicional.</p>
                 ) : (
                   <ul className="space-y-3">
-                    {contatos.map((c, i) => (
-                      <li
-                        key={i}
-                        className="grid gap-3 rounded-lg border border-border p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)_auto] md:items-end"
-                      >
-                        <div className="space-y-2">
-                          <Label className="text-xs">Tipo</Label>
-                          <Input
-                            value={c.tipo}
-                            placeholder="Telefone, Instagram…"
-                            onChange={(e) =>
-                              setContatos((prev) =>
-                                prev.map((x, j) => (j === i ? { ...x, tipo: e.target.value } : x)),
-                              )
-                            }
-                            className="h-11 text-base"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-xs">Valor</Label>
-                          <Input
-                            value={c.valor}
-                            onChange={(e) =>
-                              setContatos((prev) =>
-                                prev.map((x, j) => (j === i ? { ...x, valor: e.target.value } : x)),
-                              )
-                            }
-                            className="h-11 text-base"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-xs">Descrição</Label>
-                          <Input
-                            value={c.descricao ?? ""}
-                            onChange={(e) =>
-                              setContatos((prev) =>
-                                prev.map((x, j) =>
-                                  j === i ? { ...x, descricao: e.target.value } : x,
-                                ),
-                              )
-                            }
-                            className="h-11 text-base"
-                          />
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="tap-target justify-self-end"
-                          aria-label="Remover contato"
-                          onClick={() => setContatos((prev) => prev.filter((_, j) => j !== i))}
+                    {contatos.map((c, i) => {
+                      const erro = errors[`contato_${i}`];
+                      return (
+                        <li
+                          key={i}
+                          className="grid gap-3 rounded-lg border border-border p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)_auto] md:items-start"
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </li>
-                    ))}
+                          <div className="space-y-2">
+                            <Label className="text-xs">Tipo</Label>
+                            <Select
+                              value={c.tipo || "WhatsApp"}
+                              onValueChange={(v) => {
+                                setContatos((prev) =>
+                                  prev.map((x, j) =>
+                                    j === i ? { ...x, tipo: v, valor: maskContato(v, x.valor) } : x,
+                                  ),
+                                );
+                                setError(`contato_${i}`, null);
+                              }}
+                            >
+                              <SelectTrigger className="h-11 text-base">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {CONTATO_TIPOS.map((t) => (
+                                  <SelectItem key={t} value={t}>
+                                    {t}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-xs">Valor</Label>
+                            <Input
+                              value={c.valor}
+                              inputMode={c.tipo === "E-mail" ? "email" : "tel"}
+                              onChange={(e) =>
+                                setContatos((prev) =>
+                                  prev.map((x, j) =>
+                                    j === i
+                                      ? { ...x, valor: maskContato(x.tipo, e.target.value) }
+                                      : x,
+                                  ),
+                                )
+                              }
+                              onBlur={() => setError(`contato_${i}`, validateContato(c.tipo, c.valor))}
+                              placeholder={c.tipo === "E-mail" ? "nome@email.com" : "(00) 00000-0000"}
+                              className="h-11 text-base"
+                            />
+                            {erro ? (
+                              <p className="text-xs font-medium text-destructive">{erro}</p>
+                            ) : null}
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-xs">Descrição</Label>
+                            <Input
+                              value={c.descricao ?? ""}
+                              onChange={(e) =>
+                                setContatos((prev) =>
+                                  prev.map((x, j) =>
+                                    j === i ? { ...x, descricao: e.target.value } : x,
+                                  ),
+                                )
+                              }
+                              className="h-11 text-base"
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="tap-target justify-self-end md:mt-6"
+                            aria-label="Remover contato"
+                            onClick={() => setContatos((prev) => prev.filter((_, j) => j !== i))}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </div>
             </Section>
 
             <Section title="Acesso ao sistema (usuário administrador)">
-              <Field label="E-mail">
+              <Field
+                label="E-mail"
+                error={errors.email}
+                hint={
+                  checkingEmail
+                    ? "Verificando disponibilidade…"
+                    : emailChecked
+                      ? "E-mail disponível."
+                      : undefined
+                }
+              >
                 <Input
                   type="email"
                   value={editing ? (data?.empresa.resp_email ?? email) : email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setEmailChecked(false);
+                    setError("email", null);
+                  }}
+                  onBlur={() => void validarEmailAcesso()}
                   disabled={editing}
                   autoComplete="off"
                   className="h-11 text-base"
                   required={!editing}
                 />
               </Field>
-              <Field label={editing ? "Nova senha (opcional)" : "Senha"}>
-                <Input
-                  type="password"
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                  autoComplete="new-password"
-                  className="h-11 text-base"
-                  required={!editing}
-                />
+              <Field
+                label={editing ? "Nova senha (opcional)" : "Senha"}
+                error={senha && !senhaOk ? "Mínimo de 8 caracteres" : null}
+              >
+                <div className="flex gap-2">
+                  <Input
+                    type={showSenha ? "text" : "password"}
+                    value={senha}
+                    onChange={(e) => setSenha(e.target.value)}
+                    autoComplete="new-password"
+                    className="h-11 text-base"
+                    required={!editing}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="tap-target h-11 w-11 shrink-0"
+                    aria-label={showSenha ? "Ocultar senha" : "Revelar senha"}
+                    onClick={() => setShowSenha((v) => !v)}
+                  >
+                    {showSenha ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="tap-target h-11 w-11 shrink-0"
+                    aria-label="Gerar senha"
+                    onClick={gerarSenha}
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
               </Field>
-              <Field label="Confirmar senha">
+              <Field
+                label="Confirmar senha"
+                error={confirmar && !confirmarOk ? "As senhas não conferem" : null}
+              >
                 <Input
-                  type="password"
+                  type={showSenha ? "text" : "password"}
                   value={confirmar}
                   onChange={(e) => setConfirmar(e.target.value)}
                   autoComplete="new-password"
@@ -551,7 +809,11 @@ export default function EmpresaForm() {
             </Section>
 
             <div className="flex flex-wrap gap-3">
-              <Button type="submit" className="tap-target" disabled={saving}>
+              <Button
+                type="submit"
+                className="tap-target"
+                disabled={saving || checkingEmail || (!editing && !acessoOk)}
+              >
                 {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 {editing ? "Salvar alterações" : "Criar empresa"}
               </Button>
