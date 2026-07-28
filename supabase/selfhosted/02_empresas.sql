@@ -162,8 +162,8 @@ begin
     raise exception 'Já existe um usuário com este e-mail';
   end if;
 
-  select coalesce(min(instance_id), '00000000-0000-0000-0000-000000000000'::uuid)
-    into v_instance from auth.users;
+  select coalesce((select instance_id from auth.users limit 1), '00000000-0000-0000-0000-000000000000'::uuid)
+    into v_instance;
 
   v_user_id := gen_random_uuid();
 
