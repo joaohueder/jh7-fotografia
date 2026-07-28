@@ -163,9 +163,31 @@
     border-color: var(--color-border);
   }
 
+  /*
+   * Fundação responsiva (mobile-first)
+   * - Alturas do "chrome" (header/nav/footer) são tokens fluidos, então o main
+   *   nunca precisa de padding mágico em px espalhado pelos componentes.
+   * - Gutter lateral escala com a viewport via clamp(), sem degraus bruscos.
+   */
+  :root {
+    --gutter: clamp(1rem, 4vw, 4rem);
+    --app-header-h: clamp(3.5rem, 9vw, 4rem);
+    --app-nav-h: clamp(2.75rem, 8vw, 3rem);
+    --app-footer-h: clamp(2.75rem, 8vw, 3rem);
+    --tap: 2.75rem; /* 44px — alvo mínimo de toque */
+  }
+
   html {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Overflow control: nenhum elemento decorativo pode gerar scroll horizontal */
+  html,
+  body {
+    overflow-x: clip;
+    max-width: 100%;
   }
 
   body {
@@ -182,9 +204,35 @@
   /* Largura máxima global do site: 1200px, centralizado */
   #root {
     width: 100%;
-    max-width: 1200px;
+    max-width: 75rem; /* 1200px em unidade relativa */
     margin-inline: auto;
   }
+
+  /* Mídia é sempre fluida por padrão — evita estouro de container */
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
+  }
+
+  img,
+  video {
+    height: auto;
+  }
+
+  /* Quebra segura de textos longos (e-mails, URLs) em telas estreitas */
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  li,
+  a {
+    overflow-wrap: break-word;
+  }
+
+
 
 
   h1,
