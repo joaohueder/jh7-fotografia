@@ -165,6 +165,7 @@ export default function EmpresaForm() {
         descricao: c.descricao ?? "",
       })),
     );
+    setEmail(data.adminEmail ?? empresa.resp_email ?? "");
   }, [data]);
 
   function set<K extends keyof EmpresaPayload>(key: K, value: EmpresaPayload[K]) {
@@ -293,8 +294,14 @@ export default function EmpresaForm() {
 
     try {
       if (editing) {
-        await update.mutateAsync({ id: id!, empresa: payload, contatos: lista, password: senha });
-        toast.success("Empresa atualizada.");
+        const trocarSenha = Boolean(senha) && Boolean(confirmar) && senhaOk && confirmarOk;
+        await update.mutateAsync({
+          id: id!,
+          empresa: payload,
+          contatos: lista,
+          password: trocarSenha ? senha : undefined,
+        });
+        toast.success(trocarSenha ? "Empresa e senha atualizadas." : "Empresa atualizada.");
       } else {
         await create.mutateAsync({
           empresa: payload,
@@ -725,16 +732,18 @@ export default function EmpresaForm() {
                 label="E-mail"
                 error={errors.email}
                 hint={
-                  checkingEmail
-                    ? "Verificando disponibilidade…"
-                    : emailChecked
-                      ? "E-mail disponível."
-                      : undefined
+                  editing
+                    ? "E-mail do usuário administrador (não editável)."
+                    : checkingEmail
+                      ? "Verificando disponibilidade…"
+                      : emailChecked
+                        ? "E-mail disponível."
+                        : undefined
                 }
               >
                 <Input
                   type="email"
-                  value={editing ? (data?.empresa.resp_email ?? email) : email}
+                  value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
                     setEmailChecked(false);
@@ -742,8 +751,9 @@ export default function EmpresaForm() {
                   }}
                   onBlur={() => void validarEmailAcesso()}
                   disabled={editing}
+                  readOnly={editing}
                   autoComplete="off"
-                  className="h-11 text-base"
+                  className="h-11 text-base disabled:opacity-100"
                   required={!editing}
                 />
               </Field>
