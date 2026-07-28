@@ -379,8 +379,32 @@ export default function EmpresaForm() {
       toast.error("Informe o nome do responsável.");
       return;
     }
-    if (form.resp_cpf && !isValidCpf(form.resp_cpf)) {
+    if (!form.resp_nascimento?.trim()) {
+      toast.error("Informe a data de nascimento do responsável.");
+      return;
+    }
+    if (!form.resp_cpf?.trim()) {
+      toast.error("Informe o CPF do responsável.");
+      return;
+    }
+    if (!isValidCpf(form.resp_cpf)) {
       toast.error("CPF do responsável inválido.");
+      return;
+    }
+    if (!form.resp_whatsapp?.trim()) {
+      toast.error("Informe o WhatsApp do responsável.");
+      return;
+    }
+    if (!isValidPhone(form.resp_whatsapp)) {
+      toast.error("WhatsApp do responsável inválido.");
+      return;
+    }
+    if (!form.contato_whatsapp?.trim()) {
+      toast.error("Informe o WhatsApp de contato da empresa.");
+      return;
+    }
+    if (!isValidPhone(form.contato_whatsapp)) {
+      toast.error("WhatsApp de contato da empresa inválido.");
       return;
     }
     const contatoInvalido = contatos.find((c) => validateContato(c.tipo, c.valor));
