@@ -4,9 +4,12 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-route
 
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/selfhosted/client";
+import { Toaster } from "@/components/ui/sonner";
 import LandingPage from "@/pages/Landing";
 import AuthPage from "@/pages/Auth";
 import SaDashboard from "@/pages/panels/SaDashboard";
+import EmpresasList from "@/pages/panels/sa/Empresas";
+import EmpresaForm from "@/pages/panels/sa/EmpresaForm";
 import AdminDashboard from "@/pages/panels/AdminDashboard";
 import UsuarioDashboard from "@/pages/panels/UsuarioDashboard";
 import { RoleRedirect, RequireRole } from "@/components/role-routing";
@@ -83,6 +86,36 @@ export default function App() {
               }
             />
             <Route
+              path="/sa/empresas"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["sa_admin"]}>
+                    <EmpresasList />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/sa/empresas/nova"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["sa_admin"]}>
+                    <EmpresaForm />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/sa/empresas/:id"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["sa_admin"]}>
+                    <EmpresaForm />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
               path="/admin/dashboard"
               element={
                 <RequireAuth>
@@ -104,6 +137,7 @@ export default function App() {
             />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
+          <Toaster position="top-right" richColors />
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
