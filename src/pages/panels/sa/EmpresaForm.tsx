@@ -285,8 +285,57 @@ export default function EmpresaForm() {
     ? true
     : Boolean(email.trim()) && !errors.email && emailChecked && senhaOk && confirmarOk;
 
+  /** Valida a etapa atual antes de liberar o avanço. */
+  async function avancar() {
+    if (step === 0) {
+      if (!form.razao_social.trim() || !form.nome_fantasia.trim() || !form.cnpj.trim()) {
+        toast.error("Razão social, nome fantasia e CPF/CNPJ são obrigatórios.");
+        return;
+      }
+      if (!isValidCpfCnpj(form.cnpj)) {
+        setError("cnpj", "CPF/CNPJ inválido");
+        toast.error("CPF/CNPJ inválido.");
+        return;
+      }
+    }
+    if (step === 1) {
+      if (!form.resp_nome.trim()) {
+        toast.error("Informe o nome do responsável.");
+        return;
+      }
+      if (form.resp_cpf && !isValidCpf(form.resp_cpf)) {
+        toast.error("CPF do responsável inválido.");
+        return;
+      }
+    }
+    if (step === 2) {
+      if (contatos.some((c) => validateContato(c.tipo, c.valor))) {
+        toast.error("Verifique os contatos adicionais.");
+        return;
+      }
+    }
+    if (step === 3) {
+      if (!emailChecked) await validarEmailAcesso();
+      if (!email.trim() || !isValidEmail(email)) {
+        toast.error("Informe um e-mail de acesso válido.");
+        return;
+      }
+      if (!senhaOk) {
+        toast.error("A senha deve ter pelo menos 8 caracteres.");
+        return;
+      }
+      if (!confirmarOk) {
+        toast.error("As senhas não conferem.");
+        return;
+      }
+    }
+    setStep((s) => Math.min(RESUMO, s + 1));
+  }
+
   async function handleSubmit(ev: React.FormEvent) {
     ev.preventDefault();
+    if (!editing && step !== RESUMO) return;
+
 
     if (!form.razao_social.trim() || !form.nome_fantasia.trim() || !form.cnpj.trim()) {
       toast.error("Razão social, nome fantasia e CPF/CNPJ são obrigatórios.");
