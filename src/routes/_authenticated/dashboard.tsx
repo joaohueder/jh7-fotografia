@@ -1,8 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { LogOut } from "lucide-react";
 
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
+
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -18,6 +20,17 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 
 function DashboardPage() {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  async function handleSignOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await signOut();
+    navigate({ to: "/auth", replace: true });
+  }
+
+
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -28,7 +41,7 @@ function DashboardPage() {
           </Link>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">{user?.email}</span>
-            <Button variant="ghost" size="sm" onClick={() => signOut()}>
+            <Button variant="ghost" size="sm" onClick={handleSignOut}>
               <LogOut className="mr-2 h-4 w-4" />
               Sair
             </Button>
