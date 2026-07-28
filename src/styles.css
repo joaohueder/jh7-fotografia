@@ -46,6 +46,9 @@
   --color-ring-offset-background: var(--background);
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
+  --color-brand-orange: var(--gold);
+  --color-brand-green: var(--brand-green);
+  --color-brand-green-soft: var(--brand-green-soft);
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface-elevated);
   --color-chart-1: var(--chart-1);
