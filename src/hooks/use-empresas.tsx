@@ -129,12 +129,20 @@ export function useUpdateEmpresa() {
   });
 }
 
+/** Verifica se já existe usuário de autenticação com este e-mail. */
+export async function checkEmailExists(email: string) {
+  const { data, error } = await db.rpc("sa_email_exists", { p_email: email });
+  if (error) throw error;
+  return Boolean(data);
+}
+
 /** Checa dependências antes de excluir (usuários vinculados à empresa). */
 export async function fetchEmpresaDependencias(id: string) {
   const { data, error } = await db.rpc("sa_empresa_dependencias", { p_id: id });
   if (error) throw error;
   return (data ?? { usuarios: 0 }) as { usuarios: number };
 }
+
 
 export function useDeleteEmpresa() {
   const qc = useQueryClient();
