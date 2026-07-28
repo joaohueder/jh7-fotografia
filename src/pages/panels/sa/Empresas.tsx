@@ -170,6 +170,19 @@ export default function EmpresasList() {
             <div className="mt-2 h-[88px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={resumo.meses} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
+                  <defs>
+                    <linearGradient id="empresaBarGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="var(--brand-green-soft)" />
+                      <stop offset="100%" stopColor="var(--brand-green)" />
+                    </linearGradient>
+                    <linearGradient id="empresaBarHoverGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="var(--gold-soft)" />
+                      <stop offset="100%" stopColor="var(--gold)" />
+                    </linearGradient>
+                    <filter id="empresaBarShadow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="var(--brand-green)" floodOpacity="0.35" />
+                    </filter>
+                  </defs>
                   <XAxis
                     dataKey="mes"
                     tickLine={false}
@@ -177,15 +190,47 @@ export default function EmpresasList() {
                     tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
                   />
                   <Tooltip
-                    cursor={{ fill: "hsl(var(--muted) / 0.3)" }}
-                    contentStyle={{
-                      background: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: 8,
-                      fontSize: 12,
+                    cursor={{ fill: "hsl(var(--muted) / 0.25)" }}
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null;
+                      const value = payload[0].value as number;
+                      return (
+                        <div
+                          className="rounded-lg border px-2.5 py-1.5 text-xs shadow-lg"
+                          style={{
+                            background: "hsl(var(--card))",
+                            borderColor: "hsl(var(--border))",
+                          }}
+                        >
+                          <span className="font-semibold" style={{ color: "var(--brand-green)" }}>
+                            {value}
+                          </span>{" "}
+                          <span className="text-muted-foreground">
+                            {value === 1 ? "empresa" : "empresas"} em {payload[0].payload.mes}
+                          </span>
+                        </div>
+                      );
                     }}
                   />
-                  <Bar dataKey="total" fill="var(--panel-accent)" radius={[4, 4, 0, 0]} />
+                  <Bar
+                    dataKey="total"
+                    fill="url(#empresaBarGradient)"
+                    radius={[5, 5, 2, 2]}
+                    animationDuration={900}
+                    animationBegin={150}
+                  >
+                    {resumo.meses.map((entry, index) => (
+                      <Cell
+                        key={`cell-${entry.mes}`}
+                        fill="url(#empresaBarGradient)"
+                        strokeWidth={0}
+                        style={{
+                          filter: "url(#empresaBarShadow)",
+                          transition: "all 0.2s ease",
+                        }}
+                      />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
