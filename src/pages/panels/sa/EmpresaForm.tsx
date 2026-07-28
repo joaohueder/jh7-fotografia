@@ -277,6 +277,34 @@ export default function EmpresaForm() {
     }
   }
 
+  async function validarCnpj() {
+    const value = form.cnpj;
+    setCnpjChecked(false);
+    if (!value.trim()) {
+      setError("cnpj", "Informe o CPF ou CNPJ");
+      return;
+    }
+    if (!isValidCpfCnpj(value)) {
+      setError("cnpj", "CPF/CNPJ inválido");
+      return;
+    }
+    setError("cnpj", null);
+    setCheckingCnpj(true);
+    try {
+      const exists = await checkCnpjExists(value, editing ? id : undefined);
+      if (exists) {
+        setError("cnpj", "Já existe uma empresa cadastrada com este CPF/CNPJ");
+      } else {
+        setError("cnpj", null);
+        setCnpjChecked(true);
+      }
+    } catch (err) {
+      setError("cnpj", (err as Error).message);
+    } finally {
+      setCheckingCnpj(false);
+    }
+  }
+
   function gerarSenha() {
     const nova = generatePassword();
     setSenha(nova);
