@@ -29,7 +29,6 @@ import {
   maskCpf,
   maskCpfCnpj,
   maskPhone,
-  onlyDigits,
   validateContato,
 } from "@/lib/br-masks";
 import { Button } from "@/components/ui/button";
