@@ -413,8 +413,8 @@ export default function EmpresaForm() {
       return;
     }
     if (!cnpjChecked) {
-      await validarCnpj();
-      if (errors.cnpj) return;
+      const ok = await validarCnpj();
+      if (!ok) return;
     }
 
     if (!form.resp_nome.trim()) {
