@@ -38,7 +38,16 @@ export function RequireRole({
 }) {
   const { role, isLoading } = usePrimaryRole();
   if (isLoading) return <div className="min-h-screen bg-background" />;
-  if (!role || !allow.includes(role)) {
+  if (!role) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
+        <p className="max-w-md text-muted-foreground">
+          Sua conta ainda não possui um tipo de acesso definido. Fale com o administrador.
+        </p>
+      </div>
+    );
+  }
+  if (!allow.includes(role)) {
     return <Navigate to={panelPathForRole(role)} replace />;
   }
   return <>{children}</>;
