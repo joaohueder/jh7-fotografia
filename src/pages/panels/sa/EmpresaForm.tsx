@@ -572,7 +572,7 @@ export default function EmpresaForm() {
               </Field>
             </Section>
 
-            <Section title="Contatos">
+            <Section title="Contato da empresa">
               <Field label="WhatsApp" error={errors.contato_whatsapp}>
                 <Input
                   value={form.contato_whatsapp ?? ""}
