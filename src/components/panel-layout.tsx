@@ -18,8 +18,8 @@ export type PanelAccent = "sa" | "admin" | "usuario";
 
 /** Cada painel usa um recorte da paleta do sistema (preto / laranja / verde). */
 const ACCENTS: Record<PanelAccent, { accent: string; accentSoft: string; label: string }> = {
-  // SA admin — laranja da marca
-  sa: { accent: "var(--gold)", accentSoft: "var(--gold-soft)", label: "Painel SaaS" },
+  // SA admin — verde da marca
+  sa: { accent: "var(--brand-green)", accentSoft: "var(--brand-green-soft)", label: "Painel SaaS" },
   // Admin da empresa — verde da marca
   admin: { accent: "var(--brand-green)", accentSoft: "var(--brand-green-soft)", label: "Painel Administrativo" },
   // Usuário — laranja suave / âmbar claro derivado da paleta
