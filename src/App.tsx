@@ -116,7 +116,6 @@ export default function App() {
               }
             />
             <Route
-            <Route
               path="/admin/dashboard"
               element={
                 <RequireAuth>
