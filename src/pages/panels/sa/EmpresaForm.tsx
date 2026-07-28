@@ -345,6 +345,7 @@ export default function EmpresaForm() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
+            {showStep(0) && (
             <Section title="Dados da empresa">
               <Field label="Razão social">
                 <Input
