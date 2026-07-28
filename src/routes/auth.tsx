@@ -105,7 +105,7 @@ function AuthPage() {
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-border bg-surface">
               <Camera className="h-[18px] w-[18px] text-gold" />
             </span>
-            <span className="truncate text-sm font-medium tracking-[0.14em] uppercase text-muted-foreground">
+            <span className="truncate text-[13px] font-bold tracking-[0.16em] uppercase text-muted-foreground">
               JH7 <span className="text-foreground">Gestão Fotográfica</span>
             </span>
           </header>
@@ -132,7 +132,7 @@ function AuthPage() {
               {HIGHLIGHTS.map((item) => (
                 <li
                   key={item}
-                  className="group flex items-center gap-4 bg-surface/70 px-5 py-4 text-sm text-foreground/85 transition-colors duration-300 hover:bg-surface-elevated"
+                  className="group flex items-center gap-4 bg-surface/70 px-5 py-4 text-[15px] font-medium text-foreground/85 transition-colors duration-300 hover:bg-surface-elevated"
                 >
                   <span className="h-1 w-6 shrink-0 rounded-full bg-gold/45 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:w-10 group-hover:bg-gold" />
                   <span className="min-w-0">{item}</span>
@@ -153,15 +153,15 @@ function AuthPage() {
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-border bg-surface">
                 <Camera className="h-[18px] w-[18px] text-gold" />
               </span>
-              <span className="truncate text-sm font-medium uppercase tracking-[0.14em] text-muted-foreground">
+              <span className="truncate text-[13px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
                 JH7 <span className="text-foreground">Gestão Fotográfica</span>
               </span>
             </div>
 
             <div className="glass rounded-3xl p-8 sm:p-10 animate-fade-up">
             <div className="space-y-2">
-              <h2 className="text-3xl">Bem-vindo de volta</h2>
-              <p className="text-sm leading-relaxed text-muted-foreground">
+              <h2 className="text-[1.75rem]">Bem-vindo de volta</h2>
+              <p className="text-[15px] leading-relaxed text-muted-foreground">
                 Entre com sua conta para acessar o sistema.
               </p>
             </div>
@@ -170,7 +170,7 @@ function AuthPage() {
               <div className="space-y-2">
                 <Label
                   htmlFor="email"
-                  className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground"
+                  className="text-[11px] font-bold uppercase tracking-[0.14em] text-foreground/60"
                 >
                   E-mail
                 </Label>
@@ -189,7 +189,7 @@ function AuthPage() {
               <div className="space-y-2">
                 <Label
                   htmlFor="password"
-                  className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground"
+                  className="text-[11px] font-bold uppercase tracking-[0.14em] text-foreground/60"
                 >
                   Senha
                 </Label>
@@ -225,14 +225,14 @@ function AuthPage() {
                   />
                   <Label
                     htmlFor="remember"
-                    className="text-[13px] font-normal text-muted-foreground"
+                    className="text-[13px] font-medium text-foreground/75"
                   >
                     Ficar logado por 30 dias
                   </Label>
                 </div>
                 <button
                   type="button"
-                  className="shrink-0 text-[13px] text-muted-foreground transition-colors duration-300 hover:text-gold"
+                  className="shrink-0 text-[13px] font-semibold text-muted-foreground transition-colors duration-300 hover:text-gold"
                   onClick={() => {
                     // Password recovery flow will be implemented later.
                   }}
@@ -250,7 +250,7 @@ function AuthPage() {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="group h-12 w-full rounded-xl bg-primary text-[15px] font-medium text-primary-foreground shadow-[var(--shadow-gold)] transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 disabled:opacity-70"
+                className="group h-12 w-full rounded-xl bg-primary text-[15px] font-bold tracking-[0.01em] text-primary-foreground shadow-[var(--shadow-gold)] transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 disabled:opacity-70"
               >
                 {isSubmitting ? (
                   <>
