@@ -486,7 +486,7 @@ export default function EmpresaForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {showStep(0) && (
             <Section title="Dados da empresa">
-              <Field label="Razão social">
+              <Field label="Razão social" required>
                 <Input
                   value={form.razao_social}
                   onChange={(e) => set("razao_social", e.target.value)}
