@@ -52,6 +52,25 @@ export default function EmpresasList() {
   const [checando, setChecando] = useState(false);
   const [bloqueio, setBloqueio] = useState<string | null>(null);
 
+  const resumo = useMemo(() => {
+    const list = data ?? [];
+    const ativos = list.filter((e) => e.status === "ATIVO").length;
+    const meses: { mes: string; total: number }[] = [];
+    const hoje = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const ref = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+      const total = list.filter((e) => {
+        const d = new Date(e.created_at);
+        return d.getFullYear() === ref.getFullYear() && d.getMonth() === ref.getMonth();
+      }).length;
+      meses.push({
+        mes: ref.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""),
+        total,
+      });
+    }
+    return { total: list.length, ativos, inativos: list.length - ativos, meses };
+  }, [data]);
+
   const empresas = useMemo(() => {
     const term = busca.trim().toLowerCase();
     const list = data ?? [];
