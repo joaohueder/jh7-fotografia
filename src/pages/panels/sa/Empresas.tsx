@@ -72,6 +72,10 @@ export default function EmpresasList() {
     return { total: list.length, ativos, inativos: list.length - ativos, meses };
   }, [data]);
 
+  /** Nenhuma empresa cadastrada (estado vazio real, não filtro de busca). */
+  const vazio = !isLoading && !error && (data?.length ?? 0) === 0;
+
+
   const empresas = useMemo(() => {
     const term = busca.trim().toLowerCase();
     const list = data ?? [];
