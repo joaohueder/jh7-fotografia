@@ -573,7 +573,18 @@ export default function EmpresaForm() {
             <Loader2 className="h-4 w-4 animate-spin" /> Carregando…
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form
+            onSubmit={handleSubmit}
+            onKeyDown={(e) => {
+              // Evita salvar/avançar sem querer ao pressionar Enter nos campos.
+              const target = e.target as HTMLElement;
+              if (e.key === "Enter" && target.tagName !== "TEXTAREA") {
+                e.preventDefault();
+              }
+            }}
+            className="space-y-4"
+          >
+
             {showStep(0) && (
             <Section title="Dados da empresa">
               <Field label="Razão social" required>
