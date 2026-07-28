@@ -683,7 +683,7 @@ export default function EmpresaForm() {
                   className="h-11 text-base uppercase"
                 />
               </Field>
-              <Field label="WhatsApp" error={errors.resp_whatsapp}>
+              <Field label="WhatsApp" required error={errors.resp_whatsapp}>
                 <Input
                   value={form.resp_whatsapp ?? ""}
                   onChange={(e) => set("resp_whatsapp", maskPhone(e.target.value))}
