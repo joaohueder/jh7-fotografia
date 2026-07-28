@@ -112,6 +112,41 @@ function Field({
   );
 }
 
+/** Bloco de leitura usado no resumo final do cadastro em etapas. */
+function ResumoBloco({
+  titulo,
+  itens,
+}: {
+  titulo: string;
+  itens: [string, string | null | undefined][];
+}) {
+  return (
+    <div className="space-y-2">
+      <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+        {titulo}
+      </h3>
+      <dl className="space-y-1.5">
+        {itens.map(([label, valor]) => (
+          <div key={label} className="flex flex-wrap gap-x-2 text-sm">
+            <dt className="text-muted-foreground">{label}:</dt>
+            <dd className="min-w-0 break-words font-medium">{valor?.trim() ? valor : "—"}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
+const STEPS = [
+  "Dados da empresa",
+  "Responsável",
+  "Contato",
+  "Acesso",
+  "Observações",
+  "Resumo",
+] as const;
+const RESUMO = STEPS.length - 1;
+
 type Errors = Record<string, string | null>;
 
 export default function EmpresaForm() {
