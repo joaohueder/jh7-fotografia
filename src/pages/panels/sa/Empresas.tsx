@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Building2, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { Building2, Loader2, Pencil, Plus, Power, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
@@ -10,11 +10,14 @@ import { SA_MENU } from "@/pages/panels/sa/menu";
 import {
   useEmpresas,
   useDeleteEmpresa,
+  useSetEmpresaStatus,
   fetchEmpresaDependencias,
   type Empresa,
 } from "@/hooks/use-empresas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
 
 function StatusBadge({ status }: { status: Empresa["status"] }) {
   const ativo = status === "ATIVO";
@@ -48,10 +52,14 @@ export default function EmpresasList() {
   const navigate = useNavigate();
   const { data, isLoading, error } = useEmpresas();
   const remove = useDeleteEmpresa();
+  const setStatus = useSetEmpresaStatus();
   const [busca, setBusca] = useState("");
   const [alvo, setAlvo] = useState<Empresa | null>(null);
   const [checando, setChecando] = useState(false);
   const [bloqueio, setBloqueio] = useState<string | null>(null);
+  const [alvoStatus, setAlvoStatus] = useState<Empresa | null>(null);
+  const [nota, setNota] = useState("");
+
 
   const resumo = useMemo(() => {
     const list = data ?? [];
@@ -116,6 +124,30 @@ export default function EmpresasList() {
       toast.error((err as Error).message);
     }
   }
+
+  function abrirStatus(empresa: Empresa) {
+    setNota("");
+    setAlvoStatus(empresa);
+  }
+
+  async function confirmarStatus() {
+    if (!alvoStatus) return;
+    if (nota.trim().length < 5) {
+      toast.error("Informe uma nota com pelo menos 5 caracteres.");
+      return;
+    }
+    const novo = alvoStatus.status === "ATIVO" ? "INATIVO" : "ATIVO";
+    try {
+      await setStatus.mutateAsync({ id: alvoStatus.id, status: novo, nota: nota.trim() });
+      toast.success(novo === "ATIVO" ? "Empresa ativada." : "Empresa inativada.");
+      setAlvoStatus(null);
+      setNota("");
+    } catch (err) {
+      toast.error((err as Error).message);
+    }
+  }
+
+
 
   return (
     <PanelLayout accent="sa" menu={SA_MENU}>
@@ -315,6 +347,16 @@ export default function EmpresasList() {
                       variant="outline"
                       size="sm"
                       className="tap-target"
+                      aria-label={`${e.status === "ATIVO" ? "Inativar" : "Ativar"} ${e.nome_fantasia}`}
+                      onClick={() => abrirStatus(e)}
+                    >
+                      <Power className="h-4 w-4" />
+                    </Button>
+                    <Button
+
+                      variant="outline"
+                      size="sm"
+                      className="tap-target"
                       aria-label={`Excluir ${e.nome_fantasia}`}
                       onClick={() => abrirExclusao(e)}
                     >
@@ -363,6 +405,24 @@ export default function EmpresasList() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            title={e.status === "ATIVO" ? "Inativar empresa" : "Ativar empresa"}
+                            aria-label={`${e.status === "ATIVO" ? "Inativar" : "Ativar"} ${e.nome_fantasia}`}
+                            onClick={() => abrirStatus(e)}
+                          >
+                            <Power
+                              className="h-4 w-4"
+                              style={{
+                                color:
+                                  e.status === "ATIVO"
+                                    ? "var(--panel-accent)"
+                                    : "hsl(var(--muted-foreground))",
+                              }}
+                            />
+                          </Button>
+                          <Button
+
+                            variant="ghost"
+                            size="icon"
                             aria-label={`Excluir ${e.nome_fantasia}`}
                             onClick={() => abrirExclusao(e)}
                           >
@@ -408,6 +468,65 @@ export default function EmpresasList() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog
+        open={Boolean(alvoStatus)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setAlvoStatus(null);
+            setNota("");
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {alvoStatus?.status === "ATIVO" ? "Inativar empresa" : "Ativar empresa"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {alvoStatus?.status === "ATIVO"
+                ? `A empresa "${alvoStatus?.nome_fantasia}" ficará inativa. Descreva o motivo desta alteração.`
+                : `A empresa "${alvoStatus?.nome_fantasia}" voltará a ficar ativa. Descreva o motivo desta alteração.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="space-y-2">
+            <Label htmlFor="nota-status">
+              Nota <span style={{ color: "var(--panel-accent)" }}>*</span>
+            </Label>
+            <Textarea
+              id="nota-status"
+              value={nota}
+              onChange={(ev) => setNota(ev.target.value)}
+              placeholder="Ex.: contrato encerrado em 01/2026 por solicitação do cliente."
+              rows={3}
+              className="text-base"
+            />
+            <p className="text-xs text-muted-foreground">
+              A nota é obrigatória (mínimo 5 caracteres) e fica registrada no histórico da empresa.
+            </p>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel className="tap-target">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="tap-target"
+              onClick={(ev) => {
+                ev.preventDefault();
+                void confirmarStatus();
+              }}
+              disabled={setStatus.isPending || nota.trim().length < 5}
+            >
+              {setStatus.isPending
+                ? "Salvando…"
+                : alvoStatus?.status === "ATIVO"
+                  ? "Inativar"
+                  : "Ativar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </PanelLayout>
   );
 }

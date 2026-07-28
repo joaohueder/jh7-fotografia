@@ -157,6 +157,26 @@ export async function fetchEmpresaDependencias(id: string) {
 }
 
 
+/** Ativa/inativa a empresa registrando uma nota obrigatória no histórico. */
+export function useSetEmpresaStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { id: string; status: EmpresaStatus; nota: string }) => {
+      const { error } = await db.rpc("sa_set_empresa_status", {
+        p_id: input.id,
+        p_status: input.status,
+        p_nota: input.nota,
+      });
+      if (error) throw error;
+      return input.id;
+    },
+    onSuccess: (id) => {
+      qc.invalidateQueries({ queryKey: ["empresas"] });
+      qc.invalidateQueries({ queryKey: ["empresa", id] });
+    },
+  });
+}
+
 export function useDeleteEmpresa() {
   const qc = useQueryClient();
   return useMutation({
