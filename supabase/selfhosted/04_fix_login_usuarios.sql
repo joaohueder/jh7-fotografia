@@ -109,7 +109,7 @@ begin
 
   insert into auth.users (
     instance_id, id, aud, role, email, encrypted_password,
-    email_confirmed_at, confirmed_at,
+    email_confirmed_at,
     raw_app_meta_data, raw_user_meta_data,
     is_super_admin, is_sso_user, is_anonymous,
     confirmation_token, recovery_token, email_change,
@@ -119,7 +119,7 @@ begin
   ) values (
     v_instance, v_user_id, 'authenticated', 'authenticated', v_email,
     extensions.crypt(p_password, extensions.gen_salt('bf')),
-    now(), now(),
+    now(),
     '{"provider":"email","providers":["email"]}'::jsonb,
     jsonb_build_object('full_name', p_empresa->>'resp_nome', 'email_verified', true),
     false, false, false,
