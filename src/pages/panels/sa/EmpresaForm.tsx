@@ -725,7 +725,7 @@ export default function EmpresaForm() {
 
             {showStep(2) && (
             <Section title="Contato da empresa">
-              <Field label="WhatsApp" error={errors.contato_whatsapp}>
+              <Field label="WhatsApp" required error={errors.contato_whatsapp}>
                 <Input
                   value={form.contato_whatsapp ?? ""}
                   onChange={(e) => set("contato_whatsapp", maskPhone(e.target.value))}
