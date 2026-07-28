@@ -52,10 +52,14 @@ export default function EmpresasList() {
   const navigate = useNavigate();
   const { data, isLoading, error } = useEmpresas();
   const remove = useDeleteEmpresa();
+  const setStatus = useSetEmpresaStatus();
   const [busca, setBusca] = useState("");
   const [alvo, setAlvo] = useState<Empresa | null>(null);
   const [checando, setChecando] = useState(false);
   const [bloqueio, setBloqueio] = useState<string | null>(null);
+  const [alvoStatus, setAlvoStatus] = useState<Empresa | null>(null);
+  const [nota, setNota] = useState("");
+
 
   const resumo = useMemo(() => {
     const list = data ?? [];
