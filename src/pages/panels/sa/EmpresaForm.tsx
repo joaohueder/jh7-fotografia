@@ -451,6 +451,7 @@ export default function EmpresaForm() {
               </Field>
             </Section>
 
+            {showStep(1) && (
             <Section title="Dados do responsável">
               <Field label="Nome">
                 <Input
