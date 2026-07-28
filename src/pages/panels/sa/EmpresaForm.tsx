@@ -88,12 +88,14 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 function Field({
   label,
+  required,
   span,
   error,
   hint,
   children,
 }: {
   label: string;
+  required?: boolean;
   span?: boolean;
   error?: string | null;
   hint?: string;
@@ -101,7 +103,10 @@ function Field({
 }) {
   return (
     <div className={span ? "space-y-2 md:col-span-full" : "space-y-2"}>
-      <Label className="text-sm">{label}</Label>
+      <Label className="text-sm">
+        {label}
+        {required ? <span className="ml-0.5 text-destructive">*</span> : null}
+      </Label>
       {children}
       {error ? (
         <p className="text-xs font-medium text-destructive">{error}</p>
@@ -303,12 +308,36 @@ export default function EmpresaForm() {
         toast.error("Informe o nome do responsável.");
         return;
       }
-      if (form.resp_cpf && !isValidCpf(form.resp_cpf)) {
+      if (!form.resp_nascimento?.trim()) {
+        toast.error("Informe a data de nascimento do responsável.");
+        return;
+      }
+      if (!form.resp_cpf?.trim()) {
+        toast.error("Informe o CPF do responsável.");
+        return;
+      }
+      if (!isValidCpf(form.resp_cpf)) {
         toast.error("CPF do responsável inválido.");
+        return;
+      }
+      if (!form.resp_whatsapp?.trim()) {
+        toast.error("Informe o WhatsApp do responsável.");
+        return;
+      }
+      if (!isValidPhone(form.resp_whatsapp)) {
+        toast.error("WhatsApp do responsável inválido.");
         return;
       }
     }
     if (step === 2) {
+      if (!form.contato_whatsapp?.trim()) {
+        toast.error("Informe o WhatsApp de contato da empresa.");
+        return;
+      }
+      if (!isValidPhone(form.contato_whatsapp)) {
+        toast.error("WhatsApp de contato da empresa inválido.");
+        return;
+      }
       if (contatos.some((c) => validateContato(c.tipo, c.valor))) {
         toast.error("Verifique os contatos adicionais.");
         return;
@@ -350,8 +379,32 @@ export default function EmpresaForm() {
       toast.error("Informe o nome do responsável.");
       return;
     }
-    if (form.resp_cpf && !isValidCpf(form.resp_cpf)) {
+    if (!form.resp_nascimento?.trim()) {
+      toast.error("Informe a data de nascimento do responsável.");
+      return;
+    }
+    if (!form.resp_cpf?.trim()) {
+      toast.error("Informe o CPF do responsável.");
+      return;
+    }
+    if (!isValidCpf(form.resp_cpf)) {
       toast.error("CPF do responsável inválido.");
+      return;
+    }
+    if (!form.resp_whatsapp?.trim()) {
+      toast.error("Informe o WhatsApp do responsável.");
+      return;
+    }
+    if (!isValidPhone(form.resp_whatsapp)) {
+      toast.error("WhatsApp do responsável inválido.");
+      return;
+    }
+    if (!form.contato_whatsapp?.trim()) {
+      toast.error("Informe o WhatsApp de contato da empresa.");
+      return;
+    }
+    if (!isValidPhone(form.contato_whatsapp)) {
+      toast.error("WhatsApp de contato da empresa inválido.");
       return;
     }
     const contatoInvalido = contatos.find((c) => validateContato(c.tipo, c.valor));
@@ -481,7 +534,7 @@ export default function EmpresaForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {showStep(0) && (
             <Section title="Dados da empresa">
-              <Field label="Razão social">
+              <Field label="Razão social" required>
                 <Input
                   value={form.razao_social}
                   onChange={(e) => set("razao_social", e.target.value)}
@@ -489,7 +542,7 @@ export default function EmpresaForm() {
                   required
                 />
               </Field>
-              <Field label="Nome fantasia">
+              <Field label="Nome fantasia" required>
                 <Input
                   value={form.nome_fantasia}
                   onChange={(e) => set("nome_fantasia", e.target.value)}
@@ -497,7 +550,7 @@ export default function EmpresaForm() {
                   required
                 />
               </Field>
-              <Field label="CPF / CNPJ" error={errors.cnpj}>
+              <Field label="CPF / CNPJ" required error={errors.cnpj}>
                 <Input
                   value={form.cnpj}
                   onChange={(e) => set("cnpj", maskCpfCnpj(e.target.value))}
@@ -589,7 +642,7 @@ export default function EmpresaForm() {
 
             {showStep(1) && (
             <Section title="Dados do responsável">
-              <Field label="Nome">
+              <Field label="Nome" required>
                 <Input
                   value={form.resp_nome}
                   onChange={(e) => set("resp_nome", e.target.value)}
@@ -597,15 +650,16 @@ export default function EmpresaForm() {
                   required
                 />
               </Field>
-              <Field label="Data de nascimento">
+              <Field label="Data de nascimento" required>
                 <Input
                   type="date"
                   value={form.resp_nascimento ?? ""}
                   onChange={(e) => set("resp_nascimento", e.target.value)}
                   className="h-11 text-base"
+                  required
                 />
               </Field>
-              <Field label="CPF" error={errors.resp_cpf}>
+              <Field label="CPF" required error={errors.resp_cpf}>
                 <Input
                   value={form.resp_cpf ?? ""}
                   onChange={(e) => set("resp_cpf", maskCpf(e.target.value))}
@@ -677,7 +731,7 @@ export default function EmpresaForm() {
                   className="h-11 text-base uppercase"
                 />
               </Field>
-              <Field label="WhatsApp" error={errors.resp_whatsapp}>
+              <Field label="WhatsApp" required error={errors.resp_whatsapp}>
                 <Input
                   value={form.resp_whatsapp ?? ""}
                   onChange={(e) => set("resp_whatsapp", maskPhone(e.target.value))}
@@ -719,7 +773,7 @@ export default function EmpresaForm() {
 
             {showStep(2) && (
             <Section title="Contato da empresa">
-              <Field label="WhatsApp" error={errors.contato_whatsapp}>
+              <Field label="WhatsApp" required error={errors.contato_whatsapp}>
                 <Input
                   value={form.contato_whatsapp ?? ""}
                   onChange={(e) => set("contato_whatsapp", maskPhone(e.target.value))}
@@ -871,6 +925,7 @@ export default function EmpresaForm() {
             <Section title="Acesso ao sistema (usuário administrador)">
               <Field
                 label="E-mail"
+                required={!editing}
                 error={errors.email}
                 hint={
                   editing
@@ -900,6 +955,7 @@ export default function EmpresaForm() {
               </Field>
               <Field
                 label={editing ? "Nova senha (opcional)" : "Senha"}
+                required={!editing}
                 error={senha && !senhaOk ? "Mínimo de 8 caracteres" : null}
               >
                 <div className="flex gap-2">
@@ -935,6 +991,7 @@ export default function EmpresaForm() {
               </Field>
               <Field
                 label="Confirmar senha"
+                required={!editing}
                 error={confirmar && !confirmarOk ? "As senhas não conferem" : null}
               >
                 <Input
