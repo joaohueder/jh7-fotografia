@@ -186,13 +186,15 @@ export default function EmpresasList() {
           </div>
         </div>
 
-        <Input
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          placeholder="Buscar por razão social, nome fantasia, CNPJ ou cidade"
-          className="h-11 text-base"
-          aria-label="Buscar empresas"
-        />
+        {vazio ? null : (
+          <Input
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Buscar por razão social, nome fantasia, CNPJ ou cidade"
+            className="h-11 text-base"
+            aria-label="Buscar empresas"
+          />
+        )}
 
         {isLoading ? (
           <div className="flex items-center gap-2 text-muted-foreground">
@@ -202,10 +204,37 @@ export default function EmpresasList() {
           <p className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm">
             Não foi possível carregar as empresas: {(error as Error).message}
           </p>
+        ) : vazio ? (
+          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card px-6 py-[clamp(2.5rem,12vw,4.5rem)] text-center">
+            <span
+              className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full border"
+              style={{
+                borderColor: "var(--panel-accent)",
+                background: "color-mix(in oklab, var(--panel-accent) 12%, transparent)",
+              }}
+            >
+              <Building2 className="h-6 w-6" style={{ color: "var(--panel-accent)" }} />
+            </span>
+            <h2 className="text-[clamp(1.125rem,4vw,1.375rem)] font-bold tracking-tight">
+              Nenhuma empresa cadastrada
+            </h2>
+            <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+              Você ainda não possui empresas no sistema. Cadastre a primeira para começar a gerenciar
+              seus clientes.
+            </p>
+            <Button asChild className="tap-target mt-6">
+              <Link to="/sa/empresas/nova">
+                <Plus className="mr-2 h-4 w-4" />
+                Cadastrar nova empresa
+              </Link>
+            </Button>
+          </div>
         ) : empresas.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border p-8 text-center">
             <Building2 className="mx-auto mb-3 h-6 w-6 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Nenhuma empresa cadastrada ainda.</p>
+            <p className="text-sm text-muted-foreground">
+              Nenhuma empresa encontrada para esta busca.
+            </p>
           </div>
         ) : (
           <>
