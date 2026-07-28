@@ -174,8 +174,9 @@
     font-family: var(--font-sans);
     font-weight: 450;
     font-optical-sizing: auto;
-    letter-spacing: -0.006em;
-    line-height: 1.6;
+    letter-spacing: 0;
+    word-spacing: 0.02em;
+    line-height: 1.65;
   }
 
   h1,
