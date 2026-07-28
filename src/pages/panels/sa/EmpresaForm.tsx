@@ -277,16 +277,16 @@ export default function EmpresaForm() {
     }
   }
 
-  async function validarCnpj() {
+  async function validarCnpj(): Promise<boolean> {
     const value = form.cnpj;
     setCnpjChecked(false);
     if (!value.trim()) {
       setError("cnpj", "Informe o CPF ou CNPJ");
-      return;
+      return false;
     }
     if (!isValidCpfCnpj(value)) {
       setError("cnpj", "CPF/CNPJ inválido");
-      return;
+      return false;
     }
     setError("cnpj", null);
     setCheckingCnpj(true);
@@ -294,12 +294,14 @@ export default function EmpresaForm() {
       const exists = await checkCnpjExists(value, editing ? id : undefined);
       if (exists) {
         setError("cnpj", "Já existe uma empresa cadastrada com este CPF/CNPJ");
-      } else {
-        setError("cnpj", null);
-        setCnpjChecked(true);
+        return false;
       }
+      setError("cnpj", null);
+      setCnpjChecked(true);
+      return true;
     } catch (err) {
       setError("cnpj", (err as Error).message);
+      return false;
     } finally {
       setCheckingCnpj(false);
     }
