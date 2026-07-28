@@ -100,8 +100,8 @@ function AuthPage() {
 
       <div className="relative grid min-h-screen grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
         {/* Left — brand narrative */}
-        <section className="relative flex flex-col justify-between gap-16 px-6 py-10 sm:px-10 lg:px-16 lg:py-16">
-          <header className="flex min-w-0 items-center gap-3 animate-fade-in">
+        <section className="relative order-2 flex flex-col justify-between gap-10 px-6 pb-12 pt-4 sm:px-10 lg:order-1 lg:gap-16 lg:px-16 lg:py-16">
+          <header className="order-first flex min-w-0 items-center gap-3 animate-fade-in max-lg:hidden">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-border bg-surface">
               <Camera className="h-[18px] w-[18px] text-gold" />
             </span>
@@ -146,7 +146,7 @@ function AuthPage() {
         </section>
 
         {/* Right — sign in */}
-        <section className="flex items-center justify-center px-6 pb-16 sm:px-10 lg:px-16 lg:py-16">
+        <section className="order-1 flex items-center justify-center px-6 pb-10 pt-10 sm:px-10 lg:order-2 lg:px-16 lg:py-16">
           <div className="w-full max-w-[26rem] glass rounded-3xl p-8 sm:p-10 animate-fade-up">
             <div className="space-y-2">
               <h2 className="text-3xl">Bem-vindo de volta</h2>
