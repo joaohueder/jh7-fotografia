@@ -611,7 +611,7 @@ export default function EmpresaForm() {
                   required
                 />
               </Field>
-              <Field label="CPF" error={errors.resp_cpf}>
+              <Field label="CPF" required error={errors.resp_cpf}>
                 <Input
                   value={form.resp_cpf ?? ""}
                   onChange={(e) => set("resp_cpf", maskCpf(e.target.value))}
