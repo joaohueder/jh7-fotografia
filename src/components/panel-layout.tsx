@@ -1,10 +1,17 @@
-import { type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { Camera, LogOut } from "lucide-react";
+import { Camera, LogOut, Menu } from "lucide-react";
 
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
 export type PanelAccent = "sa" | "admin" | "usuario";
@@ -30,11 +37,22 @@ interface PanelLayoutProps {
   children: ReactNode;
 }
 
+/**
+ * Hierarquia visual (mobile-first):
+ *  1. Header fixo    → marca + identidade do painel + sair (sempre visível)
+ *  2. Navegação      → drawer (hamburger) < md · barra horizontal fixa >= md
+ *  3. Main           → offset calculado por tokens (--app-header-h/--app-nav-h)
+ *  4. Rodapé fixo    → reduzido a uma linha em telas estreitas
+ *
+ * O offset do main usa variáveis CSS fluidas, então nenhuma altura em px
+ * fica hardcoded e o conteúdo nunca fica escondido atrás do chrome fixo.
+ */
 export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const theme = ACCENTS[accent];
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -43,86 +61,148 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
     navigate("/auth", { replace: true });
   }
 
+  const navItemClass = ({ isActive }: { isActive: boolean }) =>
+    cn(
+      "relative flex items-center whitespace-nowrap rounded-lg px-3 text-sm font-semibold transition-colors",
+      "min-h-[var(--tap)] md:min-h-0 md:py-1.5",
+      isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+    );
+
+  const navItemStyle = ({ isActive }: { isActive: boolean }) =>
+    isActive
+      ? {
+          background: "color-mix(in oklab, var(--panel-accent) 14%, transparent)",
+          color: "var(--panel-accent)",
+        }
+      : undefined;
+
   return (
     <div
-      className="min-h-screen bg-background"
+      className="min-h-dvh bg-background"
       style={
         {
           "--panel-accent": theme.accent,
           "--panel-accent-soft": theme.accentSoft,
+          // navegação horizontal só existe a partir de md
+          "--panel-nav-h": "0px",
         } as React.CSSProperties
       }
     >
-      {/* Header fixo */}
+      {/* Header fixo — altura fluida via token */}
       <header className="fixed inset-x-0 top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-4 px-6">
-          <Link to="/" className="flex min-w-0 items-center gap-3">
-            <span
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-border bg-surface"
-              style={{ color: "var(--panel-accent)" }}
-            >
-              <Camera className="h-[18px] w-[18px]" />
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate text-sm font-bold">JH7 Gestão Fotográfica</span>
+        <div className="container-page flex h-[var(--app-header-h)] items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2">
+            {/* Hamburger: apenas < md, alvo de toque de 44px */}
+            <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Abrir menu de navegação"
+                  className="tap-target -ml-2 shrink-0 md:hidden"
+                >
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              {/* Overlay ocupa a tela toda no mobile, com scroll interno */}
+              <SheetContent
+                side="left"
+                className="flex w-[min(20rem,85vw)] flex-col gap-6 overflow-y-auto p-6"
+              >
+                <SheetHeader className="p-0 text-left">
+                  <SheetTitle className="text-base">{theme.label}</SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col gap-1">
+                  {menu.map((item) => (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      end
+                      onClick={() => setMobileNavOpen(false)}
+                      className={navItemClass}
+                      style={navItemStyle}
+                    >
+                      {item.label}
+                    </NavLink>
+                  ))}
+                </nav>
+                {user?.email ? (
+                  <p className="mt-auto break-all text-sm text-muted-foreground">{user.email}</p>
+                ) : null}
+              </SheetContent>
+            </Sheet>
+
+            <Link to="/" className="flex min-w-0 items-center gap-2 sm:gap-3">
               <span
-                className="block truncate text-[11px] font-semibold uppercase tracking-[0.16em]"
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-border bg-surface"
                 style={{ color: "var(--panel-accent)" }}
               >
-                {theme.label}
+                <Camera className="h-[1.125rem] w-[1.125rem]" />
               </span>
-            </span>
-          </Link>
+              <span className="min-w-0">
+                <span className="block truncate text-[clamp(0.8125rem,2.6vw,0.875rem)] font-bold">
+                  JH7 Gestão Fotográfica
+                </span>
+                <span
+                  className="block truncate text-[0.6875rem] font-semibold uppercase tracking-[0.16em]"
+                  style={{ color: "var(--panel-accent)" }}
+                >
+                  {theme.label}
+                </span>
+              </span>
+            </Link>
+          </div>
 
-          <div className="flex items-center gap-3">
-            <span className="hidden max-w-[180px] truncate text-sm text-muted-foreground sm:block">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            <span className="hidden max-w-[11rem] truncate text-sm text-muted-foreground lg:block">
               {user?.email}
             </span>
-            <Button variant="ghost" size="sm" onClick={handleSignOut}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Sair
+            {/* Ícone puro no mobile (44px), rótulo textual a partir de sm */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleSignOut}
+              aria-label="Sair"
+              className="tap-target px-2 sm:px-3"
+            >
+              <LogOut className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Sair</span>
             </Button>
           </div>
         </div>
       </header>
 
-      {/* Menu superior fixo */}
-      <nav className="fixed inset-x-0 top-16 z-30 border-b border-border bg-surface/80 backdrop-blur">
-        <div className="mx-auto flex h-12 max-w-[1200px] items-center gap-1 overflow-x-auto px-6">
+      {/* Menu superior fixo — somente >= md (no mobile vive no drawer) */}
+      <nav
+        className="fixed inset-x-0 top-[var(--app-header-h)] z-30 hidden border-b border-border bg-surface/80 backdrop-blur md:block"
+        style={{ "--panel-nav-h": "var(--app-nav-h)" } as React.CSSProperties}
+      >
+        <div className="container-page flex h-[var(--app-nav-h)] items-center gap-1 overflow-x-auto">
           {menu.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end
-              className={({ isActive }) =>
-                cn(
-                  "relative whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors",
-                  isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
-                )
-              }
-              style={({ isActive }) =>
-                isActive
-                  ? {
-                      background: "color-mix(in oklab, var(--panel-accent) 14%, transparent)",
-                      color: "var(--panel-accent)",
-                    }
-                  : undefined
-              }
-            >
+            <NavLink key={item.to} to={item.to} end className={navItemClass} style={navItemStyle}>
               {item.label}
             </NavLink>
           ))}
         </div>
       </nav>
 
-      {/* Main */}
-      <main className="mx-auto max-w-[1200px] px-6 pb-24 pt-32">{children}</main>
+      {/* Main — offset superior/inferior derivado dos tokens de chrome */}
+      <main
+        className={cn(
+          "container-page",
+          "pt-[calc(var(--app-header-h)+var(--gutter))]",
+          "md:pt-[calc(var(--app-header-h)+var(--app-nav-h)+var(--gutter))]",
+          "pb-[calc(var(--app-footer-h)+var(--gutter)*1.5)]",
+        )}
+      >
+        {children}
+      </main>
 
-      {/* Rodapé fixo */}
+      {/* Rodapé fixo — a etiqueta do painel some em telas muito estreitas */}
       <footer className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/90 backdrop-blur">
-        <div className="mx-auto flex h-12 max-w-[1200px] items-center justify-between gap-4 px-6 text-xs text-muted-foreground">
+        <div className="container-page flex h-[var(--app-footer-h)] items-center justify-between gap-3 text-xs text-muted-foreground">
           <span className="truncate">© {new Date().getFullYear()} JH7 Gestão Fotográfica</span>
-          <span className="truncate" style={{ color: "var(--panel-accent)" }}>
+          <span className="hidden truncate xs:inline sm:inline" style={{ color: "var(--panel-accent)" }}>
             {theme.label}
           </span>
         </div>
