@@ -79,10 +79,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lumina Studio" },
+      { title: "JH7 Gestão Fotográfica" },
       { name: "description", content: "SaaS para gestão de estúdios fotográficos e fotógrafos." },
-      { name: "author", content: "Lumina Studio" },
-      { property: "og:title", content: "Lumina Studio" },
+      { name: "author", content: "JH7 Gestão Fotográfica" },
+      { property: "og:title", content: "JH7 Gestão Fotográfica" },
       { property: "og:description", content: "SaaS para gestão de estúdios fotográficos e fotógrafos." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

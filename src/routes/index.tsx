@@ -6,15 +6,15 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Lumina Studio — Gestão para Estúdios Fotográficos" },
+      { title: "JH7 Gestão Fotográfica — Gestão para Estúdios Fotográficos" },
       {
         name: "description",
         content:
-          "Lumina Studio é o SaaS completo para gestão de estúdios fotográficos e fotógrafos independentes.",
+          "JH7 Gestão Fotográfica é o SaaS completo para gestão de estúdios fotográficos e fotógrafos independentes.",
       },
       {
         property: "og:title",
-        content: "Lumina Studio — Gestão para Estúdios Fotográficos",
+        content: "JH7 Gestão Fotográfica — Gestão para Estúdios Fotográficos",
       },
       {
         property: "og:description",
@@ -37,7 +37,7 @@ function LandingPage() {
             <div className="grid h-8 w-8 place-items-center rounded-md bg-primary text-primary-foreground">
               <Camera className="h-4 w-4" />
             </div>
-            <span className="font-semibold">Lumina Studio</span>
+            <span className="font-semibold">JH7 Gestão Fotográfica</span>
           </div>
           <div className="flex items-center gap-3">
             <Button asChild variant="ghost" size="sm">
@@ -82,7 +82,7 @@ function LandingPage() {
       </main>
 
       <footer className="border-t py-6 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} Lumina Studio. Todos os direitos reservados.
+        © {new Date().getFullYear()} JH7 Gestão Fotográfica. Todos os direitos reservados.
       </footer>
     </div>
   );

@@ -11,10 +11,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Entrar — Lumina Studio" },
-      { name: "description", content: "Acesse sua conta do Lumina Studio." },
-      { property: "og:title", content: "Entrar — Lumina Studio" },
-      { property: "og:description", content: "Acesse sua conta do Lumina Studio." },
+      { title: "Entrar — JH7 Gestão Fotográfica" },
+      { name: "description", content: "Acesse sua conta do JH7 Gestão Fotográfica." },
+      { property: "og:title", content: "Entrar — JH7 Gestão Fotográfica" },
+      { property: "og:description", content: "Acesse sua conta do JH7 Gestão Fotográfica." },
     ],
   }),
   component: AuthPage,
@@ -100,7 +100,7 @@ function AuthPage() {
                 <circle cx="12" cy="13" r="3" />
               </svg>
             </div>
-            <span className="text-lg font-semibold">Lumina Studio</span>
+            <span className="text-lg font-semibold">JH7 Gestão Fotográfica</span>
           </div>
         </div>
 
@@ -134,7 +134,7 @@ function AuthPage() {
         </div>
 
         <div className="relative z-10 text-xs opacity-70">
-          © {new Date().getFullYear()} Lumina Studio. Todos os direitos reservados.
+          © {new Date().getFullYear()} JH7 Gestão Fotográfica. Todos os direitos reservados.
         </div>
 
         {/* Decorative gradient overlay */}
