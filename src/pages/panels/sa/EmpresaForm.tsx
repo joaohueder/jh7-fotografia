@@ -427,6 +427,52 @@ export default function EmpresaForm() {
           </div>
         </header>
 
+        {!editing && (
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+              {STEPS.map((label, i) => (
+                <span
+                  key={label}
+                  className="inline-flex items-center gap-2 font-semibold"
+                  style={{
+                    color:
+                      i === step
+                        ? "var(--panel-accent)"
+                        : i < step
+                          ? "hsl(var(--foreground))"
+                          : "hsl(var(--muted-foreground))",
+                  }}
+                >
+                  <span
+                    className="inline-flex h-6 w-6 items-center justify-center rounded-full border text-[11px]"
+                    style={{
+                      borderColor: i <= step ? "var(--panel-accent)" : "hsl(var(--border))",
+                      background:
+                        i === step
+                          ? "color-mix(in oklab, var(--panel-accent) 16%, transparent)"
+                          : undefined,
+                    }}
+                  >
+                    {i + 1}
+                  </span>
+                  <span className="hidden sm:inline">{label}</span>
+                </span>
+              ))}
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{
+                  width: `${((step + 1) / STEPS.length) * 100}%`,
+                  background: "var(--panel-accent)",
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+
+
         {editing && isLoading ? (
           <div className="flex items-center gap-2 text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" /> Carregando…
