@@ -22,6 +22,7 @@ export interface UsuarioSistema {
   created_at: string;
   logado?: boolean | null;
   sessao_em?: string | null;
+  sessao_desde?: string | null;
 }
 
 /** Todos os usuários do sistema (somente sa_admin), em tempo real. */

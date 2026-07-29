@@ -1,4 +1,4 @@
-import { useMemo, useState, Fragment } from "react";
+import { useEffect, useMemo, useState, Fragment } from "react";
 import { Link } from "react-router-dom";
 import { LogOut, Loader2, Power, ShieldCheck, UserCog, Users } from "lucide-react";
 
@@ -50,15 +50,46 @@ const ROLE_COR: Record<UsuarioRole, string> = {
   sem_papel: "hsl(var(--muted-foreground))",
 };
 
-function ConexaoBadge({ logado }: { logado: boolean }) {
+/** Tempo decorrido em linguagem natural: agora, 30 segundos, 10 minutos, 1 hora, 3 dias… */
+function tempoDecorrido(inicio: string | null | undefined, agora: number): string | null {
+  if (!inicio) return null;
+  const ms = agora - new Date(inicio).getTime();
+  if (!Number.isFinite(ms)) return null;
+  const s = Math.max(0, Math.floor(ms / 1000));
+  if (s < 10) return "agora";
+  const plural = (n: number, um: string, muitos: string) => `${n} ${n === 1 ? um : muitos}`;
+  if (s < 60) return plural(s, "segundo", "segundos");
+  const min = Math.floor(s / 60);
+  if (min < 60) return plural(min, "minuto", "minutos");
+  const h = Math.floor(min / 60);
+  if (h < 24) return plural(h, "hora", "horas");
+  const d = Math.floor(h / 24);
+  if (d < 7) return plural(d, "dia", "dias");
+  const sem = Math.floor(d / 7);
+  if (d < 30) return plural(sem, "semana", "semanas");
+  const meses = Math.floor(d / 30);
+  if (meses < 12) return plural(meses, "mês", "meses");
+  const anos = Math.floor(d / 365);
+  return plural(anos, "ano", "anos");
+}
+
+function ConexaoBadge({ logado, desde, agora }: { logado: boolean; desde?: string | null; agora: number }) {
   const cor = logado ? "var(--brand-green)" : "hsl(var(--muted-foreground))";
+  const tempo = logado ? tempoDecorrido(desde, agora) : null;
   return (
-    <span
-      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"
-      style={{ background: `color-mix(in oklab, ${cor} 15%, transparent)`, color: cor }}
-    >
-      <span className="h-2 w-2 rounded-full" style={{ background: cor }} />
-      {logado ? "Logado" : "Deslogado"}
+    <span className="inline-flex flex-wrap items-center gap-1.5">
+      <span
+        className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"
+        style={{ background: `color-mix(in oklab, ${cor} 15%, transparent)`, color: cor }}
+      >
+        <span className="h-2 w-2 rounded-full" style={{ background: cor }} />
+        {logado ? "Logado" : "Deslogado"}
+      </span>
+      {tempo ? (
+        <span className="text-xs text-muted-foreground" title="Tempo total logado">
+          há {tempo}
+        </span>
+      ) : null}
     </span>
   );
 }
@@ -102,6 +133,12 @@ export default function UsuariosList() {
   const toggle = useToggleUsuarioAtivo();
   const logoff = useLogoffUsuario();
   const [busca, setBusca] = useState("");
+  const [agora, setAgora] = useState(() => Date.now());
+
+  useEffect(() => {
+    const t = setInterval(() => setAgora(Date.now()), 10_000);
+    return () => clearInterval(t);
+  }, []);
   const [filtro, setFiltro] = useState<Filtro>("TODOS");
   const [alvo, setAlvo] = useState<UsuarioSistema | null>(null);
   const [alvoLogoff, setAlvoLogoff] = useState<UsuarioSistema | null>(null);
@@ -284,7 +321,7 @@ export default function UsuariosList() {
                       <Badge cor={u.ativo ? "var(--brand-green)" : "hsl(var(--destructive))"}>
                         {u.ativo ? "Ativo" : "Inativo"}
                       </Badge>
-                      <ConexaoBadge logado={Boolean(u.logado)} />
+                      <ConexaoBadge logado={Boolean(u.logado)} desde={u.sessao_desde} agora={agora} />
                     </div>
                     <div className="flex items-center gap-2">
                       <Button variant="outline" size="sm" className="h-8" onClick={() => setAlvoLogoff(u)}>
@@ -323,7 +360,7 @@ export default function UsuariosList() {
                           <Badge cor={ROLE_COR[u.role]}>{ROLE_LABEL[u.role]}</Badge>
                         </td>
                         <td className="px-3 py-2 align-top">
-                          <ConexaoBadge logado={Boolean(u.logado)} />
+                          <ConexaoBadge logado={Boolean(u.logado)} desde={u.sessao_desde} agora={agora} />
                         </td>
                         <td className="px-3 py-2 text-right align-top">
                           <Button variant="outline" size="sm" className="h-8" onClick={() => setAlvoLogoff(u)}>
