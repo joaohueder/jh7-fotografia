@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/alert-dialog";
 
 function AuthPage() {
-
   usePageMeta("Entrar — JH7 Gestão Fotográfica", "Acesse sua conta do JH7 Gestão Fotográfica.");
   const { user, isLoading, signIn, signOut } = useAuth();
   const navigate = useNavigate();
@@ -46,7 +45,6 @@ function AuthPage() {
       navigate("/dashboard", { replace: true });
     }
   }, [user, isLoading, navigate, isCheckingAccess, blockMessage]);
-
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("auth_email");
@@ -70,7 +68,6 @@ function AuthPage() {
     persistRememberMe(rememberMe);
     const { error } = await signIn(email, password);
 
-
     if (error) {
       setIsSubmitting(false);
       setIsCheckingAccess(false);
@@ -84,9 +81,7 @@ function AuthPage() {
     }
 
     // Bloqueia acesso de usuário ou empresa inativos
-    const { data: acesso } = await (supabase as unknown as SupabaseClient).rpc(
-      "meu_acesso",
-    );
+    const { data: acesso } = await (supabase as unknown as SupabaseClient).rpc("meu_acesso");
     const liberado = (acesso as { ativo?: boolean } | null)?.ativo ?? true;
     if (!liberado) {
       setBlockMessage(
@@ -100,12 +95,8 @@ function AuthPage() {
       return;
     }
 
-
     setIsSubmitting(false);
     setIsCheckingAccess(false);
-
-
-
 
     if (rememberMe) {
       localStorage.setItem("auth_email", email);
@@ -146,7 +137,6 @@ function AuthPage() {
         style={{ background: "var(--gradient-gold)" }}
       />
 
-
       <div className="relative z-10 grid min-h-dvh grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
         {/* Left — brand narrative (somente desktop)
             Ritmo vertical: marca › narrativa › provas › rodapé.
@@ -175,11 +165,9 @@ function AuthPage() {
             </h1>
 
             <p className="mt-5 max-w-[44ch] text-[clamp(0.9375rem,0.35vw+0.85rem,1.0625rem)] leading-[1.65] text-foreground/65">
-              Sessões, clientes, contratos e entregas em um único fluxo — pensado
-              para fotógrafos que tratam o próprio negócio com o mesmo cuidado
-              que tratam a luz.
+              Sessões, clientes, contratos e entregas em um único fluxo — pensado para fotógrafos
+              que tratam o próprio negócio com o mesmo cuidado que tratam a luz.
             </p>
-
           </div>
 
           <div className="flex items-center gap-3 animate-fade-in">
@@ -189,7 +177,6 @@ function AuthPage() {
             </p>
           </div>
         </section>
-
 
         {/* Right — sign in */}
         <section className="order-1 flex items-center justify-center px-[var(--gutter)] py-[clamp(1.5rem,6vw,4rem)] lg:order-2">
@@ -204,125 +191,123 @@ function AuthPage() {
             </div>
 
             <div className="glass rounded-3xl p-[clamp(1.25rem,5vw,2.5rem)] animate-fade-up">
-            <div className="space-y-2">
-              <h2 className="text-[clamp(1.375rem,4vw,1.75rem)]">Bem-vindo de volta</h2>
-              <p className="text-[0.9375rem] leading-relaxed text-muted-foreground">
-                Entre com sua conta para acessar o sistema.
-              </p>
-            </div>
-
-
-            <form onSubmit={handleEmailSignIn} className="mt-8 space-y-6">
               <div className="space-y-2">
-                <Label
-                  htmlFor="email"
-                  className="text-[11px] font-bold uppercase tracking-[0.14em] text-foreground/60"
-                >
-                  E-mail
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="voce@estudio.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="email"
-                  required
-                  className="h-12 rounded-xl border-border bg-background/40 px-4 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:border-gold/50 focus-visible:bg-background/70"
-                />
+                <h2 className="text-[clamp(1.375rem,4vw,1.75rem)]">Bem-vindo de volta</h2>
+                <p className="text-[0.9375rem] leading-relaxed text-muted-foreground">
+                  Entre com sua conta para acessar o sistema.
+                </p>
               </div>
 
-              <div className="space-y-2">
-                <Label
-                  htmlFor="password"
-                  className="text-[11px] font-bold uppercase tracking-[0.14em] text-foreground/60"
-                >
-                  Senha
-                </Label>
-                <div className="relative">
+              <form onSubmit={handleEmailSignIn} className="mt-8 space-y-6">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="email"
+                    className="text-[11px] font-bold uppercase tracking-[0.14em] text-foreground/60"
+                  >
+                    E-mail
+                  </Label>
                   <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    autoComplete="current-password"
+                    id="email"
+                    type="email"
+                    placeholder="voce@estudio.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
                     required
-                    className="h-12 rounded-xl border-border bg-background/40 px-4 pr-12 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:border-gold/50 focus-visible:bg-background/70"
+                    className="h-12 rounded-xl border-border bg-background/40 px-4 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:border-gold/50 focus-visible:bg-background/70"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="password"
+                    className="text-[11px] font-bold uppercase tracking-[0.14em] text-foreground/60"
+                  >
+                    Senha
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      autoComplete="current-password"
+                      required
+                      className="h-12 rounded-xl border-border bg-background/40 px-4 pr-12 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:border-gold/50 focus-visible:bg-background/70"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="tap-target absolute right-1 top-1/2 grid -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors duration-300 hover:bg-accent hover:text-foreground"
+                      aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Empilha em telas estreitas; alvos de toque de 44px em ambos */}
+                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                  <div className="flex min-h-[var(--tap)] min-w-0 items-center gap-2.5">
+                    <Checkbox
+                      id="remember"
+                      checked={rememberMe}
+                      onCheckedChange={(checked) => setRememberMe(checked === true)}
+                      className="h-5 w-5 data-[state=checked]:border-gold data-[state=checked]:bg-gold data-[state=checked]:text-primary-foreground"
+                    />
+                    <Label
+                      htmlFor="remember"
+                      className="cursor-pointer text-[0.8125rem] font-medium leading-snug text-foreground/75"
+                    >
+                      Ficar logado por 30 dias
+                    </Label>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="tap-target absolute right-1 top-1/2 grid -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors duration-300 hover:bg-accent hover:text-foreground"
-                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    className="flex min-h-[var(--tap)] shrink-0 items-center text-[0.8125rem] font-semibold text-muted-foreground transition-colors duration-300 hover:text-gold"
+                    onClick={() => {
+                      // Password recovery flow will be implemented later.
+                    }}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    Esqueceu a senha?
                   </button>
                 </div>
-              </div>
 
-              {/* Empilha em telas estreitas; alvos de toque de 44px em ambos */}
-              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-                <div className="flex min-h-[var(--tap)] min-w-0 items-center gap-2.5">
-                  <Checkbox
-                    id="remember"
-                    checked={rememberMe}
-                    onCheckedChange={(checked) => setRememberMe(checked === true)}
-                    className="h-5 w-5 data-[state=checked]:border-gold data-[state=checked]:bg-gold data-[state=checked]:text-primary-foreground"
-                  />
-                  <Label
-                    htmlFor="remember"
-                    className="cursor-pointer text-[0.8125rem] font-medium leading-snug text-foreground/75"
-                  >
-                    Ficar logado por 30 dias
-                  </Label>
-                </div>
-                <button
-                  type="button"
-                  className="flex min-h-[var(--tap)] shrink-0 items-center text-[0.8125rem] font-semibold text-muted-foreground transition-colors duration-300 hover:text-gold"
-                  onClick={() => {
-                    // Password recovery flow will be implemented later.
-                  }}
-                >
-                  Esqueceu a senha?
-                </button>
-              </div>
-
-
-              {formError && (
-                <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive animate-fade-up">
-                  {formError}
-                </div>
-              )}
-
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="group h-12 w-full rounded-xl bg-primary text-[15px] font-bold tracking-[0.01em] text-primary-foreground shadow-[var(--shadow-gold)] transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 disabled:opacity-70"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Entrando...
-                  </>
-                ) : (
-                  <>
-                    Acessar o sistema
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1" />
-                  </>
+                {formError && (
+                  <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive animate-fade-up">
+                    {formError}
+                  </div>
                 )}
-              </Button>
-            </form>
 
-            <p className="mt-8 text-center text-sm text-muted-foreground">
-              Ainda não tem conta?{" "}
-              <Link
-                to="/"
-                className="text-gold underline-offset-4 transition-colors duration-300 hover:text-gold-soft hover:underline"
-              >
-                Conheça os planos
-              </Link>
-            </p>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="group h-12 w-full rounded-xl bg-primary text-[15px] font-bold tracking-[0.01em] text-primary-foreground shadow-[var(--shadow-gold)] transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 disabled:opacity-70"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Entrando...
+                    </>
+                  ) : (
+                    <>
+                      Acessar o sistema
+                      <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1" />
+                    </>
+                  )}
+                </Button>
+              </form>
+
+              <p className="mt-8 text-center text-sm text-muted-foreground">
+                Ainda não tem conta?{" "}
+                <Link
+                  to="/"
+                  className="text-gold underline-offset-4 transition-colors duration-300 hover:text-gold-soft hover:underline"
+                >
+                  Conheça os planos
+                </Link>
+              </p>
             </div>
           </div>
         </section>
@@ -338,9 +323,7 @@ function AuthPage() {
             <AlertDialogDescription>{blockMessage}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setBlockMessage(null)}>
-              Entendi
-            </AlertDialogAction>
+            <AlertDialogAction onClick={() => setBlockMessage(null)}>Entendi</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

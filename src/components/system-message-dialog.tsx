@@ -12,15 +12,21 @@ import {
   type SystemMessageVariant,
 } from "@/lib/system-message";
 
-const VARIANT_UI: Record<
-  SystemMessageVariant,
-  { icon: typeof Info; ring: string; text: string }
-> = {
-  success: { icon: CheckCircle2, ring: "border-brand-green/40 bg-brand-green/10", text: "text-brand-green" },
-  error: { icon: XCircle, ring: "border-destructive/40 bg-destructive/10", text: "text-destructive" },
-  warning: { icon: AlertTriangle, ring: "border-warning/40 bg-warning/10", text: "text-warning" },
-  info: { icon: Info, ring: "border-border bg-surface", text: "text-foreground" },
-};
+const VARIANT_UI: Record<SystemMessageVariant, { icon: typeof Info; ring: string; text: string }> =
+  {
+    success: {
+      icon: CheckCircle2,
+      ring: "border-brand-green/40 bg-brand-green/10",
+      text: "text-brand-green",
+    },
+    error: {
+      icon: XCircle,
+      ring: "border-destructive/40 bg-destructive/10",
+      text: "text-destructive",
+    },
+    warning: { icon: AlertTriangle, ring: "border-warning/40 bg-warning/10", text: "text-warning" },
+    info: { icon: Info, ring: "border-border bg-surface", text: "text-foreground" },
+  };
 
 /** Botão de copiar reutilizável, com feedback de "copiado". */
 function CopyButton({ value, label }: { value: string; label: string }) {
@@ -60,15 +66,7 @@ function CopyButton({ value, label }: { value: string; label: string }) {
 }
 
 /** Bloco de campo da mensagem: rótulo + conteúdo + botão de copiar. */
-function Field({
-  label,
-  value,
-  mono,
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-}) {
+function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="rounded-xl border border-border bg-background/40 p-3">
       <div className="mb-1 flex items-center justify-between gap-2">
@@ -129,8 +127,7 @@ export function SystemMessageDialog() {
       const dataUrl = await toPng(node, {
         pixelRatio: 2,
         backgroundColor: getComputedStyle(document.body).backgroundColor || "#000000",
-        filter: (el) =>
-          !(el instanceof HTMLElement && el.hasAttribute("data-screenshot-hide")),
+        filter: (el) => !(el instanceof HTMLElement && el.hasAttribute("data-screenshot-hide")),
       });
       const blob = await (await fetch(dataUrl)).blob();
       try {
@@ -177,9 +174,7 @@ export function SystemMessageDialog() {
 
             <div className="mt-5 space-y-3">
               <Field label="O que aconteceu" value={message.description} />
-              {message.original && (
-                <Field label="Erro original" value={message.original} mono />
-              )}
+              {message.original && <Field label="Erro original" value={message.original} mono />}
               {message.context &&
                 Object.entries(message.context)
                   .filter(([, v]) => v)
