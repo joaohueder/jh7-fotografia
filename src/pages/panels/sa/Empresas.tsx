@@ -553,6 +553,10 @@ export default function EmpresasList() {
                         <StatusBadge status={e.status} />
                       </td>
                       <td className="px-4 py-3">
+                        <AssinaturaBadge plano={planoDe(e.id)} />
+                      </td>
+
+                      <td className="px-4 py-3">
                         <div className="flex justify-end gap-2">
                           <IconAction
                             label="Editar empresa"
