@@ -23,14 +23,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-
-const HIGHLIGHTS = [
-  "Agenda unificada de ensaios e eventos",
-  "Clientes, contratos e pagamentos sob controle",
-  "Galerias e entregas organizadas por projeto",
-  "Visão financeira do seu negócio fotográfico",
-];
-
 function AuthPage() {
 
   usePageMeta("Entrar — JH7 Gestão Fotográfica", "Acesse sua conta do JH7 Gestão Fotográfica.");
@@ -181,19 +173,6 @@ function AuthPage() {
               que tratam a luz.
             </p>
 
-            <ul className="mt-9 grid gap-2.5">
-              {HIGHLIGHTS.map((item, i) => (
-                <li
-                  key={item}
-                  className="group flex items-center gap-4 rounded-xl border border-border/70 bg-surface/50 px-4 py-3.5 text-[0.9375rem] font-medium text-foreground/80 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:border-gold/35 hover:bg-surface-elevated hover:text-foreground"
-                >
-                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-border/80 bg-background/50 text-[0.6875rem] font-bold tabular-nums text-gold/80 transition-colors duration-300 group-hover:border-gold/40 group-hover:text-gold">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span className="min-w-0">{item}</span>
-                </li>
-              ))}
-            </ul>
           </div>
 
           <div className="flex items-center gap-3 animate-fade-in">
