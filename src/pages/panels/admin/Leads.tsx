@@ -23,7 +23,7 @@ import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-messa
 import { useEmpresaAtual } from "@/hooks/use-clientes";
 import { useDeleteLead, useLeads, useSalvarLead, type Lead } from "@/hooks/use-leads";
 import { isValidPhone, maskPhone } from "@/lib/br-masks";
-import { criarNotaCliente } from "@/hooks/use-cliente-notas";
+import { criarNotaCliente, useNotaInicial } from "@/hooks/use-cliente-notas";
 import { ClienteNotas } from "@/components/cliente-notas";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -58,6 +58,7 @@ export default function LeadsList() {
   const salvar = useSalvarLead();
   const remover = useDeleteLead();
 
+
   const [busca, setBusca] = useState("");
   const [aberto, setAberto] = useState(false);
   const [editando, setEditando] = useState<Lead | null>(null);
@@ -65,6 +66,8 @@ export default function LeadsList() {
   const [whatsapp, setWhatsapp] = useState("");
   const [interesse, setInteresse] = useState("");
   const [alvoExclusao, setAlvoExclusao] = useState<Lead | null>(null);
+
+  const notaInicial = useNotaInicial(editando?.id);
 
   const lista = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -308,30 +311,64 @@ export default function LeadsList() {
               />
             </div>
 
-            <div className="space-y-1">
-              <label htmlFor="lead-interesse" className="text-xs font-semibold text-muted-foreground">
-                Interesse do lead {editando ? "(nova nota)" : ""}
-              </label>
-              <Textarea
-                id="lead-interesse"
-                value={interesse}
-                onChange={(e) => setInteresse(e.target.value)}
-                rows={3}
-                placeholder="Ex.: quer ensaio de 15 anos em dezembro, pediu orçamento."
-                className="text-base"
-              />
-              <p className="text-xs text-muted-foreground">
-                O interesse é gravado como nota interna, com data, hora e autor.
-              </p>
-            </div>
+            {editando ? (
+              <div className="space-y-1">
+                <span className="text-xs font-semibold text-muted-foreground">
+                  Interesse inicial do lead
+                </span>
+                <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm">
+                  {notaInicial.isLoading ? (
+                    <span className="text-muted-foreground">Carregando…</span>
+                  ) : notaInicial.data ? (
+                    <>
+                      <p className="whitespace-pre-wrap text-foreground">
+                        {notaInicial.data.descricao}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Registrado em{" "}
+                        {new Date(notaInicial.data.created_at).toLocaleString("pt-BR")}
+                        {notaInicial.data.criado_por_nome
+                          ? ` por ${notaInicial.data.criado_por_nome}`
+                          : ""}
+                      </p>
+                    </>
+                  ) : (
+                    <span className="text-muted-foreground">
+                      Nenhum interesse inicial foi registrado no primeiro contato.
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Este é o motivo pelo qual o lead entrou em contato pela primeira vez. Ele não muda —
+                  novas conversas devem ser registradas no histórico abaixo.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <label htmlFor="lead-interesse" className="text-xs font-semibold text-muted-foreground">
+                  Interesse do lead
+                </label>
+                <Textarea
+                  id="lead-interesse"
+                  value={interesse}
+                  onChange={(e) => setInteresse(e.target.value)}
+                  rows={3}
+                  placeholder="Ex.: quer ensaio de 15 anos em dezembro, pediu orçamento."
+                  className="text-base"
+                />
+                <p className="text-xs text-muted-foreground">
+                  O interesse inicial é gravado como a primeira nota, com data, hora e autor.
+                </p>
+              </div>
+            )}
 
             {editando ? (
               <div className="border-t border-border pt-4">
                 <ClienteNotas
                   clienteId={editando.id}
                   modulo="LEADS"
-                  titulo="Histórico de notas"
-                  placeholder="Novo retorno, combinado ou interesse do lead."
+                  titulo="Histórico de movimentações"
+                  placeholder="Novo retorno, combinado ou andamento da negociação."
                 />
               </div>
             ) : null}
