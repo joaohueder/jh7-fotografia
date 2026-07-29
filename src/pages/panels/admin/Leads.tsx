@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Loader2, Phone, Plus, Trash2, UserCheck, UserPlus, Users } from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
@@ -9,7 +10,7 @@ import { HelpTip } from "@/components/page-help";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 import { useEmpresaAtual } from "@/hooks/use-clientes";
-import { useConverterLead, useDeleteLead, useLeads, useSalvarLead, type Lead } from "@/hooks/use-leads";
+import { useDeleteLead, useLeads, useSalvarLead, type Lead } from "@/hooks/use-leads";
 import { isValidPhone, maskPhone } from "@/lib/br-masks";
 
 import { Button } from "@/components/ui/button";
@@ -37,11 +38,11 @@ import {
 export default function LeadsList() {
   usePageMeta("Leads — JH7 Gestão Fotográfica", "Contatos interessados no seu estúdio.");
 
+  const navigate = useNavigate();
   const { data: empresaId } = useEmpresaAtual();
   const { data: leads, isLoading, error } = useLeads();
   const salvar = useSalvarLead();
   const remover = useDeleteLead();
-  const converter = useConverterLead();
 
   const [busca, setBusca] = useState("");
   const [aberto, setAberto] = useState(false);
@@ -49,7 +50,6 @@ export default function LeadsList() {
   const [nome, setNome] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [alvoExclusao, setAlvoExclusao] = useState<Lead | null>(null);
-  const [alvoConversao, setAlvoConversao] = useState<Lead | null>(null);
 
   const lista = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -102,18 +102,6 @@ export default function LeadsList() {
       notifyError(err, { title: "Não foi possível excluir o lead" });
     } finally {
       setAlvoExclusao(null);
-    }
-  }
-
-  async function confirmarConversao() {
-    if (!alvoConversao) return;
-    try {
-      await converter.mutateAsync(alvoConversao.id);
-      notifySuccess("Lead convertido em cliente. Complete o cadastro na tela de Clientes.");
-    } catch (err) {
-      notifyError(err, { title: "Não foi possível converter o lead" });
-    } finally {
-      setAlvoConversao(null);
     }
   }
 
@@ -230,9 +218,9 @@ export default function LeadsList() {
 
                 <div className="flex items-center gap-1">
                   <IconAction
-                    label="Transformar em cliente"
+                    label="Transformar em cliente (abre o cadastro completo)"
                     ariaLabel={`Converter ${l.nome} em cliente`}
-                    onClick={() => setAlvoConversao(l)}
+                    onClick={() => navigate(`/admin/clientes/novo?lead=${l.id}`)}
                   >
                     <UserCheck className="h-4 w-4" />
                   </IconAction>
@@ -299,22 +287,6 @@ export default function LeadsList() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <AlertDialog open={!!alvoConversao} onOpenChange={(o) => !o && setAlvoConversao(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Transformar em cliente</AlertDialogTitle>
-            <AlertDialogDescription>
-              O lead <strong>{alvoConversao?.nome}</strong> passará para a lista de Clientes, onde
-              você poderá completar documento, endereço e demais dados.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmarConversao}>Confirmar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <AlertDialog open={!!alvoExclusao} onOpenChange={(o) => !o && setAlvoExclusao(null)}>
         <AlertDialogContent>

@@ -29,6 +29,8 @@ export function useLeads() {
         .select("id, empresa_id, nome, contato_whatsapp, status, origem, created_at")
         .eq("empresa_id", empresaId!)
         .eq("origem", "LEAD")
+        // Somente leads ainda não convertidos (sem cadastro completo)
+        .is("documento", null)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as Lead[];

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ComponentType, type ReactNode } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -179,7 +179,11 @@ function ResumoBloco({
 /** Cadastro de clientes da empresa (novo e edição na mesma tela em abas). */
 export default function ClienteForm() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const leadId = searchParams.get("lead") ?? undefined;
   const editando = Boolean(id);
+  /** Id do registro no banco: em edição é o cliente; ao converter, é o próprio lead. */
+  const registroId = id ?? leadId;
   const navigate = useNavigate();
 
   usePageMeta(
@@ -188,7 +192,7 @@ export default function ClienteForm() {
   );
 
   const { data: empresaId } = useEmpresaAtual();
-  const { data, isLoading } = useCliente(id);
+  const { data, isLoading } = useCliente(registroId);
   const salvar = useSalvarCliente();
 
   const [form, setForm] = useState<ClientePayload>(EMPTY);
@@ -287,7 +291,7 @@ export default function ClienteForm() {
       return;
     }
     try {
-      if (await documentoDuplicado(empresaId, form.documento!, id)) {
+      if (await documentoDuplicado(empresaId, form.documento!, registroId)) {
         setError("documento", "Já existe um cliente com este CPF/CNPJ.");
         notifyValidation("Já existe um cliente cadastrado com este CPF/CNPJ nesta empresa.");
         return;
@@ -299,7 +303,7 @@ export default function ClienteForm() {
 
     try {
       await salvar.mutateAsync({
-        id,
+        id: registroId,
         empresaId,
         cliente: {
           ...form,
@@ -307,7 +311,13 @@ export default function ClienteForm() {
         },
         contatos,
       });
-      notifySuccess(editando ? "Cliente atualizado com sucesso." : "Cliente cadastrado com sucesso.");
+      notifySuccess(
+        editando
+          ? "Cliente atualizado com sucesso."
+          : leadId
+            ? "Lead convertido em cliente com sucesso."
+            : "Cliente cadastrado com sucesso.",
+      );
       navigate("/admin/clientes");
     } catch (err) {
       notifyError(err, { title: "Não foi possível salvar o cliente" });
@@ -379,7 +389,7 @@ export default function ClienteForm() {
                       setError("documento", null);
                       if (!empresaId) return;
                       try {
-                        const dup = await documentoDuplicado(empresaId, form.documento, id);
+                        const dup = await documentoDuplicado(empresaId, form.documento, registroId);
                         if (dup) setError("documento", "Já existe um cliente com este CPF/CNPJ.");
                       } catch {
                         /* validação no servidor cobre o caso */
@@ -700,7 +710,7 @@ export default function ClienteForm() {
         notifyValidation("CPF/CNPJ inválido.");
         return false;
       }
-      if (empresaId && (await documentoDuplicado(empresaId, form.documento, id))) {
+      if (empresaId && (await documentoDuplicado(empresaId, form.documento, registroId))) {
         setError("documento", "Já existe um cliente com este CPF/CNPJ.");
         notifyValidation("Já existe um cliente cadastrado com este CPF/CNPJ nesta empresa.");
         return false;
@@ -737,7 +747,7 @@ export default function ClienteForm() {
     setStep((s) => Math.min(ultimo, s + 1));
   }
 
-  if (editando && isLoading) {
+  if (registroId && isLoading) {
     return (
       <PanelLayout accent="admin" menu={ADMIN_MENU}>
         <div className="flex items-center gap-2 py-12 text-muted-foreground">
@@ -763,7 +773,7 @@ export default function ClienteForm() {
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">
-                {editando ? "Editar cliente" : "Novo cliente"}
+                {editando ? "Editar cliente" : leadId ? "Converter lead em cliente" : "Novo cliente"}
               </h1>
               <HelpTip
                 text={
