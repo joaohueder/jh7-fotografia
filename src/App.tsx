@@ -18,6 +18,9 @@ import PlanoForm from "@/pages/panels/sa/PlanoForm";
 import SaConfiguracoes from "@/pages/panels/sa/Configuracoes";
 import AdminDashboard from "@/pages/panels/AdminDashboard";
 import AdminConfiguracoes from "@/pages/panels/admin/Configuracoes";
+import ClientesList from "@/pages/panels/admin/Clientes";
+import ClienteForm from "@/pages/panels/admin/ClienteForm";
+
 import UsuarioDashboard from "@/pages/panels/UsuarioDashboard";
 import { RoleRedirect, RequireRole } from "@/components/role-routing";
 import { AssinaturaGate, RedirectSeAssinaturaAtiva } from "@/components/assinatura-gate";
@@ -250,6 +253,38 @@ export default function App() {
                 </RequireAuth>
               }
             />
+            <Route
+              path="/admin/clientes"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <ClientesList />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/clientes/novo"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <ClienteForm />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/clientes/:id"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <ClienteForm />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+
+
 
             <Route
               path="/usuario/dashboard"
