@@ -830,10 +830,13 @@ export default function ClienteForm() {
 
       if (!(await conferirDocumento())) {
         notifyValidation(
-          "Já existe um cliente com este CPF/CNPJ nesta empresa. Escolha se quer puxar os dados dele.",
+          leadId
+            ? "Já existe um cliente com este CPF/CNPJ nesta empresa. Escolha se quer puxar os dados dele."
+            : "Já existe um cliente com este CPF/CNPJ nesta empresa. Use outro documento ou abra o cadastro existente.",
         );
         return false;
       }
+
     }
     if (indice === 1 && form.cep?.trim() && !isValidCep(form.cep)) {
       notifyValidation("CEP inválido.");
