@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Eye, EyeOff, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { ArrowLeft, ClipboardCopy, Eye, EyeOff, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
