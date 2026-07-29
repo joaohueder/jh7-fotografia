@@ -262,11 +262,12 @@ export default function LeadsList() {
                     <div className="flex items-start gap-2 text-sm">
                       <StickyNote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                       <span className="min-w-0 text-muted-foreground">
-                        <span className="mr-1 font-semibold text-foreground">Última nota:</span>
-                        <span className="line-clamp-2">{l.ultima_nota.descricao}</span>
-                        <span className="mt-0.5 block text-xs text-muted-foreground">
+                        <span className="font-semibold text-foreground">Última nota:</span>{" "}
+                        <span className="text-xs text-muted-foreground">
                           {dataHora(l.ultima_nota.created_at)} · {tempoDecorrido(l.ultima_nota.created_at)}
                         </span>
+                        {" — "}
+                        <span className="line-clamp-2">{l.ultima_nota.descricao}</span>
                       </span>
                     </div>
                   ) : null}
