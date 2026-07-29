@@ -1,5 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import { authStorage, AUTH_STORAGE_KEY } from "./auth-storage";
+
 
 // Supabase autohospedado (JH7 Gestão Fotográfica)
 export const SELF_HOSTED_SUPABASE_URL =
