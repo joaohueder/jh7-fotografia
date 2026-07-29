@@ -45,3 +45,16 @@ export function useToggleUsuarioAtivo() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["usuarios"] }),
   });
 }
+
+/** Encerra todas as sessões ativas de um usuário (logoff forçado). */
+export function useLogoffUsuario() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string): Promise<number> => {
+      const { data, error } = await db.rpc("sa_logoff_usuario", { p_id: id });
+      if (error) throw error;
+      return Number(data ?? 0);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["usuarios"] }),
+  });
+}
