@@ -801,14 +801,6 @@ export default function ClienteForm() {
 
   async function validarEtapa(indice: number) {
     if (indice === 0) {
-      if (!form.nome.trim()) {
-        notifyValidation("Informe o nome do cliente.");
-        return false;
-      }
-      if (!form.nascimento?.trim()) {
-        notifyValidation("Informe a data de nascimento.");
-        return false;
-      }
       if (!form.documento?.trim()) {
         notifyValidation("Informe o CPF/CNPJ do cliente.");
         return false;
@@ -817,6 +809,15 @@ export default function ClienteForm() {
         notifyValidation("CPF/CNPJ inválido.");
         return false;
       }
+      if (!form.nome.trim()) {
+        notifyValidation("Informe o nome do cliente.");
+        return false;
+      }
+      if (!form.nascimento?.trim()) {
+        notifyValidation("Informe a data de nascimento.");
+        return false;
+      }
+
       if (!(await conferirDocumento())) {
         notifyValidation(
           "Já existe um cliente com este CPF/CNPJ nesta empresa. Escolha se quer puxar os dados dele.",
