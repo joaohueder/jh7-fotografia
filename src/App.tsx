@@ -18,6 +18,9 @@ import AdminDashboard from "@/pages/panels/AdminDashboard";
 import AdminConfiguracoes from "@/pages/panels/admin/Configuracoes";
 import UsuarioDashboard from "@/pages/panels/UsuarioDashboard";
 import { RoleRedirect, RequireRole } from "@/components/role-routing";
+import { AssinaturaGate, RedirectSeAssinaturaAtiva } from "@/components/assinatura-gate";
+import NovaAssinaturaPage from "@/pages/panels/admin/NovaAssinatura";
+
 import MeuPerfil from "@/pages/conta/Perfil";
 import Seguranca from "@/pages/conta/Seguranca";
 import AlterarSenha from "@/pages/conta/AlterarSenha";
