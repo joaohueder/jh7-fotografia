@@ -1,19 +1,32 @@
-import { Maximize2, Monitor, RotateCcw } from "lucide-react";
+import { Check, Maximize2, Monitor, RotateCcw } from "lucide-react";
+
+import { usePrimaryRole } from "@/components/role-routing";
+import { notifyError, notifySuccess } from "@/lib/system-message";
 
 import { AccountShell } from "@/components/account-shell";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  DEFAULT_MAX_WIDTH,
-  MAX_MAX_WIDTH,
-  MIN_MAX_WIDTH,
-  useAppLayout,
-} from "@/hooks/use-app-layout";
+import { MAX_MAX_WIDTH, MIN_MAX_WIDTH, useAppLayout } from "@/hooks/use-app-layout";
 
 /** Aba Layout — preferências visuais aplicadas em tempo real. */
 function LayoutTab() {
-  const { maxWidth, setMaxWidth, resetMaxWidth, isDefault } = useAppLayout();
+  const { maxWidth, systemDefault, setMaxWidth, resetMaxWidth, saveAsSystemDefault, isDefault, isSaving } =
+    useAppLayout();
+  const { role } = usePrimaryRole();
+  const isSaAdmin = role === "sa_admin";
+
+  async function handleSaveDefault() {
+    const { error } = await saveAsSystemDefault();
+    if (error) {
+      notifyError(error, { title: "Não foi possível salvar o padrão do sistema" });
+      return;
+    }
+    notifySuccess(
+      `Novos usuários passarão a usar ${maxWidth}px como largura máxima.`,
+      "Padrão do sistema atualizado",
+    );
+  }
 
   return (
     <div className="space-y-[clamp(1rem,3vw,1.5rem)]">
@@ -36,7 +49,7 @@ function LayoutTab() {
             <div>
               <p className="text-sm text-muted-foreground">
                 Define até onde o conteúdo se estende em telas grandes. O padrão é{" "}
-                {DEFAULT_MAX_WIDTH}px.
+                {systemDefault}px.
               </p>
             </div>
             <span
@@ -70,10 +83,18 @@ function LayoutTab() {
               className="tap-target gap-2"
             >
               <RotateCcw className="h-4 w-4" />
-              Restaurar padrão ({DEFAULT_MAX_WIDTH}px)
+              Restaurar padrão ({systemDefault}px)
             </Button>
+            {isSaAdmin && (
+              <Button type="button" onClick={handleSaveDefault} className="tap-target gap-2">
+                <Check className="h-4 w-4" />
+                Definir como padrão do sistema
+              </Button>
+            )}
             <p className="text-xs text-muted-foreground">
-              A alteração é aplicada imediatamente e fica salva neste navegador.
+              {isSaving
+                ? "Salvando..."
+                : "A alteração é aplicada imediatamente e salva na sua conta."}
             </p>
           </div>
         </div>
