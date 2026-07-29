@@ -23,7 +23,7 @@ import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-messa
 import { useEmpresaAtual } from "@/hooks/use-clientes";
 import { useDeleteLead, useLeads, useSalvarLead, type Lead } from "@/hooks/use-leads";
 import { isValidPhone, maskPhone } from "@/lib/br-masks";
-import { criarNotaCliente } from "@/hooks/use-cliente-notas";
+import { criarNotaCliente, useNotaInicial } from "@/hooks/use-cliente-notas";
 import { ClienteNotas } from "@/components/cliente-notas";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
