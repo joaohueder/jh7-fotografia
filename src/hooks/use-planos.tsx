@@ -37,6 +37,14 @@ function traduzErro(err: unknown) {
   }
   if (msg.includes("planos_valor_coerente")) {
     return new Error("Informe um valor válido para planos pagos.");
+  if (
+    msg.includes("empresa_assinaturas_plano_id_fkey") ||
+    msg.includes("foreign key") ||
+    msg.includes("still referenced")
+  ) {
+    return new Error(
+      "Este plano possui assinaturas vinculadas e não pode ser excluído. Inative o plano para deixar de oferecê-lo.",
+    );
   }
   return err instanceof Error ? err : new Error(String(err));
 }
