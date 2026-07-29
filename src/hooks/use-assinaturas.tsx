@@ -16,18 +16,20 @@ export interface Assinatura {
   ativo: boolean;
   inicio: string;
   fim: string | null;
+  vigencia_dias: number;
   observacao: string | null;
   created_at: string;
 }
 
 const COLUNAS =
-  "id, empresa_id, plano_id, plano_nome, gratuito, valor, ativo, inicio, fim, observacao, created_at";
+  "id, empresa_id, plano_id, plano_nome, gratuito, valor, ativo, inicio, fim, vigencia_dias, observacao, created_at";
 
 function normaliza(row: Record<string, unknown>): Assinatura {
   const valor = row.valor;
   return {
     ...(row as unknown as Assinatura),
     valor: valor === null || valor === undefined ? null : Number(valor),
+    vigencia_dias: Number(row.vigencia_dias ?? 30) || 30,
   };
 }
 
