@@ -23,7 +23,6 @@ import { Area, Bar, CartesianGrid, ComposedChart, ResponsiveContainer, Tooltip, 
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
-import { IconAction } from "@/components/icon-action";
 import { HelpTip } from "@/components/page-help";
 
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
@@ -216,6 +215,13 @@ export default function LeadsList() {
     } catch (err) {
       notifyError(err, { title: "Não foi possível salvar o lead" });
     }
+  }
+
+  async function confirmarDesistencia() {
+    if (!alvoDesistencia) return;
+    const lead = alvoDesistencia;
+    setAlvoDesistencia(null);
+    await alterarSituacao(lead, "DESISTIU");
   }
 
   async function confirmarExclusao() {
@@ -717,6 +723,25 @@ export default function LeadsList() {
           ) : null}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!alvoDesistencia} onOpenChange={(o) => !o && setAlvoDesistencia(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Marcar desistência do lead</AlertDialogTitle>
+            <AlertDialogDescription>
+              O lead <strong>{alvoDesistencia?.nome}</strong> passará para a situação
+              &ldquo;Desistiu&rdquo; e sairá da lista de contatos aguardando retorno. Nada é
+              apagado: o histórico continua salvo e você pode retomar a negociação depois.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmarDesistencia}>
+              Confirmar desistência
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={!!alvoExclusao} onOpenChange={(o) => !o && setAlvoExclusao(null)}>
         <AlertDialogContent>
