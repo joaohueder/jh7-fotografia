@@ -243,6 +243,13 @@ export default function LeadsList() {
 
                 <div className="flex shrink-0 items-start gap-1">
                   <IconAction
+                    label="Editar lead"
+                    ariaLabel={`Editar ${l.nome}`}
+                    onClick={() => abrirEdicao(l)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </IconAction>
+                  <IconAction
                     label="Transformar em cliente (abre o cadastro completo)"
                     ariaLabel={`Converter ${l.nome} em cliente`}
                     onClick={() => navigate(`/admin/clientes/novo?lead=${l.id}`)}
