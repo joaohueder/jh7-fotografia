@@ -90,7 +90,10 @@ export default function EmpresasList() {
   const { data, isLoading, error } = useEmpresas();
   const remove = useDeleteEmpresa();
   const setStatus = useSetEmpresaStatus();
+  const { data: assinaturas } = useAssinaturasAtivas();
   const [busca, setBusca] = useState("");
+  const [filtroAssinatura, setFiltroAssinatura] = useState<FiltroAssinatura>("TODAS");
+
   const [alvo, setAlvo] = useState<Empresa | null>(null);
   const [checando, setChecando] = useState(false);
   const [bloqueio, setBloqueio] = useState<string | null>(null);
