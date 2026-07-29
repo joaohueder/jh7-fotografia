@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useQueryClient } from "@tanstack/react-query";
-import { Maximize2, Monitor, RotateCcw, UserRound } from "lucide-react";
+import { Maximize2, Monitor, Moon, Palette as PaletteIcon, RotateCcw, Sun, UserRound } from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useAuth } from "@/hooks/use-auth";
@@ -16,6 +16,11 @@ import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MAX_MAX_WIDTH, MIN_MAX_WIDTH, useAppLayout } from "@/hooks/use-app-layout";
 import { notifyError, notifySuccess } from "@/lib/system-message";
+import { useTheme } from "@/hooks/use-theme";
+import { usePalette } from "@/hooks/use-palette";
+import { PaletteGrid } from "@/components/palette-grid";
+import { paletteName } from "@/lib/palettes";
+import { cn } from "@/lib/utils";
 
 const db = supabase as unknown as SupabaseClient;
 
@@ -80,6 +85,101 @@ function LarguraMaximaCard() {
             {isSaving ? "Salvando..." : "A alteração é aplicada imediatamente e salva na sua conta."}
           </p>
         </div>
+      </div>
+    </section>
+  );
+}
+
+
+/** Preferência individual de tema (claro/escuro). */
+function TemaCard() {
+  const { theme, setTheme } = useTheme();
+
+  const options = [
+    { value: "light" as const, label: "Claro", icon: Sun },
+    { value: "dark" as const, label: "Escuro", icon: Moon },
+  ];
+
+  return (
+    <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
+      <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
+        <span
+          className="inline-flex h-7 w-7 items-center justify-center rounded-lg"
+          style={{
+            background: "color-mix(in oklab, var(--panel-accent) 14%, transparent)",
+            color: "var(--panel-accent)",
+          }}
+        >
+          <Sun className="h-4 w-4" />
+        </span>
+        Aparência
+      </h2>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        {options.map(({ value, label, icon: Icon }) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setTheme(value)}
+            className={cn(
+              "flex items-center gap-3 rounded-xl border p-4 text-left transition-colors",
+              theme === value
+                ? "border-[var(--panel-accent)] bg-[color-mix(in_oklab,var(--panel-accent)_10%,transparent)]"
+                : "border-border bg-surface hover:border-[var(--panel-accent)]",
+            )}
+          >
+            <Icon className="h-5 w-5" style={{ color: "var(--panel-accent)" }} />
+            <span className="font-semibold">{label}</span>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Paleta de cores individual do usuário. */
+function TemplatesCard() {
+  const { paletteId, systemPalette, customColors, setPalette, setCustomColors, resetPalette, isDefault } =
+    usePalette();
+
+  return (
+    <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
+      <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
+        <span
+          className="inline-flex h-7 w-7 items-center justify-center rounded-lg"
+          style={{
+            background: "color-mix(in oklab, var(--panel-accent) 14%, transparent)",
+            color: "var(--panel-accent)",
+          }}
+        >
+          <PaletteIcon className="h-4 w-4" />
+        </span>
+        Templates
+      </h2>
+
+      <p className="mb-5 text-sm text-muted-foreground">
+        Escolha a paleta de cores da sua conta — altera apenas as cores primária, secundária e de
+        destaque. O padrão do sistema é {paletteName(systemPalette)}.
+      </p>
+
+      <PaletteGrid
+        value={paletteId}
+        custom={customColors}
+        onChange={setPalette}
+        onCustomChange={setCustomColors}
+      />
+
+      <div className="mt-5">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={resetPalette}
+          disabled={isDefault}
+          className="tap-target gap-2"
+        >
+          <RotateCcw className="h-4 w-4" />
+          Usar padrão do sistema ({paletteName(systemPalette)})
+        </Button>
       </div>
     </section>
   );
@@ -191,7 +291,11 @@ export default function MeuPerfil() {
         </TabsContent>
 
         <TabsContent value="layout" className="mt-0">
-          <LarguraMaximaCard />
+          <div className="space-y-[clamp(1rem,3vw,1.5rem)]">
+            <LarguraMaximaCard />
+            <TemaCard />
+            <TemplatesCard />
+          </div>
         </TabsContent>
       </Tabs>
 
