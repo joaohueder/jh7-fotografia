@@ -64,7 +64,7 @@ export default function MeuPerfil() {
   }
 
   return (
-    <AccountShell title="Meu perfil" subtitle="Consulte e atualize os dados da sua conta.">
+    <AccountShell title="Meu perfil" subtitle="Consulte e atualize os dados da sua conta." width="full">
       <form onSubmit={salvar} className="space-y-5 rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
         <div className="grid gap-1.5">
           <Label>E-mail de acesso</Label>
