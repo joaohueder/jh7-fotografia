@@ -239,8 +239,19 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
               {item.label}
             </NavLink>
           ))}
+          {/* Configurações fica sempre encostado à direita da barra */}
+          <NavLink
+            to="/configuracoes"
+            end
+            className={({ isActive }) => cn(navItemClass({ isActive }), "ml-auto gap-2")}
+            style={navItemStyle}
+          >
+            <Settings className="h-4 w-4" />
+            Configurações
+          </NavLink>
         </div>
       </nav>
+
 
       {/* Main — offset superior/inferior derivado dos tokens de chrome */}
       <main
