@@ -551,6 +551,63 @@ export default function ClienteForm() {
     ) },
   ];
 
+  if (!editando) {
+    secoes.push({
+      value: "resumo",
+      label: "Resumo",
+      node: (
+        <Section title="Resumo do cadastro" icon={ClipboardCheck}>
+          <div className="col-span-full space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Confira os dados abaixo. O cliente só será salvo ao clicar em “Salvar cliente”.
+            </p>
+
+            <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(16rem,100%),1fr))]">
+              <ResumoBloco
+                titulo="Dados básicos"
+                itens={[
+                  ["Nome", form.nome],
+                  ["Nascimento", formataData(form.nascimento)],
+                  ["Status", form.status === "ATIVO" ? "Ativo" : "Inativo"],
+                  ["CPF/CNPJ", form.documento],
+                  ["Menor de idade", menor ? "Sim" : "Não"],
+                ]}
+              />
+              <ResumoBloco
+                titulo="Endereço"
+                itens={[
+                  ["CEP", form.cep],
+                  ["Endereço", form.endereco],
+                  ["Número", form.numero],
+                  ["Complemento", form.complemento],
+                  ["Bairro", form.bairro],
+                  ["Cidade/UF", [form.cidade, form.uf].filter(Boolean).join(" / ")],
+                ]}
+              />
+              <ResumoBloco
+                titulo="Contatos"
+                itens={[
+                  ["WhatsApp", form.contato_whatsapp],
+                  ["E-mail", form.contato_email],
+                  ...contatos
+                    .filter((c) => c.valor.trim())
+                    .map(
+                      (c) =>
+                        [
+                          c.descricao?.trim() ? `${c.tipo} (${c.descricao})` : c.tipo,
+                          c.valor,
+                        ] as [string, string],
+                    ),
+                ]}
+              />
+              <ResumoBloco titulo="Observações" itens={[["Anotações", form.observacoes]]} />
+            </div>
+          </div>
+        </Section>
+      ),
+    });
+  }
+
   const ultimo = secoes.length - 1;
 
   function validarEtapa(indice: number) {
@@ -559,7 +616,15 @@ export default function ClienteForm() {
         notifyValidation("Informe o nome do cliente.");
         return false;
       }
-      if (form.documento?.trim() && !isValidCpfCnpj(form.documento)) {
+      if (!form.nascimento?.trim()) {
+        notifyValidation("Informe a data de nascimento.");
+        return false;
+      }
+      if (!form.documento?.trim()) {
+        notifyValidation("Informe o CPF/CNPJ do cliente.");
+        return false;
+      }
+      if (!isValidCpfCnpj(form.documento)) {
         notifyValidation("CPF/CNPJ inválido.");
         return false;
       }
@@ -569,7 +634,11 @@ export default function ClienteForm() {
       return false;
     }
     if (indice === 2) {
-      if (form.contato_whatsapp?.trim() && !isValidPhone(form.contato_whatsapp)) {
+      if (!form.contato_whatsapp?.trim()) {
+        notifyValidation("Informe o WhatsApp do cliente.");
+        return false;
+      }
+      if (!isValidPhone(form.contato_whatsapp)) {
         notifyValidation("WhatsApp inválido.");
         return false;
       }
@@ -584,6 +653,7 @@ export default function ClienteForm() {
     }
     return true;
   }
+
 
   function avancar() {
     if (!validarEtapa(step)) return;
