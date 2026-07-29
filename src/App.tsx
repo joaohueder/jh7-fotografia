@@ -12,6 +12,7 @@ import SaDashboard from "@/pages/panels/SaDashboard";
 import EmpresasList from "@/pages/panels/sa/Empresas";
 import EmpresaForm from "@/pages/panels/sa/EmpresaForm";
 import PlanosList from "@/pages/panels/sa/Planos";
+import AssinaturasList from "@/pages/panels/sa/Assinaturas";
 import PlanoForm from "@/pages/panels/sa/PlanoForm";
 import SaConfiguracoes from "@/pages/panels/sa/Configuracoes";
 import AdminDashboard from "@/pages/panels/AdminDashboard";
@@ -192,6 +193,16 @@ export default function App() {
                 <RequireAuth>
                   <RequireRole allow={["sa_admin"]}>
                     <PlanosList />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/sa/assinaturas"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["sa_admin"]}>
+                    <AssinaturasList />
                   </RequireRole>
                 </RequireAuth>
               }
