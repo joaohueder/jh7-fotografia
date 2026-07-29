@@ -12,6 +12,9 @@ import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-messa
 import { useEmpresaAtual } from "@/hooks/use-clientes";
 import { useDeleteLead, useLeads, useSalvarLead, type Lead } from "@/hooks/use-leads";
 import { isValidPhone, maskPhone } from "@/lib/br-masks";
+import { criarNotaCliente } from "@/hooks/use-cliente-notas";
+import { ClienteNotas } from "@/components/cliente-notas";
+import { Textarea } from "@/components/ui/textarea";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,6 +52,7 @@ export default function LeadsList() {
   const [editando, setEditando] = useState<Lead | null>(null);
   const [nome, setNome] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+  const [interesse, setInteresse] = useState("");
   const [alvoExclusao, setAlvoExclusao] = useState<Lead | null>(null);
 
   const lista = useMemo(() => {
@@ -63,6 +67,7 @@ export default function LeadsList() {
     setEditando(null);
     setNome("");
     setWhatsapp("");
+    setInteresse("");
     setAberto(true);
   }
 
@@ -70,6 +75,7 @@ export default function LeadsList() {
     setEditando(lead);
     setNome(lead.nome);
     setWhatsapp(maskPhone(lead.contato_whatsapp ?? ""));
+    setInteresse("");
     setAberto(true);
   }
 
@@ -85,7 +91,8 @@ export default function LeadsList() {
     if (!empresaId) return;
 
     try {
-      await salvar.mutateAsync({ id: editando?.id, empresaId, nome, whatsapp });
+      const leadId = await salvar.mutateAsync({ id: editando?.id, empresaId, nome, whatsapp });
+      if (interesse.trim()) await criarNotaCliente(leadId, interesse, "LEADS");
       notifySuccess(editando ? "Lead atualizado." : "Lead cadastrado com sucesso.");
       setAberto(false);
     } catch (err) {
@@ -274,6 +281,34 @@ export default function LeadsList() {
                 className="h-11 text-base"
               />
             </div>
+
+            <div className="space-y-1">
+              <label htmlFor="lead-interesse" className="text-xs font-semibold text-muted-foreground">
+                Interesse do lead {editando ? "(nova nota)" : ""}
+              </label>
+              <Textarea
+                id="lead-interesse"
+                value={interesse}
+                onChange={(e) => setInteresse(e.target.value)}
+                rows={3}
+                placeholder="Ex.: quer ensaio de 15 anos em dezembro, pediu orçamento."
+                className="text-base"
+              />
+              <p className="text-xs text-muted-foreground">
+                O interesse é gravado como nota interna, com data, hora e autor.
+              </p>
+            </div>
+
+            {editando ? (
+              <div className="border-t border-border pt-4">
+                <ClienteNotas
+                  clienteId={editando.id}
+                  modulo="LEADS"
+                  titulo="Histórico de notas"
+                  placeholder="Novo retorno, combinado ou interesse do lead."
+                />
+              </div>
+            ) : null}
           </div>
 
           <DialogFooter>
