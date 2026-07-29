@@ -222,22 +222,31 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
                   </span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => navigate("/conta/perfil")}>
+                <DropdownMenuItem
+                  onSelect={() => navigate("/conta/perfil")}
+                  className="cursor-pointer"
+                >
                   <User className="mr-2 h-4 w-4" />
                   Meu perfil
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => navigate("/conta/seguranca")}>
+                <DropdownMenuItem
+                  onSelect={() => navigate("/conta/seguranca")}
+                  className="cursor-pointer"
+                >
                   <ShieldCheck className="mr-2 h-4 w-4" />
                   Segurança
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => navigate("/conta/senha")}>
+                <DropdownMenuItem
+                  onSelect={() => navigate("/conta/senha")}
+                  className="cursor-pointer"
+                >
                   <KeyRound className="mr-2 h-4 w-4" />
                   Alterar senha
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onSelect={handleSignOut}
-                  className="text-destructive focus:text-destructive"
+                  className="cursor-pointer text-destructive focus:text-destructive"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sair
