@@ -538,50 +538,68 @@ export default function LeadsList() {
       </div>
 
       <Dialog open={aberto} onOpenChange={setAberto}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>{editando ? "Editar lead" : "Novo lead"}</DialogTitle>
             <DialogDescription>
-              Informe apenas o nome e o WhatsApp. Depois você pode transformar este lead em cliente e
-              completar os demais dados.
+              Preencha os dados básicos do contato. O interesse inicial é obrigatório para registrar
+              por que essa pessoa entrou em contato com o seu estúdio.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="space-y-1">
-              <label htmlFor="lead-nome" className="text-xs font-semibold text-muted-foreground">
-                Nome
-              </label>
+          <div className="space-y-5">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5">
+                <label htmlFor="lead-nome" className="text-xs font-semibold text-muted-foreground">
+                  Nome <span className="text-destructive">*</span>
+                </label>
+                <HelpTip text="Nome completo ou pelo nome de como o lead se apresentou. Este campo é obrigatório." />
+              </div>
               <Input
                 id="lead-nome"
                 value={nome}
-                onChange={(e) => setNome(e.target.value)}
+                onChange={(e) => setNome(e.target.value.slice(0, 100))}
                 placeholder="Nome de quem entrou em contato"
                 className="h-11 text-base"
+                maxLength={100}
               />
+              <p className="text-xs text-muted-foreground">
+                {nome.trim().length}/100 caracteres
+              </p>
             </div>
-            <div className="space-y-1">
-              <label htmlFor="lead-whats" className="text-xs font-semibold text-muted-foreground">
-                WhatsApp
-              </label>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5">
+                <label htmlFor="lead-whats" className="text-xs font-semibold text-muted-foreground">
+                  WhatsApp <span className="text-destructive">*</span>
+                </label>
+                <HelpTip text="Número do WhatsApp com DDD. Será usado para retornar o contato. Este campo é obrigatório." />
+              </div>
               <Input
                 id="lead-whats"
                 value={whatsapp}
-                onChange={(e) => setWhatsapp(maskPhone(e.target.value))}
+                onChange={(e) => setWhatsapp(maskPhone(e.target.value.slice(0, 15)))}
                 placeholder="(11) 99999-9999"
                 inputMode="numeric"
                 className="h-11 text-base"
+                maxLength={15}
               />
+              <p className="text-xs text-muted-foreground">
+                Digite o DDD + número, com até 11 dígitos.
+              </p>
             </div>
 
-            <div className="space-y-1">
-              <label htmlFor="lead-interesse" className="text-xs font-semibold text-muted-foreground">
-                Interesse inicial do lead <span className="text-destructive">*</span>
-              </label>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5">
+                <label htmlFor="lead-interesse" className="text-xs font-semibold text-muted-foreground">
+                  Interesse inicial do lead <span className="text-destructive">*</span>
+                </label>
+                <HelpTip text="Descreva o motivo do primeiro contato. Ex.: ensaio de 15 anos, orçamento de casamento, fotos de newborn. Este campo é obrigatório e fica salvo com data, hora e autor." />
+              </div>
               <Textarea
                 id="lead-interesse"
                 value={interesse}
-                onChange={(e) => setInteresse(e.target.value)}
+                onChange={(e) => setInteresse(e.target.value.slice(0, 500))}
                 rows={3}
                 required
                 placeholder={
@@ -590,21 +608,22 @@ export default function LeadsList() {
                     : "Ex.: quer ensaio de 15 anos em dezembro, pediu orçamento."
                 }
                 className="text-base"
+                maxLength={500}
               />
-              {editando && notaInicial.data ? (
-                <p className="text-xs text-muted-foreground">
-                  Registrado em {new Date(notaInicial.data.created_at).toLocaleString("pt-BR")}
-                  {notaInicial.data.criado_por_nome ? ` por ${notaInicial.data.criado_por_nome}` : ""}.
-                  Você pode corrigir este texto se o motivo do primeiro contato foi anotado errado.
-                </p>
-              ) : (
-                <p className="text-xs text-muted-foreground">
-                  É obrigatório descrever o motivo pelo qual o lead entrou em contato. Fica salvo com
-                  data, hora e autor. Novas conversas devem ir para o histórico.
-                </p>
-              )}
+              <p className="text-xs text-muted-foreground">
+                {interesse.trim().length}/500 caracteres. {editando && notaInicial.data ? (
+                  <span>
+                    Registrado em {new Date(notaInicial.data.created_at).toLocaleString("pt-BR")}
+                    {notaInicial.data.criado_por_nome ? ` por ${notaInicial.data.criado_por_nome}` : ""}.
+                    Você pode corrigir este texto se o motivo do primeiro contato foi anotado errado.
+                  </span>
+                ) : (
+                  <span>
+                    Novas conversas devem ser adicionadas no histórico de movimentações, após salvar o lead.
+                  </span>
+                )}
+              </p>
             </div>
-
 
             {/* Na edição, as ações ficam acima do histórico para não precisar
                 rolar até o fim da tela depois de mudar nome/WhatsApp/interesse. */}
