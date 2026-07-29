@@ -608,6 +608,13 @@ export default function EmpresasList() {
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-2">
                           <IconAction
+                            label="Acessar painel da empresa"
+                            ariaLabel={`Acessar painel de ${e.nome_fantasia}`}
+                            onClick={() => acessarComoEmpresa(e)}
+                          >
+                            <LogIn className="h-4 w-4" />
+                          </IconAction>
+                          <IconAction
                             label="Editar empresa"
                             ariaLabel={`Editar ${e.nome_fantasia}`}
                             onClick={() => navigate(`/sa/empresas/${e.id}`)}
