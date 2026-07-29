@@ -485,50 +485,58 @@ export default function LeadsList() {
                 </div>
 
                 <div className="flex shrink-0 items-start gap-1">
-                  <IconAction
-                    label="Editar lead"
-                    ariaLabel={`Editar ${l.nome}`}
-                    onClick={() => abrirEdicao(l)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </IconAction>
-                  {l.situacao === "AGUARDANDO" ? (
+                  {l.situacao === "CLIENTE" ? (
+                    // Lead já virou cliente: o cadastro passa a ser gerenciado na tela de
+                    // Clientes, então aqui só oferecemos a visualização do cadastro completo.
                     <IconAction
-                      label="Marcar como desistiu"
-                      ariaLabel={`Marcar ${l.nome} como desistiu`}
-                      onClick={() => void alterarSituacao(l, "DESISTIU")}
+                      label="Este lead já virou cliente. Abrir o cadastro completo em Clientes"
+                      ariaLabel={`Abrir cadastro do cliente ${l.nome}`}
+                      onClick={() => navigate(`/admin/clientes/${l.id}`)}
                     >
-                      <UserX className="h-4 w-4" />
+                      <Eye className="h-4 w-4" />
                     </IconAction>
-                  ) : l.situacao === "DESISTIU" ? (
-                    <IconAction
-                      label="Voltar para aguardando"
-                      ariaLabel={`Voltar ${l.nome} para aguardando`}
-                      onClick={() => void alterarSituacao(l, "AGUARDANDO")}
-                    >
-                      <RotateCcw className="h-4 w-4" />
-                    </IconAction>
-                  ) : null}
-                  <IconAction
-                    label="Transformar em cliente (abre o cadastro completo)"
-                    ariaLabel={`Converter ${l.nome} em cliente`}
-                    onClick={() =>
-                      navigate(
-                        l.situacao === "CLIENTE"
-                          ? `/admin/clientes/${l.id}`
-                          : `/admin/clientes/novo?lead=${l.id}`,
-                      )
-                    }
-                  >
-                    <UserCheck className="h-4 w-4" />
-                  </IconAction>
-                  <IconAction
-                    label="Excluir lead"
-                    ariaLabel={`Excluir ${l.nome}`}
-                    onClick={() => setAlvoExclusao(l)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </IconAction>
+                  ) : (
+                    <>
+                      <IconAction
+                        label="Editar lead"
+                        ariaLabel={`Editar ${l.nome}`}
+                        onClick={() => abrirEdicao(l)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </IconAction>
+                      {l.situacao === "AGUARDANDO" ? (
+                        <IconAction
+                          label="Marcar como desistiu"
+                          ariaLabel={`Marcar ${l.nome} como desistiu`}
+                          onClick={() => void alterarSituacao(l, "DESISTIU")}
+                        >
+                          <UserX className="h-4 w-4" />
+                        </IconAction>
+                      ) : (
+                        <IconAction
+                          label="Voltar para aguardando"
+                          ariaLabel={`Voltar ${l.nome} para aguardando`}
+                          onClick={() => void alterarSituacao(l, "AGUARDANDO")}
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                        </IconAction>
+                      )}
+                      <IconAction
+                        label="Transformar em cliente (abre o cadastro completo)"
+                        ariaLabel={`Converter ${l.nome} em cliente`}
+                        onClick={() => navigate(`/admin/clientes/novo?lead=${l.id}`)}
+                      >
+                        <UserCheck className="h-4 w-4" />
+                      </IconAction>
+                      <IconAction
+                        label="Excluir lead"
+                        ariaLabel={`Excluir ${l.nome}`}
+                        onClick={() => setAlvoExclusao(l)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </IconAction>
+                    </>
+                  )}
                 </div>
               </li>
             ))}
