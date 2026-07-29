@@ -654,8 +654,8 @@ export default function EmpresaForm() {
             }}
             className="space-y-4"
           >
-            {showStep(0) && (
-              <Section title="Dados da empresa">
+            {showStep(0, "empresa") && (
+              <Section title="Dados da empresa" icon={Building2}>
                 <Field label="Razão social" required>
                   <Input
                     value={form.razao_social}
@@ -760,8 +760,8 @@ export default function EmpresaForm() {
               </Section>
             )}
 
-            {showStep(1) && (
-              <Section title="Dados do responsável">
+            {showStep(1, "responsavel") && (
+              <Section title="Dados do responsável" icon={UserRound}>
                 <Field label="Nome" required>
                   <Input
                     value={form.resp_nome}
@@ -905,8 +905,8 @@ export default function EmpresaForm() {
               </Section>
             )}
 
-            {showStep(2) && (
-              <Section title="Contato da empresa">
+            {showStep(2, "empresa") && (
+              <Section title="Contato da empresa" icon={PhoneCall}>
                 <Field label="WhatsApp" required error={errors.contato_whatsapp}>
                   <Input
                     value={form.contato_whatsapp ?? ""}
@@ -1061,8 +1061,8 @@ export default function EmpresaForm() {
               </Section>
             )}
 
-            {showStep(3) && (
-              <Section title="Acesso ao sistema (usuário administrador)">
+            {showStep(3, "acesso") && (
+              <Section title="Acesso ao sistema (usuário administrador)" icon={KeyRound}>
                 <Field
                   label="E-mail"
                   required={!editing}
@@ -1146,8 +1146,8 @@ export default function EmpresaForm() {
               </Section>
             )}
 
-            {showStep(4) && (
-              <Section title="Observações">
+            {showStep(4, "observacoes") && (
+              <Section title="Observações" icon={StickyNote}>
                 <Field label="Observações" span>
                   <Textarea
                     value={form.observacoes ?? ""}
