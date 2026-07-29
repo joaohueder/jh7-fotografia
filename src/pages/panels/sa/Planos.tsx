@@ -187,6 +187,7 @@ export default function PlanosList() {
 
   const [busca, setBusca] = useState("");
   const [alvo, setAlvo] = useState<Plano | null>(null);
+  const [toggleAlvo, setToggleAlvo] = useState<Plano | null>(null);
   const [ordem, setOrdem] = useState<Plano[]>([]);
 
   useEffect(() => {
@@ -217,10 +218,19 @@ export default function PlanosList() {
     navigate(`/sa/planos/${plano.id}`);
   }
 
-  async function alternarStatus(plano: Plano) {
+  function abrirConfirmacaoToggle(plano: Plano) {
+    setToggleAlvo(plano);
+  }
+
+  async function confirmarToggle() {
+    if (!toggleAlvo) return;
     try {
-      await toggleStatus.mutateAsync({ id: plano.id, ativo: !plano.ativo });
-      notifySuccess(`Plano ${plano.ativo ? "inativado" : "ativado"} com sucesso.`);
+      await toggleStatus.mutateAsync({
+        id: toggleAlvo.id,
+        ativo: !toggleAlvo.ativo,
+      });
+      notifySuccess(`Plano ${toggleAlvo.ativo ? "inativado" : "ativado"} com sucesso.`);
+      setToggleAlvo(null);
     } catch (err) {
       notifyError(err);
     }
