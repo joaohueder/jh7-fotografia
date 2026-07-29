@@ -248,11 +248,23 @@ export default function LeadsList() {
                   </div>
 
                   <div className="flex items-start gap-2 text-sm">
-                    <StickyNote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    <Heart className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
                     <span className="line-clamp-2 text-muted-foreground">
-                      {l.ultima_nota?.descricao ?? "Nenhuma nota registrada ainda."}
+                      <span className="mr-1 font-semibold text-foreground">Interesse do lead:</span>
+                      {l.interesse?.descricao ?? "Nenhum interesse registrado ainda."}
                     </span>
                   </div>
+
+                  {l.ultima_nota && l.ultima_nota.descricao !== l.interesse?.descricao ? (
+                    <div className="flex items-start gap-2 text-sm">
+                      <StickyNote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                      <span className="line-clamp-2 text-muted-foreground">
+                        <span className="mr-1 font-semibold text-foreground">Última nota:</span>
+                        {l.ultima_nota.descricao}
+                      </span>
+                    </div>
+                  ) : null}
+
                 </div>
 
                 <div className="flex shrink-0 items-start gap-1">
