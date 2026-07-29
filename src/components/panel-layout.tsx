@@ -16,15 +16,21 @@ import { cn } from "@/lib/utils";
 
 export type PanelAccent = "sa" | "admin" | "usuario";
 
-/** Cada painel usa um recorte da paleta do sistema (preto / laranja / verde). */
+/**
+ * Cada painel usa um recorte da paleta do sistema.
+ * O acento é sempre da família verde (cor de ação principal da marca):
+ * o laranja fica reservado para atenção/pendências e o vermelho para
+ * exclusão/bloqueio — nunca para ações primárias.
+ */
 const ACCENTS: Record<PanelAccent, { accent: string; accentSoft: string; label: string }> = {
   // SA admin — verde da marca
   sa: { accent: "var(--brand-green)", accentSoft: "var(--brand-green-soft)", label: "Painel SaaS" },
   // Admin da empresa — verde da marca
   admin: { accent: "var(--brand-green)", accentSoft: "var(--brand-green-soft)", label: "Painel Administrativo" },
-  // Usuário — laranja suave / âmbar claro derivado da paleta
-  usuario: { accent: "var(--gold-soft)", accentSoft: "var(--brand-green-soft)", label: "Painel do Usuário" },
+  // Usuário — verde claro da marca (mesma família, tom mais suave)
+  usuario: { accent: "var(--brand-green-soft)", accentSoft: "var(--brand-green)", label: "Painel do Usuário" },
 };
+
 
 export interface PanelMenuItem {
   label: string;

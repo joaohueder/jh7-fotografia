@@ -9,7 +9,12 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+        /* Ação principal/positiva — verde (ou o acento do painel ativo). */
+        default:
+          "bg-action text-action-foreground shadow hover:bg-action/90 [--action:var(--panel-accent,var(--brand-green))]",
+        /* Atenção, pendências, período de teste — laranja. */
+        warning: "bg-warning text-warning-foreground shadow-sm hover:bg-warning/90",
+        /* Exclusão, bloqueio, inadimplência — vermelho. */
         destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         outline:
           "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
@@ -17,6 +22,7 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
+
       size: {
         default: "h-9 px-4 py-2",
         sm: "h-8 rounded-md px-3 text-xs",
