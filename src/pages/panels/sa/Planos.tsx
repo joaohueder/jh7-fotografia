@@ -1,6 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, GripVertical, Layers, Loader2, Pencil, Plus, Power, Trash2 } from "lucide-react";
+import {
+  Building2,
+  GripVertical,
+  Layers,
+  Loader2,
+  Pencil,
+  Plus,
+  Power,
+  Trash2,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import {
   DndContext,
   KeyboardSensor,
@@ -147,6 +158,30 @@ function PlanoCard({ plano, uso, arrastavel, onEditar, onExcluir, onToggleStatus
             {uso.ativas === 1 ? "1 empresa ativa" : `${uso.ativas} empresas ativas`}
           </span>
         </div>
+
+        {/* Limites de uso do plano — em branco no cadastro significa ilimitado */}
+        <dl className="mt-4 w-full space-y-1.5 rounded-xl border border-border bg-muted/30 p-3 text-left text-xs">
+          <div className="flex items-center justify-between gap-2">
+            <dt className="inline-flex items-center gap-1.5 text-muted-foreground">
+              <UserPlus className="h-3.5 w-3.5" />
+              Total de leads
+            </dt>
+            <dd className="font-semibold text-foreground">
+              {plano.limite_leads === null ? "Ilimitado" : plano.limite_leads.toLocaleString("pt-BR")}
+            </dd>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <dt className="inline-flex items-center gap-1.5 text-muted-foreground">
+              <Users className="h-3.5 w-3.5" />
+              Total de clientes
+            </dt>
+            <dd className="font-semibold text-foreground">
+              {plano.limite_clientes === null
+                ? "Ilimitado"
+                : plano.limite_clientes.toLocaleString("pt-BR")}
+            </dd>
+          </div>
+        </dl>
       </div>
 
 
