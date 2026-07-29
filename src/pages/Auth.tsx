@@ -7,6 +7,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/selfhosted/client";
+import { setRememberMe as persistRememberMe } from "@/integrations/selfhosted/auth-storage";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
