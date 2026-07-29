@@ -119,8 +119,17 @@ export default function EmpresasList() {
       });
     }
     const novas6m = meses.reduce((acc, m) => acc + m.total, 0);
-    return { total: list.length, ativos, inativos: list.length - ativos, meses, novas6m };
-  }, [data]);
+    const comAssinatura = list.filter((e) => Boolean(assinaturas?.get(e.id))).length;
+    return {
+      total: list.length,
+      ativos,
+      inativos: list.length - ativos,
+      meses,
+      novas6m,
+      comAssinatura,
+      semAssinatura: list.length - comAssinatura,
+    };
+  }, [data, assinaturas]);
 
   /** Nenhuma empresa cadastrada (estado vazio real, não filtro de busca). */
   const vazio = !isLoading && !error && (data?.length ?? 0) === 0;
@@ -253,6 +262,24 @@ export default function EmpresasList() {
               </div>
               <p className="mt-1 text-xs text-muted-foreground">ativos / inativos</p>
             </div>
+
+            <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.25rem)]">
+              <h3 className="text-sm font-semibold text-muted-foreground">Assinaturas</h3>
+              <div className="mt-2 flex items-baseline gap-3">
+                <p
+                  className="text-[clamp(1.75rem,6vw,2rem)] font-bold leading-tight"
+                  style={{ color: "var(--brand-green)" }}
+                >
+                  {resumo.comAssinatura}
+                </p>
+                <span className="text-muted-foreground">/</span>
+                <p className="text-[clamp(1.5rem,5vw,1.75rem)] font-bold leading-tight text-muted-foreground">
+                  {resumo.semAssinatura}
+                </p>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">com / sem assinatura ativa</p>
+            </div>
+
 
             <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.25rem)] md:col-span-full">
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
