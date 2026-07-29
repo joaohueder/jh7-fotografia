@@ -149,7 +149,7 @@ export function SystemMessageDialog() {
 
   return (
     <Dialog open={message !== null} onOpenChange={(open) => !open && dismissSystemMessage()}>
-      <DialogContent className="max-w-[min(34rem,calc(100vw-2rem))] gap-0 overflow-hidden rounded-2xl p-0 [&>button]:hidden">
+      <DialogContent className="max-w-[min(34rem,var(--app-max-w),calc(100vw-2rem))] gap-0 overflow-hidden rounded-2xl p-0 [&>button]:hidden">
         {message && (
           <div ref={cardRef} className="bg-background p-[clamp(1.125rem,4vw,1.75rem)]">
             <div className="flex items-start gap-3">
