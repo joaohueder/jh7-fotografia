@@ -142,6 +142,20 @@ function PlanoCard({ plano, arrastavel, onEditar, onExcluir, onToggleStatus }: C
           type="button"
           variant="ghost"
           size="sm"
+          className={`tap-target h-8 gap-1.5 text-xs ${
+            plano.ativo
+              ? "text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
+              : "text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+          }`}
+          onClick={() => onToggleStatus(plano)}
+        >
+          <Power className="h-3.5 w-3.5" />
+          {plano.ativo ? "Inativar" : "Ativar"}
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
           className="tap-target h-8 gap-1.5 text-xs"
           onClick={() => onEditar(plano)}
         >
