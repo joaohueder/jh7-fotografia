@@ -27,10 +27,11 @@ import {
   type UsuarioRole,
 } from "@/hooks/use-usuarios";
 
-type Filtro = "TODOS" | UsuarioRole;
+type Filtro = "TODOS" | "LOGADOS" | UsuarioRole;
 
 const FILTROS: { key: Filtro; label: string }[] = [
   { key: "TODOS", label: "Todos" },
+  { key: "LOGADOS", label: "Logados agora" },
   { key: "sa_admin", label: "Admin do SaaS" },
   { key: "admin", label: "Admin da empresa" },
   { key: "usuario", label: "Usuários" },
@@ -297,7 +298,8 @@ export default function UsuariosList() {
         [u.nome, u.email ?? "", u.empresa_nome ?? ""].join(" ").toLowerCase().includes(term),
       );
     }
-    if (filtro !== "TODOS") list = list.filter((u) => u.role === filtro);
+    if (filtro === "LOGADOS") list = list.filter((u) => Boolean(u.logado));
+    else if (filtro !== "TODOS") list = list.filter((u) => u.role === filtro);
     return list;
   }, [data, busca, filtro]);
 
