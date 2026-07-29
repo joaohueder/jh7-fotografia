@@ -318,73 +318,147 @@ export default function PlanoForm() {
               if (editing || step === RESUMO) void handleSubmit();
             }}
           >
-            {showStep(0) && (
-              <Section title="Identificação" icon={Layers}>
-                <Field label="Nome do plano" required error={erroNome}>
-                  <Input
-                    value={nome}
-                    maxLength={60}
-                    autoFocus={!editing}
-                    onChange={(e) => setNome(e.target.value)}
-                    onBlur={validarNome}
-                    placeholder="Ex.: Essencial"
-                  />
-                </Field>
-              </Section>
-            )}
+            {editing ? (
+              <Tabs value={aba} onValueChange={setAba} className="w-full">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="dados">Dados básicos</TabsTrigger>
+                  <TabsTrigger value="cobranca">Cobrança</TabsTrigger>
+                </TabsList>
 
-            {showStep(1) && (
-              <Section title="Cobrança" icon={CircleDollarSign}>
-                <SwitchRow
-                  id="plano-gratuito"
-                  label="Plano gratuito"
-                  description={gratuito ? "Sim — sem cobrança." : "Não — informe o valor mensal."}
-                  checked={gratuito}
-                  onChange={(v) => {
-                    setGratuito(v);
-                    if (v) {
-                      setValor("");
-                      setErroValor(null);
-                    }
-                  }}
-                />
-                {!gratuito && (
-                  <Field
-                    label="Valor do plano"
-                    required
-                    error={erroValor}
-                    hint="Valor mensal em reais."
-                  >
-                    <div className="relative">
-                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                        R$
-                      </span>
+                <TabsContent value="dados" className="space-y-[clamp(1rem,3vw,1.5rem)]">
+                  <Section title="Identificação" icon={Layers}>
+                    <Field label="Nome do plano" required error={erroNome}>
                       <Input
-                        inputMode="numeric"
-                        className="pl-9"
-                        value={valor}
-                        onChange={(e) => setValor(maskMoney(e.target.value))}
-                        onBlur={validarValor}
-                        placeholder="0,00"
+                        value={nome}
+                        maxLength={60}
+                        onChange={(e) => setNome(e.target.value)}
+                        onBlur={validarNome}
+                        placeholder="Ex.: Essencial"
                       />
-                    </div>
-                  </Field>
-                )}
-              </Section>
-            )}
+                    </Field>
+                    <SwitchRow
+                      id="plano-ativo"
+                      label="Plano ativo"
+                      description={
+                        ativo ? "Ativo — disponível para contratação." : "Inativo — não é oferecido."
+                      }
+                      checked={ativo}
+                      onChange={setAtivo}
+                    />
+                  </Section>
+                </TabsContent>
 
-            {showStep(2) && (
-              <Section title="Status" icon={BadgeCheck}>
-                <SwitchRow
-                  id="plano-ativo"
-                  label="Plano ativo"
-                  description={
-                    ativo ? "Ativo — disponível para contratação." : "Inativo — não é oferecido."
-                  }
-                  checked={ativo}
-                  onChange={setAtivo}
-                />
-              </Section>
+                <TabsContent value="cobranca" className="space-y-[clamp(1rem,3vw,1.5rem)]">
+                  <Section title="Cobrança" icon={CircleDollarSign}>
+                    <SwitchRow
+                      id="plano-gratuito"
+                      label="Plano gratuito"
+                      description={gratuito ? "Sim — sem cobrança." : "Não — informe o valor mensal."}
+                      checked={gratuito}
+                      onChange={(v) => {
+                        setGratuito(v);
+                        if (v) {
+                          setValor("");
+                          setErroValor(null);
+                        }
+                      }}
+                    />
+                    {!gratuito && (
+                      <Field
+                        label="Valor do plano"
+                        required
+                        error={erroValor}
+                        hint="Valor mensal em reais."
+                      >
+                        <div className="relative">
+                          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                            R$
+                          </span>
+                          <Input
+                            inputMode="numeric"
+                            className="pl-9"
+                            value={valor}
+                            onChange={(e) => setValor(maskMoney(e.target.value))}
+                            onBlur={validarValor}
+                            placeholder="0,00"
+                          />
+                        </div>
+                      </Field>
+                    )}
+                  </Section>
+                </TabsContent>
+              </Tabs>
+            ) : (
+              <>
+                {showStep(0) && (
+                  <Section title="Identificação" icon={Layers}>
+                    <Field label="Nome do plano" required error={erroNome}>
+                      <Input
+                        value={nome}
+                        maxLength={60}
+                        autoFocus={!editing}
+                        onChange={(e) => setNome(e.target.value)}
+                        onBlur={validarNome}
+                        placeholder="Ex.: Essencial"
+                      />
+                    </Field>
+                  </Section>
+                )}
+
+                {showStep(1) && (
+                  <Section title="Cobrança" icon={CircleDollarSign}>
+                    <SwitchRow
+                      id="plano-gratuito"
+                      label="Plano gratuito"
+                      description={gratuito ? "Sim — sem cobrança." : "Não — informe o valor mensal."}
+                      checked={gratuito}
+                      onChange={(v) => {
+                        setGratuito(v);
+                        if (v) {
+                          setValor("");
+                          setErroValor(null);
+                        }
+                      }}
+                    />
+                    {!gratuito && (
+                      <Field
+                        label="Valor do plano"
+                        required
+                        error={erroValor}
+                        hint="Valor mensal em reais."
+                      >
+                        <div className="relative">
+                          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                            R$
+                          </span>
+                          <Input
+                            inputMode="numeric"
+                            className="pl-9"
+                            value={valor}
+                            onChange={(e) => setValor(maskMoney(e.target.value))}
+                            onBlur={validarValor}
+                            placeholder="0,00"
+                          />
+                        </div>
+                      </Field>
+                    )}
+                  </Section>
+                )}
+
+                {showStep(2) && (
+                  <Section title="Status" icon={BadgeCheck}>
+                    <SwitchRow
+                      id="plano-ativo"
+                      label="Plano ativo"
+                      description={
+                        ativo ? "Ativo — disponível para contratação." : "Inativo — não é oferecido."
+                      }
+                      checked={ativo}
+                      onChange={setAtivo}
+                    />
+                  </Section>
+                )}
+              </>
             )}
 
             {!editing && step === RESUMO && (
