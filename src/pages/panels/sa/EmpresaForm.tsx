@@ -193,6 +193,7 @@ const TABS = [
   { id: "empresa", label: "Dados da empresa", icon: Building2 },
   { id: "responsavel", label: "Dados do responsável", icon: UserRound },
   { id: "acesso", label: "Acesso ao sistema", icon: KeyRound },
+  { id: "assinaturas", label: "Assinaturas", icon: CreditCard },
   { id: "observacoes", label: "Observações", icon: StickyNote },
 ] as const;
 
