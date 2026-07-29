@@ -293,7 +293,7 @@ export default function LeadsList() {
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Leads</h1>
-              <HelpTip text="Leads são pessoas interessadas que ainda não viraram clientes. Aqui você guarda o nome, o WhatsApp e o interesse para retornar o contato depois. Esta tela se atualiza sozinha: se alguém da sua equipe cadastrar ou alterar um lead, a lista muda automaticamente, sem precisar recarregar a página. Use os filtros para separar quem está aguardando retorno, quem desistiu e quem já virou cliente. O seu plano define quantos leads podem ser cadastrados: quando o limite é atingido, o botão “Novo lead” some e aparece um aviso — o consumo completo fica em Configurações › Limites." />
+              <HelpTip text="Leads são pessoas interessadas que ainda não viraram clientes. Aqui você guarda o nome, o WhatsApp e o interesse para retornar o contato depois. Esta tela se atualiza sozinha: se alguém da sua equipe cadastrar ou alterar um lead, a lista muda automaticamente, sem precisar recarregar a página. Use os filtros para separar quem está aguardando retorno, quem desistiu e quem já virou cliente. O seu plano define quantos leads podem ser cadastrados: quando o limite é atingido, o botão “Novo lead” some e aparece um aviso — o consumo completo fica em Configurações › Limites. O limite de clientes também vale aqui: se ele acabar, o botão “Transformar em cliente” fica desabilitado e o motivo aparece ao passar o mouse sobre ele." />
             </div>
             <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
               Contatos captados por formulários ou cadastrados manualmente.
