@@ -379,6 +379,7 @@ export default function PlanosList() {
                   <PlanoCard
                     key={plano.id}
                     plano={plano}
+                    uso={usoDe(plano.id)}
                     arrastavel={arrastavel}
                     onEditar={abrirEdicao}
                     onExcluir={setAlvo}
