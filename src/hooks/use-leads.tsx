@@ -61,7 +61,7 @@ export function useLeads() {
       const { data, error } = await db
         .from("clientes")
         .select(
-          "id, empresa_id, nome, contato_whatsapp, status, origem, created_at, cliente_notas(descricao, modulo, criado_por_nome, created_at), interesse:cliente_notas(descricao, criado_por_nome, created_at, tipo)",
+          "id, empresa_id, nome, contato_whatsapp, status, origem, created_at, cliente_notas(descricao, modulo, criado_por_nome, created_at, tipo), interesse:cliente_notas(descricao, criado_por_nome, created_at, tipo)",
         )
         .eq("empresa_id", empresaId!)
         .eq("origem", "LEAD")
@@ -69,21 +69,30 @@ export function useLeads() {
         .is("documento", null)
         .eq("interesse.tipo", "INTERESSE")
         .order("created_at", { ascending: false, foreignTable: "cliente_notas" })
-        .limit(1, { foreignTable: "cliente_notas" })
+        .limit(10, { foreignTable: "cliente_notas" })
         .limit(1, { foreignTable: "interesse" })
         .order("created_at", { ascending: false });
       if (error) throw error;
 
       return ((data ?? []) as any[]).map((l) => {
-        const notas = Array.isArray(l.cliente_notas) ? (l.cliente_notas as Lead["ultima_nota"][]) : [];
+        const notas = Array.isArray(l.cliente_notas) ? (l.cliente_notas as any[]) : [];
         const interesses = Array.isArray(l.interesse) ? (l.interesse as Lead["interesse"][]) : [];
+        const interesse = interesses[0] ?? null;
+        // A última nota é a movimentação mais recente que não seja o interesse inicial.
+        const ultima =
+          notas.find(
+            (n) =>
+              n?.tipo !== "INTERESSE" &&
+              !(interesse && n?.created_at === interesse.created_at && n?.descricao === interesse.descricao),
+          ) ?? null;
         const { cliente_notas: _n, interesse: _i, ...rest } = l;
         return {
           ...rest,
-          ultima_nota: notas[0] ?? null,
-          interesse: interesses[0] ?? null,
+          ultima_nota: ultima,
+          interesse,
         } as Lead;
       });
+
     },
   });
 }
