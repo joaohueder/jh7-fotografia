@@ -62,6 +62,8 @@ const EMPTY: ClientePayload = {
   nome: "",
   nascimento: "",
   status: "ATIVO",
+  origem: "CLIENTE",
+
   documento: "",
   cep: "",
   endereco: "",
