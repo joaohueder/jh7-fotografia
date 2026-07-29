@@ -85,7 +85,9 @@ export default function EmpresasList() {
         total,
       });
     }
-    return { total: list.length, ativos, inativos: list.length - ativos, meses };
+    const novas6m = meses.reduce((acc, m) => acc + m.total, 0);
+    return { total: list.length, ativos, inativos: list.length - ativos, meses, novas6m };
+
   }, [data]);
 
   /** Nenhuma empresa cadastrada (estado vazio real, não filtro de busca). */
