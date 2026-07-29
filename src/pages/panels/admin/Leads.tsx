@@ -145,6 +145,10 @@ export default function LeadsList() {
   }, [leads, busca, filtro]);
 
   async function alterarSituacao(lead: Lead, situacao: "AGUARDANDO" | "DESISTIU") {
+    if (lead.situacao === "CLIENTE") {
+      notifyValidation("Este lead já virou cliente, a situação não pode mais ser alterada.");
+      return;
+    }
     try {
       await situacaoLead.mutateAsync({ id: lead.id, situacao });
       notifySuccess(
@@ -166,6 +170,13 @@ export default function LeadsList() {
   }
 
   function abrirEdicao(lead: Lead) {
+    // Leads que já viraram clientes são editados apenas na tela de Clientes.
+    if (lead.situacao === "CLIENTE") {
+      notifyValidation(
+        "Este lead já virou cliente. Faça as alterações pela tela de Clientes.",
+      );
+      return;
+    }
     setEditando(lead);
     setNome(lead.nome);
     setWhatsapp(maskPhone(lead.contato_whatsapp ?? ""));
@@ -207,6 +218,13 @@ export default function LeadsList() {
 
   async function confirmarExclusao() {
     if (!alvoExclusao) return;
+    if (alvoExclusao.situacao === "CLIENTE") {
+      notifyValidation(
+        "Este lead já virou cliente e não pode ser excluído por aqui. Use a tela de Clientes.",
+      );
+      setAlvoExclusao(null);
+      return;
+    }
     try {
       await remover.mutateAsync(alvoExclusao.id);
       notifySuccess("Lead excluído.");
