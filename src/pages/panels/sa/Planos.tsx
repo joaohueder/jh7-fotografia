@@ -23,7 +23,6 @@ import { CSS } from "@dnd-kit/utilities";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
-import { IconAction } from "@/components/icon-action";
 import { SA_MENU } from "@/pages/panels/sa/menu";
 import { notifyError, notifySuccess } from "@/lib/system-message";
 import {
