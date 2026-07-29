@@ -18,11 +18,14 @@ import { PanelLayout } from "@/components/panel-layout";
 import { IconAction } from "@/components/icon-action";
 import { HelpTip } from "@/components/page-help";
 
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
 import { notifyError, notifySuccess } from "@/lib/system-message";
 import {
   isMenorDeIdade,
   useClientes,
+  useClientesEvolucao,
   useDeleteCliente,
   useSetClienteStatus,
   type Cliente,
@@ -81,6 +84,7 @@ export default function ClientesList() {
 
   const navigate = useNavigate();
   const { data: clientes, isLoading, error } = useClientes();
+  const { data: evolucao, isLoading: carregandoEvolucao } = useClientesEvolucao();
   const setStatus = useSetClienteStatus();
   const remover = useDeleteCliente();
 
@@ -106,7 +110,7 @@ export default function ClientesList() {
     return {
       total: todos.length,
       ativos: todos.filter((c) => c.status === "ATIVO").length,
-      menores: todos.filter((c) => isMenorDeIdade(c.nascimento)).length,
+      inativos: todos.filter((c) => c.status === "INATIVO").length,
     };
   }, [clientes]);
 
