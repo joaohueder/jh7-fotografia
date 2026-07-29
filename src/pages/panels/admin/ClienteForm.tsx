@@ -459,7 +459,11 @@ export default function ClienteForm() {
                 <Field label="CPF / CNPJ" required error={errors.documento}>
                   <Input
                     value={form.documento ?? ""}
-                    onChange={(e) => set("documento", maskCpfCnpj(e.target.value))}
+                    onChange={(e) => {
+                      set("documento", maskCpfCnpj(e.target.value));
+                      // Trocou o documento: desfaz a unificação escolhida antes.
+                      if (mesclarId) setMesclarId(null);
+                    }}
                     onBlur={async () => {
                       if (!form.documento?.trim()) {
                         setError("documento", "Informe o CPF/CNPJ");
@@ -470,13 +474,7 @@ export default function ClienteForm() {
                         return;
                       }
                       setError("documento", null);
-                      if (!empresaId) return;
-                      try {
-                        const dup = await documentoDuplicado(empresaId, form.documento, registroId);
-                        if (dup) setError("documento", "Já existe um cliente com este CPF/CNPJ.");
-                      } catch {
-                        /* validação no servidor cobre o caso */
-                      }
+                      await conferirDocumento();
                     }}
                     placeholder="000.000.000-00"
                     inputMode="numeric"
