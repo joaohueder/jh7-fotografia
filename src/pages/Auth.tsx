@@ -70,12 +70,13 @@ function AuthPage() {
     if (!liberado) {
       await signOut();
       setIsSubmitting(false);
-      setFormError(
+      setBlockMessage(
         (acesso as { motivo?: string } | null)?.motivo ??
           "Acesso bloqueado. Fale com o administrador.",
       );
       return;
     }
+
 
     setIsSubmitting(false);
 
