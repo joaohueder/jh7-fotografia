@@ -208,16 +208,18 @@ export default function LeadsList() {
       const interesseMudou = interesse.trim() !== (notaInicial.data?.descricao ?? "").trim();
       if (interesse.trim() && interesseMudou) {
         await salvarNotaInicial(leadId, interesse, "LEADS", editando ? notaInicial.data?.id : null);
-        await notaInicial.refetch();
       }
-      // Recarrega a lista direto do banco para exibir nome, WhatsApp e nota atualizados.
-      await recarregarLeads();
+      // Fecha na hora: a lista e o interesse se atualizam sozinhos logo em seguida,
+      // sem deixar o usuário esperando o recarregamento completo da tela.
       notifySuccess(editando ? "Lead atualizado." : "Lead cadastrado com sucesso.");
       setAberto(false);
+      void notaInicial.refetch();
+      void recarregarLeads();
     } catch (err) {
       notifyError(err, { title: "Não foi possível salvar o lead" });
     }
   }
+
 
   async function confirmarDesistencia() {
     if (!alvoDesistencia) return;
