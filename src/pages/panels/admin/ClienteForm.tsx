@@ -811,9 +811,10 @@ export default function ClienteForm() {
         notifyValidation("CPF/CNPJ inválido.");
         return false;
       }
-      if (empresaId && (await documentoDuplicado(empresaId, form.documento, registroId))) {
-        setError("documento", "Já existe um cliente com este CPF/CNPJ.");
-        notifyValidation("Já existe um cliente cadastrado com este CPF/CNPJ nesta empresa.");
+      if (!(await conferirDocumento())) {
+        notifyValidation(
+          "Já existe um cliente com este CPF/CNPJ nesta empresa. Escolha se quer puxar os dados dele.",
+        );
         return false;
       }
     }
