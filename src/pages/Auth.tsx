@@ -68,10 +68,12 @@ function AuthPage() {
     }
 
     setIsSubmitting(true);
+    setIsCheckingAccess(true);
     const { error } = await signIn(email, password);
 
     if (error) {
       setIsSubmitting(false);
+      setIsCheckingAccess(false);
       setFormError("E-mail ou senha inválidos.");
       return;
     }
@@ -82,17 +84,22 @@ function AuthPage() {
     );
     const liberado = (acesso as { ativo?: boolean } | null)?.ativo ?? true;
     if (!liberado) {
-      await signOut();
-      setIsSubmitting(false);
       setBlockMessage(
         (acesso as { motivo?: string } | null)?.motivo ??
           "Acesso bloqueado. Fale com o administrador.",
       );
+      await signOut();
+      setIsSubmitting(false);
+      setIsCheckingAccess(false);
+      setPassword("");
       return;
     }
 
 
     setIsSubmitting(false);
+    setIsCheckingAccess(false);
+
+
 
 
     if (rememberMe) {
