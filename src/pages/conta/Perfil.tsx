@@ -127,6 +127,7 @@ export default function MeuPerfil() {
       notifyError(error, { title: "Não foi possível salvar o perfil" });
       return;
     }
+    queryClient.invalidateQueries({ queryKey: ["profile"] });
     notifySuccess("Seus dados de perfil foram atualizados.", "Perfil atualizado");
   }
 
