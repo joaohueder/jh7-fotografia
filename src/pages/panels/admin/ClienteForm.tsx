@@ -4,6 +4,8 @@ import {
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
+  ClipboardCheck,
+
   Loader2,
   MapPin,
   Phone,
@@ -131,6 +133,44 @@ function Field({
   );
 }
 
+/** Formata "1990-05-20" em "20/05/1990". */
+function formataData(v?: string | null) {
+  if (!v?.trim()) return "";
+  const [a, m, d] = v.split("-");
+  return a && m && d ? `${d}/${m}/${a}` : v;
+}
+
+function ResumoBloco({
+  titulo,
+  itens,
+}: {
+  titulo: string;
+  itens: Array<[string, string | null | undefined]>;
+}) {
+  const preenchidos = itens.filter(([, v]) => v?.toString().trim());
+  return (
+    <div className="rounded-lg border border-border bg-muted/30 p-4">
+      <h3 className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+        {titulo}
+      </h3>
+      {preenchidos.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Não informado.</p>
+      ) : (
+        <dl className="space-y-2">
+          {preenchidos.map(([k, v], i) => (
+            <div key={`${k}-${i}`} className="flex flex-wrap items-baseline justify-between gap-2">
+              <dt className="text-xs text-muted-foreground">{k}</dt>
+              <dd className="text-sm font-medium text-foreground">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+    </div>
+  );
+}
+
+
+
 /** Cadastro de clientes da empresa (novo e edição na mesma tela em abas). */
 export default function ClienteForm() {
   const { id } = useParams<{ id: string }>();
@@ -212,14 +252,19 @@ export default function ClienteForm() {
       notifyValidation("Informe o nome do cliente.");
       return;
     }
-    if (form.documento?.trim() && !isValidCpfCnpj(form.documento)) {
-      notifyValidation("CPF/CNPJ inválido.");
+    if (!form.nascimento?.trim()) {
+      notifyValidation("Informe a data de nascimento.");
       return;
     }
-    if (form.contato_whatsapp?.trim() && !isValidPhone(form.contato_whatsapp)) {
-      notifyValidation("WhatsApp inválido.");
+    if (!form.documento?.trim() || !isValidCpfCnpj(form.documento)) {
+      notifyValidation("Informe um CPF/CNPJ válido.");
       return;
     }
+    if (!form.contato_whatsapp?.trim() || !isValidPhone(form.contato_whatsapp)) {
+      notifyValidation("Informe um WhatsApp válido.");
+      return;
+    }
+
     if (form.contato_email?.trim() && !isValidEmail(form.contato_email)) {
       notifyValidation("E-mail inválido.");
       return;
@@ -262,11 +307,14 @@ export default function ClienteForm() {
                 </Field>
 
                 <div className="space-y-2">
-                  <Label className="text-sm">Data de nascimento</Label>
+                  <Label className="text-sm">
+                    Data de nascimento<span className="ml-0.5 text-destructive">*</span>
+                  </Label>
                   <Input
                     type="date"
                     value={form.nascimento ?? ""}
                     onChange={(e) => set("nascimento", e.target.value)}
+                    required
                     className={
                       menor
                         ? "h-11 animate-pulse border-2 border-destructive text-base ring-2 ring-destructive/40"
@@ -296,7 +344,7 @@ export default function ClienteForm() {
                   </Select>
                 </Field>
 
-                <Field label="CPF / CNPJ" error={errors.documento}>
+                <Field label="CPF / CNPJ" required error={errors.documento}>
                   <Input
                     value={form.documento ?? ""}
                     onChange={(e) => set("documento", maskCpfCnpj(e.target.value))}
@@ -304,7 +352,7 @@ export default function ClienteForm() {
                       setError(
                         "documento",
                         !form.documento?.trim()
-                          ? null
+                          ? "Informe o CPF/CNPJ"
                           : isValidCpfCnpj(form.documento)
                             ? null
                             : "CPF/CNPJ inválido",
@@ -312,9 +360,11 @@ export default function ClienteForm() {
                     }
                     placeholder="000.000.000-00"
                     inputMode="numeric"
+                    required
                     className="h-11 text-base"
                   />
                 </Field>
+
               </Section>
     ) },
     { value: "endereco", label: "Endereço", node: (
@@ -376,7 +426,7 @@ export default function ClienteForm() {
     ) },
     { value: "contatos", label: "Contatos", node: (
               <Section title="Contatos" icon={Phone}>
-                <Field label="WhatsApp" error={errors.contato_whatsapp}>
+                <Field label="WhatsApp" required error={errors.contato_whatsapp}>
                   <Input
                     value={form.contato_whatsapp ?? ""}
                     onChange={(e) => set("contato_whatsapp", maskPhone(e.target.value))}
@@ -384,7 +434,7 @@ export default function ClienteForm() {
                       setError(
                         "contato_whatsapp",
                         !form.contato_whatsapp?.trim()
-                          ? null
+                          ? "Informe o WhatsApp"
                           : isValidPhone(form.contato_whatsapp)
                             ? null
                             : "Telefone inválido",
@@ -392,9 +442,11 @@ export default function ClienteForm() {
                     }
                     placeholder="(00) 00000-0000"
                     inputMode="tel"
+                    required
                     className="h-11 text-base"
                   />
                 </Field>
+
                 <Field label="E-mail" error={errors.contato_email}>
                   <Input
                     type="email"
@@ -544,6 +596,63 @@ export default function ClienteForm() {
     ) },
   ];
 
+  if (!editando) {
+    secoes.push({
+      value: "resumo",
+      label: "Resumo",
+      node: (
+        <Section title="Resumo do cadastro" icon={ClipboardCheck}>
+          <div className="col-span-full space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Confira os dados abaixo. O cliente só será salvo ao clicar em “Salvar cliente”.
+            </p>
+
+            <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(16rem,100%),1fr))]">
+              <ResumoBloco
+                titulo="Dados básicos"
+                itens={[
+                  ["Nome", form.nome],
+                  ["Nascimento", formataData(form.nascimento)],
+                  ["Status", form.status === "ATIVO" ? "Ativo" : "Inativo"],
+                  ["CPF/CNPJ", form.documento],
+                  ["Menor de idade", menor ? "Sim" : "Não"],
+                ]}
+              />
+              <ResumoBloco
+                titulo="Endereço"
+                itens={[
+                  ["CEP", form.cep],
+                  ["Endereço", form.endereco],
+                  ["Número", form.numero],
+                  ["Complemento", form.complemento],
+                  ["Bairro", form.bairro],
+                  ["Cidade/UF", [form.cidade, form.uf].filter(Boolean).join(" / ")],
+                ]}
+              />
+              <ResumoBloco
+                titulo="Contatos"
+                itens={[
+                  ["WhatsApp", form.contato_whatsapp],
+                  ["E-mail", form.contato_email],
+                  ...contatos
+                    .filter((c) => c.valor.trim())
+                    .map(
+                      (c) =>
+                        [
+                          c.descricao?.trim() ? `${c.tipo} (${c.descricao})` : c.tipo,
+                          c.valor,
+                        ] as [string, string],
+                    ),
+                ]}
+              />
+              <ResumoBloco titulo="Observações" itens={[["Anotações", form.observacoes]]} />
+            </div>
+          </div>
+        </Section>
+      ),
+    });
+  }
+
   const ultimo = secoes.length - 1;
 
   function validarEtapa(indice: number) {
@@ -552,7 +661,15 @@ export default function ClienteForm() {
         notifyValidation("Informe o nome do cliente.");
         return false;
       }
-      if (form.documento?.trim() && !isValidCpfCnpj(form.documento)) {
+      if (!form.nascimento?.trim()) {
+        notifyValidation("Informe a data de nascimento.");
+        return false;
+      }
+      if (!form.documento?.trim()) {
+        notifyValidation("Informe o CPF/CNPJ do cliente.");
+        return false;
+      }
+      if (!isValidCpfCnpj(form.documento)) {
         notifyValidation("CPF/CNPJ inválido.");
         return false;
       }
@@ -562,7 +679,11 @@ export default function ClienteForm() {
       return false;
     }
     if (indice === 2) {
-      if (form.contato_whatsapp?.trim() && !isValidPhone(form.contato_whatsapp)) {
+      if (!form.contato_whatsapp?.trim()) {
+        notifyValidation("Informe o WhatsApp do cliente.");
+        return false;
+      }
+      if (!isValidPhone(form.contato_whatsapp)) {
         notifyValidation("WhatsApp inválido.");
         return false;
       }
@@ -577,6 +698,7 @@ export default function ClienteForm() {
     }
     return true;
   }
+
 
   function avancar() {
     if (!validarEtapa(step)) return;
@@ -727,7 +849,7 @@ export default function ClienteForm() {
                   ) : (
                     <Save className="h-4 w-4" />
                   )}
-                  Cadastrar cliente
+                  Salvar cliente
                 </Button>
               ) : (
                 <Button type="button" className="tap-target gap-2" onClick={avancar}>
