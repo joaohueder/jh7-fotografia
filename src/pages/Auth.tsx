@@ -5,6 +5,7 @@ import { ArrowRight, Camera, Eye, EyeOff, Loader2 } from "lucide-react";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { useForcedTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/selfhosted/client";
 import { setRememberMe as persistRememberMe } from "@/integrations/selfhosted/auth-storage";
