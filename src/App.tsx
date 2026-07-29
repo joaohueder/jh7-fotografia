@@ -11,6 +11,7 @@ import AuthPage from "@/pages/Auth";
 import SaDashboard from "@/pages/panels/SaDashboard";
 import EmpresasList from "@/pages/panels/sa/Empresas";
 import EmpresaForm from "@/pages/panels/sa/EmpresaForm";
+import PlanosList from "@/pages/panels/sa/Planos";
 import SaConfiguracoes from "@/pages/panels/sa/Configuracoes";
 import AdminDashboard from "@/pages/panels/AdminDashboard";
 import AdminConfiguracoes from "@/pages/panels/admin/Configuracoes";
