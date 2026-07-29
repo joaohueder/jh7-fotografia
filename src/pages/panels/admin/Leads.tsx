@@ -117,6 +117,8 @@ export default function LeadsList() {
   const [whatsapp, setWhatsapp] = useState("");
   const [interesse, setInteresse] = useState("");
   const [alvoExclusao, setAlvoExclusao] = useState<Lead | null>(null);
+  // Lead aguardando confirmação de desistência (abre o modal de confirmação).
+  const [alvoDesistencia, setAlvoDesistencia] = useState<Lead | null>(null);
 
   const notaInicial = useNotaInicial(editando?.id);
 
