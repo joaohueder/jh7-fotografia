@@ -258,7 +258,7 @@ function UsuarioCard({
             className="h-9 text-xs font-bold"
             style={{
               background: u.ativo ? "hsl(var(--destructive))" : "var(--primary)",
-              color: "white",
+              color: u.ativo ? "hsl(var(--destructive-foreground))" : "var(--primary-foreground, hsl(var(--primary-foreground)))",
             }}
             onClick={() => onToggle(u)}
           >
