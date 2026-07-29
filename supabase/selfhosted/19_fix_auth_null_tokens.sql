@@ -31,11 +31,6 @@ where confirmation_token is null
 
 -- 2) Garante e-mail confirmado (login com senha exige confirmação)
 update auth.users
-   set email_confirmed_at = coalesce(email_confirmed_at, now()),
-       confirmed_at_dummy = null
- where false; -- no-op de segurança (confirmed_at é coluna gerada)
-
-update auth.users
    set email_confirmed_at = now()
  where email_confirmed_at is null;
 
