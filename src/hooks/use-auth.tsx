@@ -2,6 +2,11 @@ import { createContext, useContext, useEffect, useState, useCallback, type React
 import type { User, Session } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/selfhosted/client";
+import {
+  clearRememberState,
+  isRememberExpired,
+} from "@/integrations/selfhosted/auth-storage";
+
 
 interface AuthContextValue {
   user: User | null;
