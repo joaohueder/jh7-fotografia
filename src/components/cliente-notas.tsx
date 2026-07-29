@@ -1,5 +1,13 @@
-import { useState } from "react";
-import { Loader2, MessageSquarePlus, StickyNote, Trash2, UserRound } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  MessageSquarePlus,
+  StickyNote,
+  Trash2,
+  UserRound,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,6 +22,9 @@ import {
   type NotaModulo,
 } from "@/hooks/use-cliente-notas";
 import { dataHora, tempoDecorrido } from "@/lib/tempo";
+
+/** Quantidade de notas exibidas por página no histórico. */
+const POR_PAGINA = 5;
 
 interface Props {
   clienteId: string | undefined;
@@ -31,13 +42,28 @@ export function ClienteNotas({
   modulo,
   titulo = "Notas internas",
   placeholder = "Ex.: interessada em ensaio gestante para setembro.",
-  ajuda = "Registre quantas notas quiser. Cada nota guarda data, hora, quem escreveu e em qual tela foi criada. As mais novas aparecem no topo.",
+  ajuda = "Registre quantas notas quiser. Cada nota guarda data, hora, quem escreveu e em qual tela foi criada. As mais novas aparecem no topo e a lista é dividida em páginas de 5 registros.",
 }: Props) {
   const { data: notas, isLoading } = useClienteNotas(clienteId);
   const adicionar = useAdicionarNota();
   const excluir = useExcluirNota();
   const [texto, setTexto] = useState("");
   const [removendo, setRemovendo] = useState<string | null>(null);
+  const [pagina, setPagina] = useState(1);
+
+  const total = (notas ?? []).length;
+  const totalPaginas = Math.max(1, Math.ceil(total / POR_PAGINA));
+
+  // Se a lista encolher (ex.: nota excluída), volta para uma página válida.
+  useEffect(() => {
+    setPagina((p) => Math.min(p, totalPaginas));
+  }, [totalPaginas]);
+
+  const paginaAtual = Math.min(pagina, totalPaginas);
+  const visiveis = useMemo(
+    () => (notas ?? []).slice((paginaAtual - 1) * POR_PAGINA, paginaAtual * POR_PAGINA),
+    [notas, paginaAtual],
+  );
 
   async function salvarNota() {
     if (!clienteId) return;
@@ -48,6 +74,7 @@ export function ClienteNotas({
     try {
       await adicionar.mutateAsync({ clienteId, descricao: texto, modulo });
       setTexto("");
+      setPagina(1);
       notifySuccess("Nota adicionada.");
     } catch (err) {
       notifyError(err, { title: "Não foi possível adicionar a nota" });
@@ -115,8 +142,9 @@ export function ClienteNotas({
           Nenhuma nota registrada até agora.
         </p>
       ) : (
+        <>
         <ul className="space-y-2">
-          {(notas ?? []).map((n) => (
+          {visiveis.map((n) => (
             <li key={n.id} className="rounded-xl border border-border bg-card p-3">
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 <span className="font-semibold text-foreground">{dataHora(n.created_at)}</span>
@@ -150,6 +178,41 @@ export function ClienteNotas({
             </li>
           ))}
         </ul>
+
+        {totalPaginas > 1 ? (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <p className="text-xs text-muted-foreground">
+              Mostrando {(paginaAtual - 1) * POR_PAGINA + 1}–
+              {Math.min(paginaAtual * POR_PAGINA, total)} de {total} registros · página {paginaAtual}{" "}
+              de {totalPaginas}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1"
+                onClick={() => setPagina((p) => Math.max(1, p - 1))}
+                disabled={paginaAtual <= 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Anterior
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1"
+                onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+                disabled={paginaAtual >= totalPaginas}
+              >
+                Próxima
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        ) : null}
+        </>
       )}
     </div>
   );
