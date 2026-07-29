@@ -15,6 +15,8 @@ import {
   UserRound,
 } from "lucide-react";
 
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { IconAction } from "@/components/icon-action";
@@ -23,7 +25,7 @@ import { HelpTip } from "@/components/page-help";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 import { useEmpresaAtual } from "@/hooks/use-clientes";
-import { useDeleteLead, useLeads, useSalvarLead, type Lead } from "@/hooks/use-leads";
+import { useDeleteLead, useLeads, useLeadsEvolucao, useSalvarLead, type Lead } from "@/hooks/use-leads";
 import { isValidPhone, maskPhone } from "@/lib/br-masks";
 import { salvarNotaInicial, useNotaInicial } from "@/hooks/use-cliente-notas";
 import { ClienteNotas } from "@/components/cliente-notas";
@@ -58,6 +60,7 @@ export default function LeadsList() {
   const navigate = useNavigate();
   const { data: empresaId } = useEmpresaAtual();
   const { data: leads, isLoading, error, refetch: recarregarLeads } = useLeads();
+  const { data: evolucao, isLoading: carregandoEvolucao } = useLeadsEvolucao();
   const salvar = useSalvarLead();
   const remover = useDeleteLead();
 
