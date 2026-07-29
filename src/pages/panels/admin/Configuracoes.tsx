@@ -134,7 +134,7 @@ export default function AdminConfiguracoes() {
 
   return (
     <PanelLayout accent="admin" menu={ADMIN_MENU}>
-      <div className="mx-auto w-full max-w-[min(42rem,var(--app-max-w))] space-y-[clamp(1.5rem,4vw,2rem)]">
+      <div className="mx-auto w-full max-w-[var(--app-max-w)] space-y-[clamp(1.5rem,4vw,2rem)]">
         <header className="space-y-1">
           <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Configurações</h1>
           <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
