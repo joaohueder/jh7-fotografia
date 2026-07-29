@@ -44,12 +44,7 @@ export function RequireRole({
   children: React.ReactNode;
 }) {
   const { role, isLoading } = usePrimaryRole();
-  const { impersonando } = useImpersonacao();
   if (isLoading) return <div className="min-h-dvh bg-background" />;
-  // SA admin "acessando como empresa" enxerga o painel do administrador.
-  if (impersonando && role === "sa_admin" && allow.includes("admin")) {
-    return <>{children}</>;
-  }
   if (!role) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-background px-[var(--gutter)] text-center">
