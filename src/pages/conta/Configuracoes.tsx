@@ -9,7 +9,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
 import { usePalette } from "@/hooks/use-palette";
 import { PaletteGrid } from "@/components/palette-grid";
-import { getPalette } from "@/lib/palettes";
+import { paletteName } from "@/lib/palettes";
 
 /** Aba Layout — preferências visuais aplicadas em tempo real. */
 function LayoutTab() {
@@ -85,7 +85,8 @@ function LayoutTab() {
 
 /** Paleta de cores individual do usuário. */
 function PaletteSection() {
-  const { paletteId, systemPalette, setPalette, resetPalette, isDefault } = usePalette();
+  const { paletteId, systemPalette, customColors, setPalette, setCustomColors, resetPalette, isDefault } =
+    usePalette();
 
   return (
     <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
@@ -104,10 +105,15 @@ function PaletteSection() {
 
       <p className="mb-5 text-sm text-muted-foreground">
         Escolha o template de cores da sua conta. O padrão do sistema é{" "}
-        {getPalette(systemPalette).name}.
+        {paletteName(systemPalette)}.
       </p>
 
-      <PaletteGrid value={paletteId} onChange={setPalette} />
+      <PaletteGrid
+        value={paletteId}
+        custom={customColors}
+        onChange={setPalette}
+        onCustomChange={setCustomColors}
+      />
 
       <div className="mt-5">
         <Button
@@ -118,7 +124,7 @@ function PaletteSection() {
           className="tap-target gap-2"
         >
           <RotateCcw className="h-4 w-4" />
-          Usar padrão do sistema ({getPalette(systemPalette).name})
+          Usar padrão do sistema ({paletteName(systemPalette)})
         </Button>
       </div>
     </section>
