@@ -203,6 +203,8 @@ export interface LeadMes {
   mes: string;
   /** Quantidade de leads captados naquele mês. */
   total: number;
+  /** Quantidade de leads daquele mês que já viraram cliente. */
+  clientes: number;
 }
 
 /**
@@ -225,7 +227,7 @@ export function useLeadsEvolucao() {
 
       const { data, error } = await db
         .from("clientes")
-        .select("id, created_at, origem, cliente_notas(tipo)")
+        .select("id, created_at, origem, documento, cliente_notas(tipo)")
         .eq("empresa_id", empresaId!)
         .gte("created_at", inicio.toISOString());
       if (error) throw error;
@@ -248,16 +250,21 @@ export function useLeadsEvolucao() {
             .toLocaleDateString("pt-BR", { month: "short", year: "2-digit" })
             .replace(".", ""),
           total: 0,
+          clientes: 0,
         });
       }
 
       for (const r of registros) {
         const d = new Date(r.created_at);
         const idx = chaves.indexOf(`${d.getFullYear()}-${d.getMonth()}`);
-        if (idx >= 0) meses[idx].total += 1;
+        if (idx >= 0) {
+          meses[idx].total += 1;
+          if (r.documento) meses[idx].clientes += 1;
+        }
       }
 
       return meses;
     },
   });
 }
+
