@@ -160,7 +160,10 @@ export function useSalvarLead() {
       if (error) throw error;
       return (data as { id: string }).id;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["leads"], refetchType: "active" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["leads"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["leads-evolucao"], refetchType: "active" });
+    },
   });
 }
 
@@ -172,7 +175,10 @@ export function useSituacaoLead() {
       const { error } = await db.from("clientes").update({ lead_status: situacao }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["leads"], refetchType: "active" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["leads"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["leads-evolucao"], refetchType: "active" });
+    },
   });
 }
 
@@ -183,7 +189,10 @@ export function useDeleteLead() {
       const { error } = await db.from("clientes").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["leads"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["leads"] });
+      qc.invalidateQueries({ queryKey: ["leads-evolucao"] });
+    },
   });
 }
 
@@ -197,6 +206,7 @@ export function useConverterLead() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["leads"] });
+      qc.invalidateQueries({ queryKey: ["leads-evolucao"] });
       qc.invalidateQueries({ queryKey: ["clientes"] });
     },
   });
