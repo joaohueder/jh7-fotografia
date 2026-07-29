@@ -112,7 +112,8 @@ export default function UsuariosList() {
             proximo ? "Usuário ativado" : "Usuário inativado",
             `${alvo.nome} foi ${proximo ? "ativado" : "inativado"} com sucesso.`,
           ),
-        onError: (err) => notifyError(err, "Não foi possível alterar o acesso do usuário."),
+        onError: (err) =>
+          notifyError(err, { description: "Não foi possível alterar o acesso do usuário." }),
       },
     );
     setAlvo(null);
