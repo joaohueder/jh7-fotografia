@@ -13,6 +13,7 @@ import EmpresasList from "@/pages/panels/sa/Empresas";
 import EmpresaForm from "@/pages/panels/sa/EmpresaForm";
 import PlanosList from "@/pages/panels/sa/Planos";
 import AssinaturasList from "@/pages/panels/sa/Assinaturas";
+import UsuariosList from "@/pages/panels/sa/Usuarios";
 import PlanoForm from "@/pages/panels/sa/PlanoForm";
 import SaConfiguracoes from "@/pages/panels/sa/Configuracoes";
 import AdminDashboard from "@/pages/panels/AdminDashboard";
@@ -203,6 +204,16 @@ export default function App() {
                 <RequireAuth>
                   <RequireRole allow={["sa_admin"]}>
                     <AssinaturasList />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/sa/usuarios"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["sa_admin"]}>
+                    <UsuariosList />
                   </RequireRole>
                 </RequireAuth>
               }
