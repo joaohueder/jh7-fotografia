@@ -7,6 +7,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MAX_MAX_WIDTH, MIN_MAX_WIDTH, useAppLayout } from "@/hooks/use-app-layout";
 import { useTheme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
+import { usePalette } from "@/hooks/use-palette";
+import { PaletteGrid } from "@/components/palette-grid";
+import { getPalette } from "@/lib/palettes";
 
 /** Aba Layout — preferências visuais aplicadas em tempo real. */
 function LayoutTab() {
@@ -79,6 +82,49 @@ function LayoutTab() {
   );
 }
 
+
+/** Paleta de cores individual do usuário. */
+function PaletteSection() {
+  const { paletteId, systemPalette, setPalette, resetPalette, isDefault } = usePalette();
+
+  return (
+    <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
+      <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
+        <span
+          className="inline-flex h-7 w-7 items-center justify-center rounded-lg"
+          style={{
+            background: "color-mix(in oklab, var(--panel-accent) 14%, transparent)",
+            color: "var(--panel-accent)",
+          }}
+        >
+          <Palette className="h-4 w-4" />
+        </span>
+        Paleta de cores
+      </h2>
+
+      <p className="mb-5 text-sm text-muted-foreground">
+        Escolha o template de cores da sua conta. O padrão do sistema é{" "}
+        {getPalette(systemPalette).name}.
+      </p>
+
+      <PaletteGrid value={paletteId} onChange={setPalette} />
+
+      <div className="mt-5">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={resetPalette}
+          disabled={isDefault}
+          className="tap-target gap-2"
+        >
+          <RotateCcw className="h-4 w-4" />
+          Usar padrão do sistema ({getPalette(systemPalette).name})
+        </Button>
+      </div>
+    </section>
+  );
+}
+
 /** Aba Tema — preferência claro/escuro. */
 function ThemeTab() {
   const { theme, setTheme } = useTheme();
@@ -123,6 +169,8 @@ function ThemeTab() {
           ))}
         </div>
       </section>
+
+      <PaletteSection />
     </div>
   );
 }
