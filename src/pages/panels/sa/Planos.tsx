@@ -418,7 +418,7 @@ export default function PlanosList() {
                     uso={usoDe(plano.id)}
                     arrastavel={arrastavel}
                     onEditar={abrirEdicao}
-                    onExcluir={setAlvo}
+                    onExcluir={abrirExclusao}
                     onToggleStatus={abrirConfirmacaoToggle}
                   />
                 ))}
