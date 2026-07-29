@@ -83,6 +83,7 @@ export function useDefinirAssinatura() {
     },
     onSuccess: (_data, vars) => {
       void qc.invalidateQueries({ queryKey: ["empresa-assinaturas", vars.empresaId] });
+      void qc.invalidateQueries({ queryKey: ["empresa-assinaturas-ativas"] });
     },
   });
 }
@@ -100,6 +101,32 @@ export function useEncerrarAssinatura() {
     },
     onSuccess: (_data, vars) => {
       void qc.invalidateQueries({ queryKey: ["empresa-assinaturas", vars.empresaId] });
+      void qc.invalidateQueries({ queryKey: ["empresa-assinaturas-ativas"] });
+    },
+  });
+}
+
+/**
+ * Assinaturas vigentes de todas as empresas (uso na listagem do SA).
+ * Vigente = ativo e sem data de fim ou com fim ainda no futuro.
+ */
+export function useAssinaturasAtivas() {
+  return useQuery({
+    queryKey: ["empresa-assinaturas-ativas"],
+    queryFn: async (): Promise<Map<string, Assinatura>> => {
+      const hoje = new Date().toISOString().slice(0, 10);
+      const { data, error } = await db
+        .from("empresa_assinaturas")
+        .select(COLUNAS)
+        .eq("ativo", true)
+        .or(`fim.is.null,fim.gte.${hoje}`);
+      if (error) throw traduzErro(error);
+      const mapa = new Map<string, Assinatura>();
+      for (const row of data ?? []) {
+        const a = normaliza(row as Record<string, unknown>);
+        mapa.set(a.empresa_id, a);
+      }
+      return mapa;
     },
   });
 }

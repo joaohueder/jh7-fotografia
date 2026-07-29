@@ -25,6 +25,8 @@ import {
   fetchEmpresaDependencias,
   type Empresa,
 } from "@/hooks/use-empresas";
+import { useAssinaturasAtivas } from "@/hooks/use-assinaturas";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,6 +58,33 @@ function StatusBadge({ status }: { status: Empresa["status"] }) {
   );
 }
 
+/** Sinaliza se a empresa possui uma assinatura vigente. */
+function AssinaturaBadge({ plano }: { plano: string | null }) {
+  const tem = plano !== null;
+  return (
+    <span
+      className="inline-flex max-w-[12rem] items-center gap-1.5 truncate rounded-full border px-2.5 py-0.5 text-xs font-semibold"
+      style={{
+        borderColor: tem
+          ? "color-mix(in oklab, var(--brand-green) 55%, transparent)"
+          : "hsl(var(--border))",
+        color: tem ? "var(--brand-green)" : "hsl(var(--muted-foreground))",
+        background: tem ? "color-mix(in oklab, var(--brand-green) 12%, transparent)" : undefined,
+      }}
+    >
+      <span
+        aria-hidden
+        className="h-1.5 w-1.5 shrink-0 rounded-full"
+        style={{ background: tem ? "var(--brand-green)" : "hsl(var(--muted-foreground))" }}
+      />
+      <span className="truncate">{tem ? plano : "Sem assinatura"}</span>
+    </span>
+  );
+}
+
+type FiltroAssinatura = "TODAS" | "COM" | "SEM";
+
+
 export default function EmpresasList() {
   usePageMeta("Empresas — JH7 Gestão Fotográfica", "Gestão das empresas do SaaS.");
 
@@ -63,7 +92,10 @@ export default function EmpresasList() {
   const { data, isLoading, error } = useEmpresas();
   const remove = useDeleteEmpresa();
   const setStatus = useSetEmpresaStatus();
+  const { data: assinaturas } = useAssinaturasAtivas();
   const [busca, setBusca] = useState("");
+  const [filtroAssinatura, setFiltroAssinatura] = useState<FiltroAssinatura>("TODAS");
+
   const [alvo, setAlvo] = useState<Empresa | null>(null);
   const [checando, setChecando] = useState(false);
   const [bloqueio, setBloqueio] = useState<string | null>(null);
@@ -93,17 +125,29 @@ export default function EmpresasList() {
   /** Nenhuma empresa cadastrada (estado vazio real, não filtro de busca). */
   const vazio = !isLoading && !error && (data?.length ?? 0) === 0;
 
+  /** Nome do plano vigente da empresa, ou null quando não há assinatura ativa. */
+  const planoDe = (id: string) => assinaturas?.get(id)?.plano_nome ?? null;
+
   const empresas = useMemo(() => {
     const term = busca.trim().toLowerCase();
-    const list = data ?? [];
-    if (!term) return list;
-    return list.filter((e) =>
-      [e.razao_social, e.nome_fantasia, e.cnpj, e.cidade ?? ""]
-        .join(" ")
-        .toLowerCase()
-        .includes(term),
-    );
-  }, [data, busca]);
+    let list = data ?? [];
+    if (term) {
+      list = list.filter((e) =>
+        [e.razao_social, e.nome_fantasia, e.cnpj, e.cidade ?? ""]
+          .join(" ")
+          .toLowerCase()
+          .includes(term),
+      );
+    }
+    if (filtroAssinatura !== "TODAS") {
+      list = list.filter((e) => {
+        const tem = Boolean(assinaturas?.get(e.id));
+        return filtroAssinatura === "COM" ? tem : !tem;
+      });
+    }
+    return list;
+  }, [data, busca, filtroAssinatura, assinaturas]);
+
 
   async function abrirExclusao(empresa: Empresa) {
     setAlvo(empresa);
@@ -344,14 +388,49 @@ export default function EmpresasList() {
         )}
 
         {vazio ? null : (
-          <Input
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar por razão social, nome fantasia, documento ou cidade"
-            className="h-11 text-base"
-            aria-label="Buscar empresas"
-          />
+          <div className="space-y-3">
+            <Input
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Buscar por razão social, nome fantasia, documento ou cidade"
+              className="h-11 text-base"
+              aria-label="Buscar empresas"
+            />
+            <div
+              role="group"
+              aria-label="Filtrar por assinatura"
+              className="flex w-full gap-1 rounded-xl border border-border bg-surface/50 p-1"
+            >
+              {(
+                [
+                  { key: "TODAS", label: "Todas" },
+                  { key: "COM", label: "Com assinatura" },
+                  { key: "SEM", label: "Sem assinatura" },
+                ] as { key: FiltroAssinatura; label: string }[]
+              ).map((op) => {
+                const ativo = filtroAssinatura === op.key;
+                return (
+                  <button
+                    key={op.key}
+                    type="button"
+                    aria-pressed={ativo}
+                    onClick={() => setFiltroAssinatura(op.key)}
+                    className="min-h-[var(--tap)] flex-1 rounded-lg px-3 text-[0.8125rem] font-semibold transition-colors"
+                    style={{
+                      background: ativo
+                        ? "color-mix(in oklab, var(--panel-accent) 15%, transparent)"
+                        : undefined,
+                      color: ativo ? "var(--panel-accent)" : "hsl(var(--muted-foreground))",
+                    }}
+                  >
+                    {op.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         )}
+
 
         {isLoading ? (
           <div className="flex items-center gap-2 text-muted-foreground">
@@ -407,6 +486,10 @@ export default function EmpresasList() {
                     </div>
                     <StatusBadge status={e.status} />
                   </div>
+                  <div className="mt-3">
+                    <AssinaturaBadge plano={planoDe(e.id)} />
+                  </div>
+
                   <div className="mt-3 flex gap-2">
                     <Button
                       variant="outline"
@@ -451,7 +534,10 @@ export default function EmpresasList() {
                     <th className="px-4 py-3 font-semibold">CPF/CNPJ</th>
                     <th className="px-4 py-3 font-semibold">Cidade/UF</th>
                     <th className="px-4 py-3 font-semibold">Status</th>
+                    <th className="px-4 py-3 font-semibold">Assinatura</th>
                     <th className="px-4 py-3 text-right font-semibold">Ações</th>
+
+
                   </tr>
                 </thead>
                 <tbody>
@@ -466,6 +552,10 @@ export default function EmpresasList() {
                       <td className="px-4 py-3">
                         <StatusBadge status={e.status} />
                       </td>
+                      <td className="px-4 py-3">
+                        <AssinaturaBadge plano={planoDe(e.id)} />
+                      </td>
+
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-2">
                           <IconAction
