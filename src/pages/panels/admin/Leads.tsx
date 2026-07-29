@@ -178,12 +178,20 @@ export default function LeadsList() {
   }
 
   function abrirNovo() {
+    // Nenhum cadastro novo quando a cota de leads do plano já foi usada por completo.
+    if (limiteAtingido) {
+      notifyValidation(
+        `Limite de leads do plano atingido (${usadoLeads} de ${limiteLeads}). Fale com o administrador para contratar um plano maior.`,
+      );
+      return;
+    }
     setEditando(null);
     setNome("");
     setWhatsapp("");
     setInteresse("");
     setAberto(true);
   }
+
 
   function abrirEdicao(lead: Lead) {
     // Leads que já viraram clientes são editados apenas na tela de Clientes.
