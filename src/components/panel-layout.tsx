@@ -64,11 +64,12 @@ interface PanelLayoutProps {
  */
 export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
   const { user, signOut } = useAuth();
+  const { fullName, displayName } = useProfile();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const theme = ACCENTS[accent];
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const initials = (user?.email ?? "?").slice(0, 2);
+  const initials = (displayName ?? user?.email ?? "?").slice(0, 2);
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
