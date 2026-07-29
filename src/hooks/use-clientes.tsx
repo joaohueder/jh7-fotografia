@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -62,10 +63,31 @@ export function useEmpresaAtual() {
 
 export function useClientes() {
   const { data: empresaId } = useEmpresaAtual();
+  const qc = useQueryClient();
+
+  // Tempo real: a lista se atualiza sozinha quando alguém da equipe cadastra,
+  // edita ou exclui um cliente — sem precisar recarregar a página.
+  useEffect(() => {
+    const invalidar = () => {
+      qc.invalidateQueries({ queryKey: ["clientes"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["clientes-evolucao"], refetchType: "active" });
+    };
+    const channel = supabase
+      .channel("clientes-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "clientes" }, invalidar)
+      .on("postgres_changes", { event: "*", schema: "public", table: "cliente_contatos" }, invalidar)
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [qc]);
 
   return useQuery({
     queryKey: ["clientes", empresaId],
     enabled: Boolean(empresaId),
+    staleTime: 0,
+    refetchOnWindowFocus: true,
     queryFn: async (): Promise<Cliente[]> => {
       const { data, error } = await db
         .from("clientes")
