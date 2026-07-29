@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { Camera, KeyRound, LogOut, Menu, ShieldCheck, User, ChevronDown } from "lucide-react";
+import { Camera, KeyRound, LogOut, Menu, Settings, ShieldCheck, User, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
