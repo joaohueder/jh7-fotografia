@@ -14,6 +14,9 @@ import EmpresaForm from "@/pages/panels/sa/EmpresaForm";
 import AdminDashboard from "@/pages/panels/AdminDashboard";
 import UsuarioDashboard from "@/pages/panels/UsuarioDashboard";
 import { RoleRedirect, RequireRole } from "@/components/role-routing";
+import MeuPerfil from "@/pages/conta/Perfil";
+import Seguranca from "@/pages/conta/Seguranca";
+import AlterarSenha from "@/pages/conta/AlterarSenha";
 import NotFoundPage from "@/pages/NotFound";
 
 const queryClient = new QueryClient({
