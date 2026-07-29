@@ -61,7 +61,11 @@ export function useLeads() {
   // Tempo real: recarrega a lista assim que leads ou notas mudarem no banco,
   // mesmo que a alteração tenha vindo de outro usuário/aba.
   useEffect(() => {
-    const invalidar = () => qc.invalidateQueries({ queryKey: ["leads"], refetchType: "active" });
+    const invalidar = () => {
+      qc.invalidateQueries({ queryKey: ["leads"], refetchType: "active" });
+      // O gráfico de evolução também precisa acompanhar as mudanças em tempo real.
+      qc.invalidateQueries({ queryKey: ["leads-evolucao"], refetchType: "active" });
+    };
     const channel = supabase
       .channel("leads-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "clientes" }, invalidar)
