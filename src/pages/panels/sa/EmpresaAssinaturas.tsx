@@ -197,21 +197,35 @@ function AssinaturaCard({
   );
 }
 
-/** Modal de seleção de plano. */
-function SelecionarPlanoDialog({
+/** Modal completo: seleciona o plano, define início e observação. */
+function ContratarPlanoDialog({
   open,
   onOpenChange,
   planos,
   loading,
-  selecionado,
-  onSelecionar,
+  temAtiva,
+  plano,
+  onPlano,
+  inicio,
+  onInicio,
+  observacao,
+  onObservacao,
+  salvando,
+  onConfirmar,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   planos: Plano[];
   loading: boolean;
-  selecionado: string | null;
-  onSelecionar: (plano: Plano) => void;
+  temAtiva: boolean;
+  plano: Plano | null;
+  onPlano: (p: Plano) => void;
+  inicio: string;
+  onInicio: (v: string) => void;
+  observacao: string;
+  onObservacao: (v: string) => void;
+  salvando: boolean;
+  onConfirmar: () => void;
 }) {
   const [busca, setBusca] = useState("");
 
@@ -226,66 +240,107 @@ function SelecionarPlanoDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Selecionar plano</DialogTitle>
+          <DialogTitle>{temAtiva ? "Trocar de plano" : "Novo plano"}</DialogTitle>
           <DialogDescription>
-            Escolha um dos planos ativos para vincular a esta empresa.
+            {temAtiva
+              ? "A assinatura ativa será encerrada ao confirmar o novo plano."
+              : "Escolha um dos planos ativos para vincular a esta empresa."}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar plano…"
-            className="h-11 pl-9 text-base"
-          />
-        </div>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label className="text-sm">
+              Plano<span className="ml-0.5 text-destructive">*</span>
+            </Label>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                placeholder="Buscar plano…"
+                className="h-11 pl-9 text-base"
+              />
+            </div>
 
-        {loading ? (
-          <div className="flex items-center gap-2 py-6 text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" /> Carregando planos…
+            {loading ? (
+              <div className="flex items-center gap-2 py-6 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Carregando planos…
+              </div>
+            ) : lista.length === 0 ? (
+              <p className="py-6 text-sm text-muted-foreground">
+                Nenhum plano ativo encontrado. Cadastre ou ative um plano no módulo Planos.
+              </p>
+            ) : (
+              <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(14rem,100%),1fr))]">
+                {lista.map((p) => {
+                  const active = plano?.id === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => onPlano(p)}
+                      className="flex flex-col gap-2 rounded-xl border p-4 text-left transition-colors"
+                      style={{
+                        borderColor: active ? "var(--panel-accent)" : "hsl(var(--border))",
+                        background: active
+                          ? "color-mix(in oklab, var(--panel-accent) 12%, transparent)"
+                          : "hsl(var(--card))",
+                      }}
+                    >
+                      <span className="break-words text-sm font-bold">{p.nome}</span>
+                      <span className="text-lg font-bold" style={{ color: "var(--panel-accent)" }}>
+                        {precoLabel(p.gratuito, p.valor)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        ) : lista.length === 0 ? (
-          <p className="py-6 text-sm text-muted-foreground">
-            Nenhum plano ativo encontrado. Cadastre ou ative um plano no módulo Planos.
-          </p>
-        ) : (
-          <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(14rem,100%),1fr))]">
-            {lista.map((p) => {
-              const active = selecionado === p.id;
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => onSelecionar(p)}
-                  className="flex flex-col gap-2 rounded-xl border p-4 text-left transition-colors"
-                  style={{
-                    borderColor: active ? "var(--panel-accent)" : "hsl(var(--border))",
-                    background: active
-                      ? "color-mix(in oklab, var(--panel-accent) 12%, transparent)"
-                      : "hsl(var(--card))",
-                  }}
-                >
-                  <span className="break-words text-sm font-bold">{p.nome}</span>
-                  <span className="text-lg font-bold" style={{ color: "var(--panel-accent)" }}>
-                    {precoLabel(p.gratuito, p.valor)}
-                  </span>
-                </button>
-              );
-            })}
+
+          <div className="space-y-2">
+            <Label className="text-sm">
+              Início<span className="ml-0.5 text-destructive">*</span>
+            </Label>
+            <Input
+              type="date"
+              value={inicio}
+              onChange={(e) => onInicio(e.target.value)}
+              className="h-11 text-base"
+            />
+            <p className="text-xs text-muted-foreground">
+              Vigência de 30 dias — vence em{" "}
+              <strong>{formatDate(vencimento({ inicio, fim: null })) ?? "—"}</strong>
+            </p>
           </div>
-        )}
+
+          <div className="space-y-2">
+            <Label className="text-sm">Observação</Label>
+            <Textarea
+              value={observacao}
+              onChange={(e) => onObservacao(e.target.value)}
+              rows={3}
+              placeholder="Condições negociadas, motivo da troca…"
+              className="text-base"
+            />
+          </div>
+        </div>
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Fechar
+            Cancelar
+          </Button>
+          <Button type="button" onClick={onConfirmar} disabled={!plano || salvando}>
+            {salvando ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {temAtiva ? "Trocar plano" : "Contratar plano"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+
 
 /** Aba de assinaturas da empresa: plano vigente + histórico completo. */
 export function EmpresaAssinaturas({ empresaId }: { empresaId: string }) {
@@ -338,6 +393,7 @@ export function EmpresaAssinaturas({ empresaId }: { empresaId: string }) {
       setPlano(null);
       setObservacao("");
       setInicio(hoje());
+      setModalOpen(false);
     } catch (err) {
       notifyError(err);
     } finally {
@@ -386,94 +442,19 @@ export function EmpresaAssinaturas({ empresaId }: { empresaId: string }) {
           />
         ) : (
           <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-            Esta empresa não possui assinatura ativa. Selecione um plano abaixo.
+            Esta empresa não possui assinatura ativa. Clique em "Novo plano" para contratar.
           </p>
         )}
       </section>
 
-      {/* Contratar / trocar plano ------------------------------------- */}
-      <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
-        <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
-          <span
-            className="inline-flex h-7 w-7 items-center justify-center rounded-lg"
-            style={{
-              background: "color-mix(in oklab, var(--panel-accent) 14%, transparent)",
-              color: "var(--panel-accent)",
-            }}
-          >
-            <CreditCard className="h-4 w-4" />
-          </span>
-          {ativa ? "Trocar de plano" : "Contratar plano"}
-        </h2>
+      {/* Ação: contratar / trocar plano ------------------------------- */}
+      <div className="flex flex-wrap gap-3">
+        <Button type="button" className="tap-target" onClick={() => setModalOpen(true)}>
+          <CreditCard className="mr-2 h-4 w-4" />
+          {ativa ? "Trocar de plano" : "Novo plano"}
+        </Button>
+      </div>
 
-        <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(16rem,100%),1fr))]">
-          <div className="space-y-2 md:col-span-full">
-            <Label className="text-sm">
-              Plano<span className="ml-0.5 text-destructive">*</span>
-            </Label>
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                className="tap-target h-11"
-                onClick={() => setModalOpen(true)}
-              >
-                <Search className="mr-2 h-4 w-4" />
-                {plano ? "Alterar seleção" : "Selecionar plano"}
-              </Button>
-              {plano ? (
-                <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-semibold">
-                  {plano.nome}
-                  <span style={{ color: "var(--panel-accent)" }}>
-                    {precoLabel(plano.gratuito, plano.valor)}
-                  </span>
-                </span>
-              ) : (
-                <span className="text-sm text-muted-foreground">Nenhum plano selecionado</span>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-sm">
-              Início<span className="ml-0.5 text-destructive">*</span>
-            </Label>
-            <Input
-              type="date"
-              value={inicio}
-              onChange={(e) => setInicio(e.target.value)}
-              className="h-11 text-base"
-            />
-            <p className="text-xs text-muted-foreground">
-              Vigência de 30 dias — vence em{" "}
-              <strong>{formatDate(vencimento({ inicio, fim: null })) ?? "—"}</strong>
-            </p>
-          </div>
-
-          <div className="space-y-2 md:col-span-full">
-            <Label className="text-sm">Observação</Label>
-            <Textarea
-              value={observacao}
-              onChange={(e) => setObservacao(e.target.value)}
-              rows={3}
-              placeholder="Condições negociadas, motivo da troca…"
-              className="text-base"
-            />
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Button
-            type="button"
-            className="tap-target"
-            onClick={abrirConfirmacao}
-            disabled={!plano || definir.isPending}
-          >
-            {definir.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {ativa ? "Trocar plano" : "Contratar plano"}
-          </Button>
-        </div>
-      </section>
 
       {/* Histórico ---------------------------------------------------- */}
       <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
@@ -507,17 +488,29 @@ export function EmpresaAssinaturas({ empresaId }: { empresaId: string }) {
         )}
       </section>
 
-      <SelecionarPlanoDialog
+      <ContratarPlanoDialog
         open={modalOpen}
-        onOpenChange={setModalOpen}
+        onOpenChange={(v) => {
+          setModalOpen(v);
+          if (!v) {
+            setPlano(null);
+            setObservacao("");
+            setInicio(hoje());
+          }
+        }}
         planos={planos ?? []}
         loading={loadingPlanos}
-        selecionado={plano?.id ?? null}
-        onSelecionar={(p) => {
-          setPlano(p);
-          setModalOpen(false);
-        }}
+        temAtiva={Boolean(ativa)}
+        plano={plano}
+        onPlano={setPlano}
+        inicio={inicio}
+        onInicio={setInicio}
+        observacao={observacao}
+        onObservacao={setObservacao}
+        salvando={definir.isPending}
+        onConfirmar={abrirConfirmacao}
       />
+
 
       <AlertDialog open={confirmarTroca} onOpenChange={setConfirmarTroca}>
         <AlertDialogContent>
