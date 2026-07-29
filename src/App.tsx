@@ -108,6 +108,17 @@ export default function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route
+              path="/assinatura"
+              element={
+                <RequireAuth checkAssinatura={false}>
+                  <RedirectSeAssinaturaAtiva>
+                    <NovaAssinaturaPage />
+                  </RedirectSeAssinaturaAtiva>
+                </RequireAuth>
+              }
+            />
+
+            <Route
               path="/dashboard"
               element={
                 <RequireAuth>
