@@ -5,6 +5,7 @@ import {
   Building2,
   ClipboardCopy,
   CreditCard,
+  Eye,
   EyeOff,
   KeyRound,
   Loader2,
