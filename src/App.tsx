@@ -78,10 +78,10 @@ function ScrollToTop() {
 export default function App() {
   return (
     <ThemeProvider>
-    <AppLayoutProvider>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
+        <AppLayoutProvider>
 
           <ScrollToTop />
           <AuthEvents />
@@ -192,10 +192,10 @@ export default function App() {
 
           </Routes>
           <SystemMessageDialog />
+        </AppLayoutProvider>
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
-    </AppLayoutProvider>
     </ThemeProvider>
   );
 
