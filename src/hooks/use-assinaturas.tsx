@@ -83,6 +83,7 @@ export function useDefinirAssinatura() {
     },
     onSuccess: (_data, vars) => {
       void qc.invalidateQueries({ queryKey: ["empresa-assinaturas", vars.empresaId] });
+      void qc.invalidateQueries({ queryKey: ["empresa-assinaturas-ativas"] });
     },
   });
 }
@@ -100,6 +101,7 @@ export function useEncerrarAssinatura() {
     },
     onSuccess: (_data, vars) => {
       void qc.invalidateQueries({ queryKey: ["empresa-assinaturas", vars.empresaId] });
+      void qc.invalidateQueries({ queryKey: ["empresa-assinaturas-ativas"] });
     },
   });
 }
