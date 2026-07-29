@@ -13,6 +13,9 @@ import {
   UserPlus,
   Users,
   UserRound,
+  BadgeCheck,
+  RotateCcw,
+  UserX,
 } from "lucide-react";
 
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -25,7 +28,16 @@ import { HelpTip } from "@/components/page-help";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 import { useEmpresaAtual } from "@/hooks/use-clientes";
-import { useDeleteLead, useLeads, useLeadsEvolucao, useSalvarLead, type Lead } from "@/hooks/use-leads";
+import {
+  LEAD_SITUACOES,
+  useDeleteLead,
+  useLeads,
+  useLeadsEvolucao,
+  useSalvarLead,
+  useSituacaoLead,
+  type Lead,
+  type LeadSituacao,
+} from "@/hooks/use-leads";
 import { isValidPhone, maskPhone } from "@/lib/br-masks";
 import { salvarNotaInicial, useNotaInicial } from "@/hooks/use-cliente-notas";
 import { ClienteNotas } from "@/components/cliente-notas";
@@ -53,6 +65,36 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+/** Etiqueta colorida com a situação do lead no funil. */
+function SituacaoBadge({ situacao }: { situacao: LeadSituacao }) {
+  const mapa = {
+    AGUARDANDO: {
+      rotulo: "Aguardando",
+      icone: Clock,
+      classe: "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    },
+    DESISTIU: {
+      rotulo: "Desistiu",
+      icone: UserX,
+      classe: "border-destructive/40 bg-destructive/10 text-destructive",
+    },
+    CLIENTE: {
+      rotulo: "Virou cliente",
+      icone: BadgeCheck,
+      classe: "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    },
+  }[situacao];
+  const Icone = mapa.icone;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${mapa.classe}`}
+    >
+      <Icone className="h-3 w-3" />
+      {mapa.rotulo}
+    </span>
+  );
+}
+
 /** Leads: contatos interessados, com nome e WhatsApp apenas. */
 export default function LeadsList() {
   usePageMeta("Leads — JH7 Gestão Fotográfica", "Contatos interessados no seu estúdio.");
@@ -63,9 +105,11 @@ export default function LeadsList() {
   const { data: evolucao, isLoading: carregandoEvolucao } = useLeadsEvolucao();
   const salvar = useSalvarLead();
   const remover = useDeleteLead();
+  const situacaoLead = useSituacaoLead();
 
 
   const [busca, setBusca] = useState("");
+  const [filtro, setFiltro] = useState<"TODOS" | LeadSituacao>("TODOS");
   const [aberto, setAberto] = useState(false);
   const [editando, setEditando] = useState<Lead | null>(null);
   const [nome, setNome] = useState("");
@@ -80,13 +124,37 @@ export default function LeadsList() {
     if (editando && notaInicial.data) setInteresse(notaInicial.data.descricao);
   }, [editando, notaInicial.data]);
 
+  const contagem = useMemo(() => {
+    const base = { AGUARDANDO: 0, DESISTIU: 0, CLIENTE: 0 } as Record<LeadSituacao, number>;
+    for (const l of leads ?? []) base[l.situacao] += 1;
+    return base;
+  }, [leads]);
+
   const lista = useMemo(() => {
     const termo = busca.trim().toLowerCase();
-    if (!termo) return leads ?? [];
-    return (leads ?? []).filter((l) =>
-      [l.nome, l.contato_whatsapp].filter(Boolean).some((v) => String(v).toLowerCase().includes(termo)),
-    );
-  }, [leads, busca]);
+    return (leads ?? [])
+      .filter((l) => (filtro === "TODOS" ? true : l.situacao === filtro))
+      .filter((l) =>
+        !termo
+          ? true
+          : [l.nome, l.contato_whatsapp]
+              .filter(Boolean)
+              .some((v) => String(v).toLowerCase().includes(termo)),
+      );
+  }, [leads, busca, filtro]);
+
+  async function alterarSituacao(lead: Lead, situacao: "AGUARDANDO" | "DESISTIU") {
+    try {
+      await situacaoLead.mutateAsync({ id: lead.id, situacao });
+      notifySuccess(
+        situacao === "DESISTIU"
+          ? "Lead marcado como desistente."
+          : "Lead voltou para a lista de aguardando.",
+      );
+    } catch (err) {
+      notifyError(err, { title: "Não foi possível alterar a situação do lead" });
+    }
+  }
 
   function abrirNovo() {
     setEditando(null);
@@ -150,7 +218,7 @@ export default function LeadsList() {
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Leads</h1>
-              <HelpTip text="Leads são pessoas interessadas que ainda não viraram clientes. Aqui você guarda apenas o nome e o WhatsApp para retornar o contato depois. Esta tela se atualiza sozinha: se alguém da sua equipe cadastrar ou alterar um lead, a lista muda automaticamente, sem precisar recarregar a página." />
+              <HelpTip text="Leads são pessoas interessadas que ainda não viraram clientes. Aqui você guarda apenas o nome e o WhatsApp para retornar o contato depois. Esta tela se atualiza sozinha: se alguém da sua equipe cadastrar ou alterar um lead, a lista muda automaticamente, sem precisar recarregar a página. Use os filtros para separar quem está aguardando retorno, quem desistiu e quem já virou cliente." />
             </div>
             <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
               Contatos captados por formulários ou cadastrados manualmente.
@@ -241,6 +309,39 @@ export default function LeadsList() {
         </div>
 
 
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-semibold text-muted-foreground">Filtrar por situação</span>
+            <HelpTip text="Aguardando: contatos ainda em negociação. Desistiu: quem avisou que não tem mais interesse. Virou cliente: leads que já preencheram o cadastro completo." />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {[{ valor: "TODOS" as const, rotulo: "Todos" }, ...LEAD_SITUACOES].map((op) => {
+              const ativo = filtro === op.valor;
+              const total =
+                op.valor === "TODOS" ? (leads ?? []).length : contagem[op.valor as LeadSituacao];
+              return (
+                <button
+                  key={op.valor}
+                  type="button"
+                  onClick={() => setFiltro(op.valor as "TODOS" | LeadSituacao)}
+                  aria-pressed={ativo}
+                  className={`tap-target rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors ${
+                    ativo
+                      ? "border-transparent text-primary-foreground"
+                      : "border-border bg-card text-muted-foreground hover:bg-accent/40"
+                  }`}
+                  style={ativo ? { background: "var(--panel-accent)" } : undefined}
+                >
+                  {op.rotulo}
+                  <span className={ativo ? "ml-1.5 opacity-80" : "ml-1.5 text-foreground/70"}>
+                    ({total})
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="min-w-[16rem] max-w-md space-y-1">
           <label htmlFor="busca-leads" className="text-xs font-semibold text-muted-foreground">
             Buscar lead
@@ -290,9 +391,18 @@ export default function LeadsList() {
         ) : lista.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border p-10 text-center">
             <Users className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Nenhum lead encontrado para esta busca.</p>
-            <Button variant="ghost" className="tap-target mt-3" onClick={() => setBusca("")}>
-              Limpar busca
+            <p className="text-sm text-muted-foreground">
+              Nenhum lead encontrado com os filtros escolhidos.
+            </p>
+            <Button
+              variant="ghost"
+              className="tap-target mt-3"
+              onClick={() => {
+                setBusca("");
+                setFiltro("TODOS");
+              }}
+            >
+              Limpar filtros
             </Button>
           </div>
         ) : (
@@ -309,6 +419,7 @@ export default function LeadsList() {
                 <div className="min-w-0 flex-1 space-y-2">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                     <span className="font-semibold text-foreground">{l.nome}</span>
+                    <SituacaoBadge situacao={l.situacao} />
                     {l.contato_whatsapp ? (
                       <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
                         <Phone className="h-3.5 w-3.5" />
@@ -365,10 +476,33 @@ export default function LeadsList() {
                   >
                     <Pencil className="h-4 w-4" />
                   </IconAction>
+                  {l.situacao === "AGUARDANDO" ? (
+                    <IconAction
+                      label="Marcar como desistiu"
+                      ariaLabel={`Marcar ${l.nome} como desistiu`}
+                      onClick={() => void alterarSituacao(l, "DESISTIU")}
+                    >
+                      <UserX className="h-4 w-4" />
+                    </IconAction>
+                  ) : l.situacao === "DESISTIU" ? (
+                    <IconAction
+                      label="Voltar para aguardando"
+                      ariaLabel={`Voltar ${l.nome} para aguardando`}
+                      onClick={() => void alterarSituacao(l, "AGUARDANDO")}
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                    </IconAction>
+                  ) : null}
                   <IconAction
                     label="Transformar em cliente (abre o cadastro completo)"
                     ariaLabel={`Converter ${l.nome} em cliente`}
-                    onClick={() => navigate(`/admin/clientes/novo?lead=${l.id}`)}
+                    onClick={() =>
+                      navigate(
+                        l.situacao === "CLIENTE"
+                          ? `/admin/clientes/${l.id}`
+                          : `/admin/clientes/novo?lead=${l.id}`,
+                      )
+                    }
                   >
                     <UserCheck className="h-4 w-4" />
                   </IconAction>
