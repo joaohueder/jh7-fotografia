@@ -195,6 +195,8 @@ export default function App() {
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
+    </AppLayoutProvider>
     </ThemeProvider>
   );
+
 }
