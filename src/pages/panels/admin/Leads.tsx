@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Loader2,
-  MessageSquare,
   Phone,
   Plus,
   StickyNote,
@@ -27,8 +26,6 @@ import { criarNotaCliente } from "@/hooks/use-cliente-notas";
 import { ClienteNotas } from "@/components/cliente-notas";
 import { Textarea } from "@/components/ui/textarea";
 
-
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
