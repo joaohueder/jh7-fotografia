@@ -14,6 +14,9 @@ import EmpresaForm from "@/pages/panels/sa/EmpresaForm";
 import AdminDashboard from "@/pages/panels/AdminDashboard";
 import UsuarioDashboard from "@/pages/panels/UsuarioDashboard";
 import { RoleRedirect, RequireRole } from "@/components/role-routing";
+import MeuPerfil from "@/pages/conta/Perfil";
+import Seguranca from "@/pages/conta/Seguranca";
+import AlterarSenha from "@/pages/conta/AlterarSenha";
 import NotFoundPage from "@/pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -134,6 +137,30 @@ export default function App() {
                   <RequireRole allow={["usuario"]}>
                     <UsuarioDashboard />
                   </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/conta/perfil"
+              element={
+                <RequireAuth>
+                  <MeuPerfil />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/conta/seguranca"
+              element={
+                <RequireAuth>
+                  <Seguranca />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/conta/senha"
+              element={
+                <RequireAuth>
+                  <AlterarSenha />
                 </RequireAuth>
               }
             />

@@ -1,7 +1,15 @@
 import { useState, type ReactNode } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { Camera, LogOut, Menu } from "lucide-react";
+import { Camera, KeyRound, LogOut, Menu, ShieldCheck, User, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -60,6 +68,7 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
   const queryClient = useQueryClient();
   const theme = ACCENTS[accent];
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const initials = (user?.email ?? "?").slice(0, 2);
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -161,22 +170,61 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
           </div>
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-            <span className="hidden max-w-[11rem] truncate text-sm text-muted-foreground lg:block">
-              {user?.email}
-            </span>
             <ThemeToggle />
-            {/* Ícone puro no mobile (44px), rótulo textual a partir de sm */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSignOut}
-              aria-label="Sair"
-              className="tap-target px-2 sm:px-3"
-            >
-              <LogOut className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Sair</span>
-            </Button>
+
+            {/* Menu da conta — avatar/iniciais no mobile, e-mail a partir de lg */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  aria-label="Abrir menu da conta"
+                  className="tap-target gap-2 px-2 sm:px-3"
+                >
+                  <span
+                    className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-border bg-surface text-[0.6875rem] font-bold uppercase"
+                    style={{ color: "var(--panel-accent)" }}
+                  >
+                    {initials}
+                  </span>
+                  <span className="hidden max-w-[11rem] truncate text-sm text-muted-foreground lg:inline">
+                    {user?.email}
+                  </span>
+                  <ChevronDown className="hidden h-4 w-4 text-muted-foreground sm:inline" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-60">
+                <DropdownMenuLabel className="space-y-0.5">
+                  <span className="block text-xs font-normal text-muted-foreground">
+                    Conectado como
+                  </span>
+                  <span className="block break-all text-sm">{user?.email ?? "—"}</span>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => navigate("/conta/perfil")}>
+                  <User className="mr-2 h-4 w-4" />
+                  Meu perfil
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => navigate("/conta/seguranca")}>
+                  <ShieldCheck className="mr-2 h-4 w-4" />
+                  Segurança
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => navigate("/conta/senha")}>
+                  <KeyRound className="mr-2 h-4 w-4" />
+                  Alterar senha
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={handleSignOut}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
+
         </div>
       </header>
 
