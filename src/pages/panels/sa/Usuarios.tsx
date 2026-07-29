@@ -27,10 +27,11 @@ import {
   type UsuarioRole,
 } from "@/hooks/use-usuarios";
 
-type Filtro = "TODOS" | UsuarioRole;
+type Filtro = "TODOS" | "LOGADOS" | UsuarioRole;
 
 const FILTROS: { key: Filtro; label: string }[] = [
   { key: "TODOS", label: "Todos" },
+  { key: "LOGADOS", label: "Logados agora" },
   { key: "sa_admin", label: "Admin do SaaS" },
   { key: "admin", label: "Admin da empresa" },
   { key: "usuario", label: "Usuários" },
