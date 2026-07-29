@@ -258,19 +258,24 @@ export default function LeadsList() {
                     </span>
                   </div>
 
-                  {l.ultima_nota && l.ultima_nota.descricao !== l.interesse?.descricao ? (
-                    <div className="flex items-start gap-2 text-sm">
-                      <StickyNote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                      <span className="min-w-0 text-muted-foreground">
-                        <span className="font-semibold text-foreground">Última nota:</span>{" "}
-                        <span className="text-xs text-muted-foreground">
-                          {dataHora(l.ultima_nota.created_at)} · {tempoDecorrido(l.ultima_nota.created_at)}
-                        </span>
-                        {" — "}
-                        <span className="line-clamp-2">{l.ultima_nota.descricao}</span>
-                      </span>
-                    </div>
-                  ) : null}
+                  <div className="flex items-start gap-2 text-sm">
+                    <StickyNote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    <span className="min-w-0 text-muted-foreground">
+                      <span className="font-semibold text-foreground">Última nota:</span>{" "}
+                      {l.ultima_nota ? (
+                        <>
+                          <span className="text-xs text-muted-foreground">
+                            {dataHora(l.ultima_nota.created_at)} · {tempoDecorrido(l.ultima_nota.created_at)}
+                          </span>
+                          {" — "}
+                          <span className="line-clamp-2">{l.ultima_nota.descricao}</span>
+                        </>
+                      ) : (
+                        "Nenhuma movimentação registrada ainda."
+                      )}
+                    </span>
+                  </div>
+
 
 
                 </div>
