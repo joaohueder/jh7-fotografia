@@ -1,6 +1,6 @@
 import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, BadgeCheck, CircleDollarSign, Layers, Loader2 } from "lucide-react";
+import { ArrowLeft, BadgeCheck, CircleDollarSign, Gauge, Layers, Loader2 } from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
@@ -133,7 +133,7 @@ function ResumoBloco({
   );
 }
 
-const STEPS = ["Identificação", "Cobrança", "Status", "Resumo"] as const;
+const STEPS = ["Identificação", "Cobrança", "Limites", "Status", "Resumo"] as const;
 const RESUMO = STEPS.length - 1;
 
 /** Remonta o formulário sempre que o plano em edição muda. */
@@ -186,6 +186,9 @@ function PlanoFormInner() {
   const [ativo, setAtivo] = useState(true);
   const [gratuito, setGratuito] = useState(false);
   const [valor, setValor] = useState("");
+  const [limiteLeads, setLimiteLeads] = useState("");
+  const [limiteClientes, setLimiteClientes] = useState("");
+  const [erroLimites, setErroLimites] = useState<string | null>(null);
   const [erroNome, setErroNome] = useState<string | null>(null);
   const [erroValor, setErroValor] = useState<string | null>(null);
   const [step, setStep] = useState(0);
@@ -199,6 +202,8 @@ function PlanoFormInner() {
     setAtivo(data.ativo);
     setGratuito(data.gratuito);
     setValor(data.valor === null ? "" : formatMoney(data.valor));
+    setLimiteLeads(data.limite_leads === null ? "" : String(data.limite_leads));
+    setLimiteClientes(data.limite_clientes === null ? "" : String(data.limite_clientes));
   }, [data]);
 
   function validarNome() {
@@ -233,6 +238,24 @@ function PlanoFormInner() {
     return true;
   }
 
+  /** Converte o campo em número; vazio significa ilimitado (null). */
+  function parseLimite(v: string): number | null {
+    const limpo = v.replace(/\D/g, "");
+    return limpo === "" ? null : Number(limpo);
+  }
+
+  function validarLimites() {
+    for (const v of [limiteLeads, limiteClientes]) {
+      const n = parseLimite(v);
+      if (n !== null && n > 1000000) {
+        setErroLimites("Use um limite de até 1.000.000 ou deixe em branco para ilimitado.");
+        return false;
+      }
+    }
+    setErroLimites(null);
+    return true;
+  }
+
   function avancar() {
     if (step === 0 && !validarNome()) {
       notifyValidation("Corrija o nome do plano para continuar.");
@@ -240,6 +263,10 @@ function PlanoFormInner() {
     }
     if (step === 1 && !validarValor()) {
       notifyValidation("Corrija o valor do plano para continuar.");
+      return;
+    }
+    if (step === 2 && !validarLimites()) {
+      notifyValidation("Corrija os limites do plano para continuar.");
       return;
     }
     setStep((s) => Math.min(RESUMO, s + 1));
@@ -254,6 +281,10 @@ function PlanoFormInner() {
       notifyValidation("Corrija o valor do plano.");
       return;
     }
+    if (!validarLimites()) {
+      notifyValidation("Corrija os limites do plano.");
+      return;
+    }
     if (gratuito && ativo && gratuitoAtivo) {
       notifyValidation(MSG_GRATUITO);
       return;
@@ -263,6 +294,8 @@ function PlanoFormInner() {
       ativo,
       gratuito,
       valor: gratuito ? null : parseMoney(valor),
+      limite_leads: parseLimite(limiteLeads),
+      limite_clientes: parseLimite(limiteClientes),
     };
     try {
       if (editing && id) {
@@ -277,6 +310,43 @@ function PlanoFormInner() {
       notifyError(err);
     }
   }
+
+
+  /** Campos de limite de uso — usados na aba (edição) e no step (criação). */
+  const secaoLimites = (
+    <Section title="Limites de uso" icon={Gauge}>
+      <div className="md:col-span-full rounded-lg border border-dashed border-border bg-muted/30 p-3 text-xs text-muted-foreground">
+        Defina quantos leads e clientes cada empresa assinante deste plano pode ter cadastrados.
+        Deixe o campo <strong>em branco</strong> para liberar uso ilimitado.
+      </div>
+      <Field
+        label="Total de leads"
+        error={erroLimites}
+        hint="Em branco = ilimitado. Ex.: 200"
+      >
+        <Input
+          inputMode="numeric"
+          value={limiteLeads}
+          onChange={(e) => setLimiteLeads(e.target.value.replace(/\D/g, "").slice(0, 7))}
+          onBlur={validarLimites}
+          placeholder="Ilimitado"
+        />
+      </Field>
+      <Field
+        label="Total de clientes"
+        error={erroLimites}
+        hint="Em branco = ilimitado. Ex.: 500"
+      >
+        <Input
+          inputMode="numeric"
+          value={limiteClientes}
+          onChange={(e) => setLimiteClientes(e.target.value.replace(/\D/g, "").slice(0, 7))}
+          onBlur={validarLimites}
+          placeholder="Ilimitado"
+        />
+      </Field>
+    </Section>
+  );
 
   const showStep = (index: number) => editing || step === index;
 
@@ -361,6 +431,7 @@ function PlanoFormInner() {
                 <TabsList className="mb-4">
                   <TabsTrigger value="dados">Dados básicos</TabsTrigger>
                   <TabsTrigger value="cobranca">Cobrança</TabsTrigger>
+                  <TabsTrigger value="limites">Limites</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="dados" className="space-y-[clamp(1rem,3vw,1.5rem)]">
@@ -419,6 +490,10 @@ function PlanoFormInner() {
                     )}
                   </Section>
                 </TabsContent>
+
+                <TabsContent value="limites" className="space-y-[clamp(1rem,3vw,1.5rem)]">
+                  {secaoLimites}
+                </TabsContent>
               </Tabs>
             ) : (
               <>
@@ -471,7 +546,9 @@ function PlanoFormInner() {
                   </Section>
                 )}
 
-                {showStep(2) && (
+                {showStep(2) && secaoLimites}
+
+                {showStep(3) && (
                   <Section title="Status" icon={BadgeCheck}>
                     <SwitchRow
                       id="plano-ativo"
@@ -499,6 +576,13 @@ function PlanoFormInner() {
                     itens={[
                       ["Plano gratuito", gratuito ? "Sim" : "Não"],
                       ["Valor", gratuito ? "—" : valor ? `R$ ${valor}` : ""],
+                    ]}
+                  />
+                  <ResumoBloco
+                    titulo="Limites de uso"
+                    itens={[
+                      ["Total de leads", limiteLeads ? limiteLeads : "Ilimitado"],
+                      ["Total de clientes", limiteClientes ? limiteClientes : "Ilimitado"],
                     ]}
                   />
                   <ResumoBloco titulo="Status" itens={[["Situação", ativo ? "Ativo" : "Inativo"]]} />
