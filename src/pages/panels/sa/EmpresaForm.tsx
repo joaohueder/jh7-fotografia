@@ -751,7 +751,22 @@ export default function EmpresaForm() {
                     className="h-11 text-base"
                   />
                 </Field>
+                <div className="col-span-full flex flex-wrap items-center gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={copiarEnderecoEmpresa}
+                    className="tap-target"
+                  >
+                    <ClipboardCopy className="mr-2 h-4 w-4" />
+                    Copiar endereço da empresa
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Preenche CEP, endereço, número, complemento, bairro, cidade e UF do responsável.
+                  </p>
+                </div>
                 <Field label="CEP" error={errors.resp_cep}>
+
                   <Input
                     value={form.resp_cep ?? ""}
                     onChange={(e) => set("resp_cep", maskCep(e.target.value))}
