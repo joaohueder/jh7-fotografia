@@ -79,42 +79,17 @@ function LayoutTab() {
         </div>
       </section>
 
-      <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
-        <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
-          <span
-            className="inline-flex h-7 w-7 items-center justify-center rounded-lg"
-            style={{
-              background: "color-mix(in oklab, var(--panel-accent) 14%, transparent)",
-              color: "var(--panel-accent)",
-            }}
-          >
-            <Monitor className="h-4 w-4" />
-          </span>
-          Pré-visualização
-        </h2>
-        <div className="rounded-lg border border-dashed border-border bg-surface p-4">
-          <div
-            className="mx-auto space-y-3 rounded-lg border border-border bg-card p-4 transition-[max-width] duration-150"
-            style={{ maxWidth: `${maxWidth / 2}px` }}
-          >
-            <div className="h-2.5 w-1/3 rounded-full" style={{ background: "var(--panel-accent)" }} />
-            <div className="h-2 w-full rounded-full bg-muted" />
-            <div className="h-2 w-4/5 rounded-full bg-muted" />
-          </div>
-          <p className="mt-3 text-center text-xs text-muted-foreground">
-            Proporção do conteúdo em relação à largura escolhida
-          </p>
-        </div>
-      </section>
     </div>
   );
 }
+
 
 export default function ConfiguracoesPage() {
   return (
     <AccountShell
       title="Configurações"
       subtitle="Ajuste a aparência e o comportamento do sistema."
+      width="full"
     >
       <Tabs defaultValue="layout" className="space-y-5">
         <TabsList>
