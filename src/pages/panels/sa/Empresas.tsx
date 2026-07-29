@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Building2, Loader2, Pencil, Plus, Power, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
@@ -28,7 +28,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
 
 function StatusBadge({ status }: { status: Empresa["status"] }) {
   const ativo = status === "ATIVO";
@@ -60,7 +59,6 @@ export default function EmpresasList() {
   const [alvoStatus, setAlvoStatus] = useState<Empresa | null>(null);
   const [nota, setNota] = useState("");
 
-
   const resumo = useMemo(() => {
     const list = data ?? [];
     const ativos = list.filter((e) => e.status === "ATIVO").length;
@@ -82,7 +80,6 @@ export default function EmpresasList() {
 
   /** Nenhuma empresa cadastrada (estado vazio real, não filtro de busca). */
   const vazio = !isLoading && !error && (data?.length ?? 0) === 0;
-
 
   const empresas = useMemo(() => {
     const term = busca.trim().toLowerCase();
@@ -118,10 +115,10 @@ export default function EmpresasList() {
     if (!alvo) return;
     try {
       await remove.mutateAsync(alvo.id);
-      toast.success("Empresa excluída.");
+      notifySuccess("Empresa excluída.");
       setAlvo(null);
     } catch (err) {
-      toast.error((err as Error).message);
+      notifyError(err);
     }
   }
 
@@ -133,21 +130,19 @@ export default function EmpresasList() {
   async function confirmarStatus() {
     if (!alvoStatus) return;
     if (nota.trim().length < 5) {
-      toast.error("Informe uma nota com pelo menos 5 caracteres.");
+      notifyValidation("Informe uma nota com pelo menos 5 caracteres.");
       return;
     }
     const novo = alvoStatus.status === "ATIVO" ? "INATIVO" : "ATIVO";
     try {
       await setStatus.mutateAsync({ id: alvoStatus.id, status: novo, nota: nota.trim() });
-      toast.success(novo === "ATIVO" ? "Empresa ativada." : "Empresa inativada.");
+      notifySuccess(novo === "ATIVO" ? "Empresa ativada." : "Empresa inativada.");
       setAlvoStatus(null);
       setNota("");
     } catch (err) {
-      toast.error((err as Error).message);
+      notifyError(err);
     }
   }
-
-
 
   return (
     <PanelLayout accent="sa" menu={SA_MENU}>
@@ -169,105 +164,111 @@ export default function EmpresasList() {
 
         {/* Indicadores: apenas em telas médias/grandes (ocultos no mobile). */}
         {!vazio && (
-        <div className="hidden gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(15rem,100%),1fr))] md:grid">
-          <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.25rem)]">
-            <h3 className="text-sm font-semibold text-muted-foreground">Empresas cadastradas</h3>
-            <p
-              className="mt-2 text-[clamp(1.75rem,6vw,2rem)] font-bold leading-tight"
-              style={{ color: "var(--panel-accent)" }}
-            >
-              {resumo.total}
-            </p>
-          </div>
-
-          <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.25rem)]">
-            <h3 className="text-sm font-semibold text-muted-foreground">Ativos x Inativos</h3>
-            <div className="mt-2 flex items-baseline gap-3">
+          <div className="hidden gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(15rem,100%),1fr))] md:grid">
+            <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.25rem)]">
+              <h3 className="text-sm font-semibold text-muted-foreground">Empresas cadastradas</h3>
               <p
-                className="text-[clamp(1.75rem,6vw,2rem)] font-bold leading-tight"
+                className="mt-2 text-[clamp(1.75rem,6vw,2rem)] font-bold leading-tight"
                 style={{ color: "var(--panel-accent)" }}
               >
-                {resumo.ativos}
-              </p>
-              <span className="text-muted-foreground">/</span>
-              <p className="text-[clamp(1.5rem,5vw,1.75rem)] font-bold leading-tight text-muted-foreground">
-                {resumo.inativos}
+                {resumo.total}
               </p>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">ativos / inativos</p>
-          </div>
 
-          <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.25rem)]">
-            <h3 className="text-sm font-semibold text-muted-foreground">Últimos 6 meses</h3>
-            <div className="mt-2 h-[88px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={resumo.meses} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
-                  <defs>
-                    <linearGradient id="empresaBarGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--brand-green-soft)" />
-                      <stop offset="100%" stopColor="var(--brand-green)" />
-                    </linearGradient>
-                    <linearGradient id="empresaBarHoverGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--gold-soft)" />
-                      <stop offset="100%" stopColor="var(--gold)" />
-                    </linearGradient>
-                    <filter id="empresaBarShadow" x="-20%" y="-20%" width="140%" height="140%">
-                      <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="var(--brand-green)" floodOpacity="0.35" />
-                    </filter>
-                  </defs>
-                  <XAxis
-                    dataKey="mes"
-                    tickLine={false}
-                    axisLine={false}
-                    tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
-                  />
-                  <Tooltip
-                    cursor={{ fill: "color-mix(in oklab, var(--muted) 25%, transparent)" }}
-                    content={({ active, payload }) => {
-                      if (!active || !payload?.length) return null;
-                      const value = payload[0].value as number;
-                      return (
-                        <div
-                          className="rounded-lg border px-2.5 py-1.5 text-xs shadow-lg"
+            <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.25rem)]">
+              <h3 className="text-sm font-semibold text-muted-foreground">Ativos x Inativos</h3>
+              <div className="mt-2 flex items-baseline gap-3">
+                <p
+                  className="text-[clamp(1.75rem,6vw,2rem)] font-bold leading-tight"
+                  style={{ color: "var(--panel-accent)" }}
+                >
+                  {resumo.ativos}
+                </p>
+                <span className="text-muted-foreground">/</span>
+                <p className="text-[clamp(1.5rem,5vw,1.75rem)] font-bold leading-tight text-muted-foreground">
+                  {resumo.inativos}
+                </p>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">ativos / inativos</p>
+            </div>
+
+            <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.25rem)]">
+              <h3 className="text-sm font-semibold text-muted-foreground">Últimos 6 meses</h3>
+              <div className="mt-2 h-[88px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={resumo.meses} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
+                    <defs>
+                      <linearGradient id="empresaBarGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="var(--brand-green-soft)" />
+                        <stop offset="100%" stopColor="var(--brand-green)" />
+                      </linearGradient>
+                      <linearGradient id="empresaBarHoverGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="var(--gold-soft)" />
+                        <stop offset="100%" stopColor="var(--gold)" />
+                      </linearGradient>
+                      <filter id="empresaBarShadow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow
+                          dx="0"
+                          dy="2"
+                          stdDeviation="2"
+                          floodColor="var(--brand-green)"
+                          floodOpacity="0.35"
+                        />
+                      </filter>
+                    </defs>
+                    <XAxis
+                      dataKey="mes"
+                      tickLine={false}
+                      axisLine={false}
+                      tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                    />
+                    <Tooltip
+                      cursor={{ fill: "color-mix(in oklab, var(--muted) 25%, transparent)" }}
+                      content={({ active, payload }) => {
+                        if (!active || !payload?.length) return null;
+                        const value = payload[0].value as number;
+                        return (
+                          <div
+                            className="rounded-lg border px-2.5 py-1.5 text-xs shadow-lg"
+                            style={{
+                              background: "var(--card)",
+                              borderColor: "var(--border)",
+                            }}
+                          >
+                            <span className="font-semibold" style={{ color: "var(--brand-green)" }}>
+                              {value}
+                            </span>{" "}
+                            <span className="text-muted-foreground">
+                              {value === 1 ? "empresa" : "empresas"} em {payload[0].payload.mes}
+                            </span>
+                          </div>
+                        );
+                      }}
+                    />
+                    <Bar
+                      dataKey="total"
+                      fill="url(#empresaBarGradient)"
+                      radius={[5, 5, 2, 2]}
+                      animationDuration={900}
+                      animationBegin={150}
+                    >
+                      {resumo.meses.map((entry, index) => (
+                        <Cell
+                          key={`cell-${entry.mes}`}
+                          fill="url(#empresaBarGradient)"
+                          strokeWidth={0}
                           style={{
-                            background: "var(--card)",
-                            borderColor: "var(--border)",
+                            filter: "url(#empresaBarShadow)",
+                            transition: "all 0.2s ease",
                           }}
-                        >
-                          <span className="font-semibold" style={{ color: "var(--brand-green)" }}>
-                            {value}
-                          </span>{" "}
-                          <span className="text-muted-foreground">
-                            {value === 1 ? "empresa" : "empresas"} em {payload[0].payload.mes}
-                          </span>
-                        </div>
-                      );
-                    }}
-                  />
-                  <Bar
-                    dataKey="total"
-                    fill="url(#empresaBarGradient)"
-                    radius={[5, 5, 2, 2]}
-                    animationDuration={900}
-                    animationBegin={150}
-                  >
-                    {resumo.meses.map((entry, index) => (
-                      <Cell
-                        key={`cell-${entry.mes}`}
-                        fill="url(#empresaBarGradient)"
-                        strokeWidth={0}
-                        style={{
-                          filter: "url(#empresaBarShadow)",
-                          transition: "all 0.2s ease",
-                        }}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
-        </div>
         )}
 
         {vazio ? null : (
@@ -303,8 +304,8 @@ export default function EmpresasList() {
               Nenhuma empresa cadastrada
             </h2>
             <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-              Você ainda não possui empresas no sistema. Cadastre a primeira para começar a gerenciar
-              seus clientes.
+              Você ainda não possui empresas no sistema. Cadastre a primeira para começar a
+              gerenciar seus clientes.
             </p>
             <Button asChild className="tap-target mt-6">
               <Link to="/sa/empresas/nova">
@@ -353,7 +354,6 @@ export default function EmpresasList() {
                       <Power className="h-4 w-4" />
                     </Button>
                     <Button
-
                       variant="outline"
                       size="sm"
                       className="tap-target"
@@ -420,7 +420,6 @@ export default function EmpresasList() {
                             />
                           </Button>
                           <Button
-
                             variant="ghost"
                             size="icon"
                             aria-label={`Excluir ${e.nome_fantasia}`}
@@ -526,7 +525,6 @@ export default function EmpresasList() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
     </PanelLayout>
   );
 }

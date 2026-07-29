@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
@@ -314,7 +314,7 @@ export default function EmpresaForm() {
     setShowSenha(true);
     setError("senha", null);
     setError("confirmar", null);
-    toast.success("Senha gerada. Copie-a antes de salvar.");
+    notifySuccess("Senha gerada. Copie-a antes de salvar.");
   }
 
   const senhaOk = senha.length >= 8;
@@ -327,12 +327,12 @@ export default function EmpresaForm() {
   async function avancar() {
     if (step === 0) {
       if (!form.razao_social.trim() || !form.nome_fantasia.trim() || !form.cnpj.trim()) {
-        toast.error("Razão social, nome fantasia e CPF/CNPJ são obrigatórios.");
+        notifyValidation("Razão social, nome fantasia e CPF/CNPJ são obrigatórios.");
         return;
       }
       if (!isValidCpfCnpj(form.cnpj)) {
         setError("cnpj", "CPF/CNPJ inválido");
-        toast.error("CPF/CNPJ inválido.");
+        notifyValidation("CPF/CNPJ inválido.");
         return;
       }
       if (!cnpjChecked) {
@@ -342,56 +342,56 @@ export default function EmpresaForm() {
     }
     if (step === 1) {
       if (!form.resp_nome.trim()) {
-        toast.error("Informe o nome do responsável.");
+        notifyValidation("Informe o nome do responsável.");
         return;
       }
       if (!form.resp_nascimento?.trim()) {
-        toast.error("Informe a data de nascimento do responsável.");
+        notifyValidation("Informe a data de nascimento do responsável.");
         return;
       }
       if (!form.resp_cpf?.trim()) {
-        toast.error("Informe o CPF do responsável.");
+        notifyValidation("Informe o CPF do responsável.");
         return;
       }
       if (!isValidCpf(form.resp_cpf)) {
-        toast.error("CPF do responsável inválido.");
+        notifyValidation("CPF do responsável inválido.");
         return;
       }
       if (!form.resp_whatsapp?.trim()) {
-        toast.error("Informe o WhatsApp do responsável.");
+        notifyValidation("Informe o WhatsApp do responsável.");
         return;
       }
       if (!isValidPhone(form.resp_whatsapp)) {
-        toast.error("WhatsApp do responsável inválido.");
+        notifyValidation("WhatsApp do responsável inválido.");
         return;
       }
     }
     if (step === 2) {
       if (!form.contato_whatsapp?.trim()) {
-        toast.error("Informe o WhatsApp de contato da empresa.");
+        notifyValidation("Informe o WhatsApp de contato da empresa.");
         return;
       }
       if (!isValidPhone(form.contato_whatsapp)) {
-        toast.error("WhatsApp de contato da empresa inválido.");
+        notifyValidation("WhatsApp de contato da empresa inválido.");
         return;
       }
       if (contatos.some((c) => validateContato(c.tipo, c.valor))) {
-        toast.error("Verifique os contatos adicionais.");
+        notifyValidation("Verifique os contatos adicionais.");
         return;
       }
     }
     if (step === 3) {
       if (!emailChecked) await validarEmailAcesso();
       if (!email.trim() || !isValidEmail(email)) {
-        toast.error("Informe um e-mail de acesso válido.");
+        notifyValidation("Informe um e-mail de acesso válido.");
         return;
       }
       if (!senhaOk) {
-        toast.error("A senha deve ter pelo menos 8 caracteres.");
+        notifyValidation("A senha deve ter pelo menos 8 caracteres.");
         return;
       }
       if (!confirmarOk) {
-        toast.error("As senhas não conferem.");
+        notifyValidation("As senhas não conferem.");
         return;
       }
     }
@@ -402,15 +402,13 @@ export default function EmpresaForm() {
     ev?.preventDefault();
     if (!editing && step !== RESUMO) return;
 
-
-
     if (!form.razao_social.trim() || !form.nome_fantasia.trim() || !form.cnpj.trim()) {
-      toast.error("Razão social, nome fantasia e CPF/CNPJ são obrigatórios.");
+      notifyValidation("Razão social, nome fantasia e CPF/CNPJ são obrigatórios.");
       return;
     }
     if (!isValidCpfCnpj(form.cnpj)) {
       setError("cnpj", "CPF/CNPJ inválido");
-      toast.error("CPF/CNPJ inválido.");
+      notifyValidation("CPF/CNPJ inválido.");
       return;
     }
     if (!cnpjChecked) {
@@ -419,53 +417,53 @@ export default function EmpresaForm() {
     }
 
     if (!form.resp_nome.trim()) {
-      toast.error("Informe o nome do responsável.");
+      notifyValidation("Informe o nome do responsável.");
       return;
     }
     if (!form.resp_nascimento?.trim()) {
-      toast.error("Informe a data de nascimento do responsável.");
+      notifyValidation("Informe a data de nascimento do responsável.");
       return;
     }
     if (!form.resp_cpf?.trim()) {
-      toast.error("Informe o CPF do responsável.");
+      notifyValidation("Informe o CPF do responsável.");
       return;
     }
     if (!isValidCpf(form.resp_cpf)) {
-      toast.error("CPF do responsável inválido.");
+      notifyValidation("CPF do responsável inválido.");
       return;
     }
     if (!form.resp_whatsapp?.trim()) {
-      toast.error("Informe o WhatsApp do responsável.");
+      notifyValidation("Informe o WhatsApp do responsável.");
       return;
     }
     if (!isValidPhone(form.resp_whatsapp)) {
-      toast.error("WhatsApp do responsável inválido.");
+      notifyValidation("WhatsApp do responsável inválido.");
       return;
     }
     if (!form.contato_whatsapp?.trim()) {
-      toast.error("Informe o WhatsApp de contato da empresa.");
+      notifyValidation("Informe o WhatsApp de contato da empresa.");
       return;
     }
     if (!isValidPhone(form.contato_whatsapp)) {
-      toast.error("WhatsApp de contato da empresa inválido.");
+      notifyValidation("WhatsApp de contato da empresa inválido.");
       return;
     }
     const contatoInvalido = contatos.find((c) => validateContato(c.tipo, c.valor));
     if (contatoInvalido) {
-      toast.error("Verifique os contatos adicionais.");
+      notifyValidation("Verifique os contatos adicionais.");
       return;
     }
     if (!editing && !acessoOk) {
-      toast.error("Preencha e valide e-mail, senha e confirmação de senha.");
+      notifyValidation("Preencha e valide e-mail, senha e confirmação de senha.");
       return;
     }
     if (editing && (senha || confirmar)) {
       if (!senhaOk) {
-        toast.error("A senha deve ter pelo menos 8 caracteres.");
+        notifyValidation("A senha deve ter pelo menos 8 caracteres.");
         return;
       }
       if (!confirmarOk) {
-        toast.error("As senhas não conferem.");
+        notifyValidation("As senhas não conferem.");
         return;
       }
     }
@@ -488,7 +486,7 @@ export default function EmpresaForm() {
           contatos: lista,
           password: trocarSenha ? senha : undefined,
         });
-        toast.success(trocarSenha ? "Empresa e senha atualizadas." : "Empresa atualizada.");
+        notifySuccess(trocarSenha ? "Empresa e senha atualizadas." : "Empresa atualizada.");
       } else {
         await create.mutateAsync({
           empresa: payload,
@@ -496,11 +494,11 @@ export default function EmpresaForm() {
           email: email.trim(),
           password: senha,
         });
-        toast.success("Empresa criada e usuário administrador cadastrado.");
+        notifySuccess("Empresa criada e usuário administrador cadastrado.");
       }
       navigate("/sa/empresas");
     } catch (err) {
-      toast.error((err as Error).message);
+      notifyError(err);
     }
   }
 
@@ -570,8 +568,6 @@ export default function EmpresaForm() {
           </div>
         )}
 
-
-
         {editing && isLoading ? (
           <div className="flex items-center gap-2 text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" /> Carregando…
@@ -588,477 +584,482 @@ export default function EmpresaForm() {
             }}
             className="space-y-4"
           >
-
             {showStep(0) && (
-            <Section title="Dados da empresa">
-              <Field label="Razão social" required>
-                <Input
-                  value={form.razao_social}
-                  onChange={(e) => set("razao_social", e.target.value)}
-                  className="h-11 text-base"
-                  required
-                />
-              </Field>
-              <Field label="Nome fantasia" required>
-                <Input
-                  value={form.nome_fantasia}
-                  onChange={(e) => set("nome_fantasia", e.target.value)}
-                  className="h-11 text-base"
-                  required
-                />
-              </Field>
-              <Field label="CPF / CNPJ" required error={errors.cnpj}>
-                <Input
-                  value={form.cnpj}
-                  onChange={(e) => {
-                    set("cnpj", maskCpfCnpj(e.target.value));
-                    setCnpjChecked(false);
-                    if (errors.cnpj) setError("cnpj", null);
-                  }}
-                  onBlur={() => void validarCnpj()}
-                  placeholder="000.000.000-00 ou 00.000.000/0000-00"
-                  inputMode="numeric"
-                  className="h-11 text-base"
-                  required
-                />
-                {checkingCnpj && (
-                  <p className="text-xs text-muted-foreground">Verificando CPF/CNPJ…</p>
-                )}
-              </Field>
-              <Field label="Status">
-                <Select
-                  value={form.status}
-                  onValueChange={(v) => set("status", v as EmpresaStatus)}
-                >
-                  <SelectTrigger className="h-11 text-base">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ATIVO">Ativo</SelectItem>
-                    <SelectItem value="INATIVO">Inativo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </Field>
-              <Field label="CEP" error={errors.cep}>
-                <Input
-                  value={form.cep ?? ""}
-                  onChange={(e) => set("cep", maskCep(e.target.value))}
-                  onBlur={() => void buscarCep("")}
-                  placeholder="00000-000"
-                  inputMode="numeric"
-                  className="h-11 text-base"
-                />
-              </Field>
-              <Field label="Endereço">
-                <Input
-                  value={form.endereco ?? ""}
-                  onChange={(e) => set("endereco", e.target.value)}
-                  className="h-11 text-base"
-                />
-              </Field>
-              <Field label="Número">
-                <Input
-                  value={form.numero ?? ""}
-                  onChange={(e) => set("numero", e.target.value)}
-                  className="h-11 text-base"
-                />
-              </Field>
-              <Field label="Complemento">
-                <Input
-                  value={form.complemento ?? ""}
-                  onChange={(e) => set("complemento", e.target.value)}
-                  className="h-11 text-base"
-                />
-              </Field>
-              <Field label="Bairro">
-                <Input
-                  value={form.bairro ?? ""}
-                  onChange={(e) => set("bairro", e.target.value)}
-                  className="h-11 text-base"
-                />
-              </Field>
-              <Field label="Cidade">
-                <Input
-                  value={form.cidade ?? ""}
-                  onChange={(e) => set("cidade", e.target.value)}
-                  className="h-11 text-base"
-                />
-              </Field>
-              <Field label="UF">
-                <Input
-                  value={form.uf ?? ""}
-                  onChange={(e) => set("uf", e.target.value.toUpperCase().slice(0, 2))}
-                  maxLength={2}
-                  className="h-11 text-base uppercase"
-                />
-              </Field>
-            </Section>
+              <Section title="Dados da empresa">
+                <Field label="Razão social" required>
+                  <Input
+                    value={form.razao_social}
+                    onChange={(e) => set("razao_social", e.target.value)}
+                    className="h-11 text-base"
+                    required
+                  />
+                </Field>
+                <Field label="Nome fantasia" required>
+                  <Input
+                    value={form.nome_fantasia}
+                    onChange={(e) => set("nome_fantasia", e.target.value)}
+                    className="h-11 text-base"
+                    required
+                  />
+                </Field>
+                <Field label="CPF / CNPJ" required error={errors.cnpj}>
+                  <Input
+                    value={form.cnpj}
+                    onChange={(e) => {
+                      set("cnpj", maskCpfCnpj(e.target.value));
+                      setCnpjChecked(false);
+                      if (errors.cnpj) setError("cnpj", null);
+                    }}
+                    onBlur={() => void validarCnpj()}
+                    placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                    inputMode="numeric"
+                    className="h-11 text-base"
+                    required
+                  />
+                  {checkingCnpj && (
+                    <p className="text-xs text-muted-foreground">Verificando CPF/CNPJ…</p>
+                  )}
+                </Field>
+                <Field label="Status">
+                  <Select
+                    value={form.status}
+                    onValueChange={(v) => set("status", v as EmpresaStatus)}
+                  >
+                    <SelectTrigger className="h-11 text-base">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ATIVO">Ativo</SelectItem>
+                      <SelectItem value="INATIVO">Inativo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field label="CEP" error={errors.cep}>
+                  <Input
+                    value={form.cep ?? ""}
+                    onChange={(e) => set("cep", maskCep(e.target.value))}
+                    onBlur={() => void buscarCep("")}
+                    placeholder="00000-000"
+                    inputMode="numeric"
+                    className="h-11 text-base"
+                  />
+                </Field>
+                <Field label="Endereço">
+                  <Input
+                    value={form.endereco ?? ""}
+                    onChange={(e) => set("endereco", e.target.value)}
+                    className="h-11 text-base"
+                  />
+                </Field>
+                <Field label="Número">
+                  <Input
+                    value={form.numero ?? ""}
+                    onChange={(e) => set("numero", e.target.value)}
+                    className="h-11 text-base"
+                  />
+                </Field>
+                <Field label="Complemento">
+                  <Input
+                    value={form.complemento ?? ""}
+                    onChange={(e) => set("complemento", e.target.value)}
+                    className="h-11 text-base"
+                  />
+                </Field>
+                <Field label="Bairro">
+                  <Input
+                    value={form.bairro ?? ""}
+                    onChange={(e) => set("bairro", e.target.value)}
+                    className="h-11 text-base"
+                  />
+                </Field>
+                <Field label="Cidade">
+                  <Input
+                    value={form.cidade ?? ""}
+                    onChange={(e) => set("cidade", e.target.value)}
+                    className="h-11 text-base"
+                  />
+                </Field>
+                <Field label="UF">
+                  <Input
+                    value={form.uf ?? ""}
+                    onChange={(e) => set("uf", e.target.value.toUpperCase().slice(0, 2))}
+                    maxLength={2}
+                    className="h-11 text-base uppercase"
+                  />
+                </Field>
+              </Section>
             )}
 
             {showStep(1) && (
-            <Section title="Dados do responsável">
-              <Field label="Nome" required>
-                <Input
-                  value={form.resp_nome}
-                  onChange={(e) => set("resp_nome", e.target.value)}
-                  className="h-11 text-base"
-                  required
-                />
-              </Field>
-              <Field label="Data de nascimento" required>
-                <Input
-                  type="date"
-                  value={form.resp_nascimento ?? ""}
-                  onChange={(e) => set("resp_nascimento", e.target.value)}
-                  className="h-11 text-base"
-                  required
-                />
-              </Field>
-              <Field label="CPF" required error={errors.resp_cpf}>
-                <Input
-                  value={form.resp_cpf ?? ""}
-                  onChange={(e) => set("resp_cpf", maskCpf(e.target.value))}
-                  onBlur={() =>
-                    setError(
-                      "resp_cpf",
-                      !form.resp_cpf?.trim()
-                        ? null
-                        : isValidCpf(form.resp_cpf)
+              <Section title="Dados do responsável">
+                <Field label="Nome" required>
+                  <Input
+                    value={form.resp_nome}
+                    onChange={(e) => set("resp_nome", e.target.value)}
+                    className="h-11 text-base"
+                    required
+                  />
+                </Field>
+                <Field label="Data de nascimento" required>
+                  <Input
+                    type="date"
+                    value={form.resp_nascimento ?? ""}
+                    onChange={(e) => set("resp_nascimento", e.target.value)}
+                    className="h-11 text-base"
+                    required
+                  />
+                </Field>
+                <Field label="CPF" required error={errors.resp_cpf}>
+                  <Input
+                    value={form.resp_cpf ?? ""}
+                    onChange={(e) => set("resp_cpf", maskCpf(e.target.value))}
+                    onBlur={() =>
+                      setError(
+                        "resp_cpf",
+                        !form.resp_cpf?.trim()
                           ? null
-                          : "CPF inválido",
-                    )
-                  }
-                  placeholder="000.000.000-00"
-                  inputMode="numeric"
-                  className="h-11 text-base"
-                />
-              </Field>
-              <Field label="CEP" error={errors.resp_cep}>
-                <Input
-                  value={form.resp_cep ?? ""}
-                  onChange={(e) => set("resp_cep", maskCep(e.target.value))}
-                  onBlur={() => void buscarCep("resp_")}
-                  placeholder="00000-000"
-                  inputMode="numeric"
-                  className="h-11 text-base"
-                />
-              </Field>
-              <Field label="Endereço">
-                <Input
-                  value={form.resp_endereco ?? ""}
-                  onChange={(e) => set("resp_endereco", e.target.value)}
-                  className="h-11 text-base"
-                />
-              </Field>
-              <Field label="Número">
-                <Input
-                  value={form.resp_numero ?? ""}
-                  onChange={(e) => set("resp_numero", e.target.value)}
-                  className="h-11 text-base"
-                />
-              </Field>
-              <Field label="Complemento">
-                <Input
-                  value={form.resp_complemento ?? ""}
-                  onChange={(e) => set("resp_complemento", e.target.value)}
-                  className="h-11 text-base"
-                />
-              </Field>
-              <Field label="Bairro">
-                <Input
-                  value={form.resp_bairro ?? ""}
-                  onChange={(e) => set("resp_bairro", e.target.value)}
-                  className="h-11 text-base"
-                />
-              </Field>
-              <Field label="Cidade">
-                <Input
-                  value={form.resp_cidade ?? ""}
-                  onChange={(e) => set("resp_cidade", e.target.value)}
-                  className="h-11 text-base"
-                />
-              </Field>
-              <Field label="UF">
-                <Input
-                  value={form.resp_uf ?? ""}
-                  onChange={(e) => set("resp_uf", e.target.value.toUpperCase().slice(0, 2))}
-                  maxLength={2}
-                  className="h-11 text-base uppercase"
-                />
-              </Field>
-              <Field label="WhatsApp" required error={errors.resp_whatsapp}>
-                <Input
-                  value={form.resp_whatsapp ?? ""}
-                  onChange={(e) => set("resp_whatsapp", maskPhone(e.target.value))}
-                  onBlur={() =>
-                    setError(
-                      "resp_whatsapp",
-                      !form.resp_whatsapp?.trim()
-                        ? null
-                        : isValidPhone(form.resp_whatsapp)
+                          : isValidCpf(form.resp_cpf)
+                            ? null
+                            : "CPF inválido",
+                      )
+                    }
+                    placeholder="000.000.000-00"
+                    inputMode="numeric"
+                    className="h-11 text-base"
+                  />
+                </Field>
+                <Field label="CEP" error={errors.resp_cep}>
+                  <Input
+                    value={form.resp_cep ?? ""}
+                    onChange={(e) => set("resp_cep", maskCep(e.target.value))}
+                    onBlur={() => void buscarCep("resp_")}
+                    placeholder="00000-000"
+                    inputMode="numeric"
+                    className="h-11 text-base"
+                  />
+                </Field>
+                <Field label="Endereço">
+                  <Input
+                    value={form.resp_endereco ?? ""}
+                    onChange={(e) => set("resp_endereco", e.target.value)}
+                    className="h-11 text-base"
+                  />
+                </Field>
+                <Field label="Número">
+                  <Input
+                    value={form.resp_numero ?? ""}
+                    onChange={(e) => set("resp_numero", e.target.value)}
+                    className="h-11 text-base"
+                  />
+                </Field>
+                <Field label="Complemento">
+                  <Input
+                    value={form.resp_complemento ?? ""}
+                    onChange={(e) => set("resp_complemento", e.target.value)}
+                    className="h-11 text-base"
+                  />
+                </Field>
+                <Field label="Bairro">
+                  <Input
+                    value={form.resp_bairro ?? ""}
+                    onChange={(e) => set("resp_bairro", e.target.value)}
+                    className="h-11 text-base"
+                  />
+                </Field>
+                <Field label="Cidade">
+                  <Input
+                    value={form.resp_cidade ?? ""}
+                    onChange={(e) => set("resp_cidade", e.target.value)}
+                    className="h-11 text-base"
+                  />
+                </Field>
+                <Field label="UF">
+                  <Input
+                    value={form.resp_uf ?? ""}
+                    onChange={(e) => set("resp_uf", e.target.value.toUpperCase().slice(0, 2))}
+                    maxLength={2}
+                    className="h-11 text-base uppercase"
+                  />
+                </Field>
+                <Field label="WhatsApp" required error={errors.resp_whatsapp}>
+                  <Input
+                    value={form.resp_whatsapp ?? ""}
+                    onChange={(e) => set("resp_whatsapp", maskPhone(e.target.value))}
+                    onBlur={() =>
+                      setError(
+                        "resp_whatsapp",
+                        !form.resp_whatsapp?.trim()
                           ? null
-                          : "Telefone inválido",
-                    )
-                  }
-                  placeholder="(00) 00000-0000"
-                  inputMode="tel"
-                  className="h-11 text-base"
-                />
-              </Field>
-              <Field label="E-mail" error={errors.resp_email}>
-                <Input
-                  type="email"
-                  value={form.resp_email ?? ""}
-                  onChange={(e) => set("resp_email", e.target.value)}
-                  onBlur={() =>
-                    setError(
-                      "resp_email",
-                      !form.resp_email?.trim()
-                        ? null
-                        : isValidEmail(form.resp_email)
+                          : isValidPhone(form.resp_whatsapp)
+                            ? null
+                            : "Telefone inválido",
+                      )
+                    }
+                    placeholder="(00) 00000-0000"
+                    inputMode="tel"
+                    className="h-11 text-base"
+                  />
+                </Field>
+                <Field label="E-mail" error={errors.resp_email}>
+                  <Input
+                    type="email"
+                    value={form.resp_email ?? ""}
+                    onChange={(e) => set("resp_email", e.target.value)}
+                    onBlur={() =>
+                      setError(
+                        "resp_email",
+                        !form.resp_email?.trim()
                           ? null
-                          : "E-mail inválido",
-                    )
-                  }
-                  className="h-11 text-base"
-                />
-              </Field>
-            </Section>
+                          : isValidEmail(form.resp_email)
+                            ? null
+                            : "E-mail inválido",
+                      )
+                    }
+                    className="h-11 text-base"
+                  />
+                </Field>
+              </Section>
             )}
 
             {showStep(2) && (
-            <Section title="Contato da empresa">
-              <Field label="WhatsApp" required error={errors.contato_whatsapp}>
-                <Input
-                  value={form.contato_whatsapp ?? ""}
-                  onChange={(e) => set("contato_whatsapp", maskPhone(e.target.value))}
-                  onBlur={() =>
-                    setError(
-                      "contato_whatsapp",
-                      !form.contato_whatsapp?.trim()
-                        ? null
-                        : isValidPhone(form.contato_whatsapp)
+              <Section title="Contato da empresa">
+                <Field label="WhatsApp" required error={errors.contato_whatsapp}>
+                  <Input
+                    value={form.contato_whatsapp ?? ""}
+                    onChange={(e) => set("contato_whatsapp", maskPhone(e.target.value))}
+                    onBlur={() =>
+                      setError(
+                        "contato_whatsapp",
+                        !form.contato_whatsapp?.trim()
                           ? null
-                          : "Telefone inválido",
-                    )
-                  }
-                  placeholder="(00) 00000-0000"
-                  inputMode="tel"
-                  className="h-11 text-base"
-                />
-              </Field>
-              <Field label="E-mail" error={errors.contato_email}>
-                <Input
-                  type="email"
-                  value={form.contato_email ?? ""}
-                  onChange={(e) => set("contato_email", e.target.value)}
-                  onBlur={() =>
-                    setError(
-                      "contato_email",
-                      !form.contato_email?.trim()
-                        ? null
-                        : isValidEmail(form.contato_email)
-                          ? null
-                          : "E-mail inválido",
-                    )
-                  }
-                  className="h-11 text-base"
-                />
-              </Field>
-
-              <div className="space-y-3 md:col-span-full">
-                <div className="flex items-center justify-between gap-3">
-                  <Label className="text-sm">Outros contatos</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="tap-target"
-                    onClick={() =>
-                      setContatos((prev) => [
-                        ...prev,
-                        { tipo: "WhatsApp", valor: "", descricao: "" },
-                      ])
+                          : isValidPhone(form.contato_whatsapp)
+                            ? null
+                            : "Telefone inválido",
+                      )
                     }
-                  >
-                    <Plus className="mr-2 h-4 w-4" /> Adicionar
-                  </Button>
-                </div>
+                    placeholder="(00) 00000-0000"
+                    inputMode="tel"
+                    className="h-11 text-base"
+                  />
+                </Field>
+                <Field label="E-mail" error={errors.contato_email}>
+                  <Input
+                    type="email"
+                    value={form.contato_email ?? ""}
+                    onChange={(e) => set("contato_email", e.target.value)}
+                    onBlur={() =>
+                      setError(
+                        "contato_email",
+                        !form.contato_email?.trim()
+                          ? null
+                          : isValidEmail(form.contato_email)
+                            ? null
+                            : "E-mail inválido",
+                      )
+                    }
+                    className="h-11 text-base"
+                  />
+                </Field>
 
-                {contatos.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Nenhum contato adicional.</p>
-                ) : (
-                  <ul className="space-y-3">
-                    {contatos.map((c, i) => {
-                      const erro = errors[`contato_${i}`];
-                      return (
-                        <li
-                          key={i}
-                          className="grid gap-3 rounded-lg border border-border p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)_auto] md:items-start"
-                        >
-                          <div className="space-y-2">
-                            <Label className="text-xs">Tipo</Label>
-                            <Select
-                              value={c.tipo || "WhatsApp"}
-                              onValueChange={(v) => {
-                                setContatos((prev) =>
-                                  prev.map((x, j) =>
-                                    j === i ? { ...x, tipo: v, valor: maskContato(v, x.valor) } : x,
-                                  ),
-                                );
-                                setError(`contato_${i}`, null);
-                              }}
-                            >
-                              <SelectTrigger className="h-11 text-base">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {CONTATO_TIPOS.map((t) => (
-                                  <SelectItem key={t} value={t}>
-                                    {t}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Valor</Label>
-                            <Input
-                              value={c.valor}
-                              inputMode={c.tipo === "E-mail" ? "email" : "tel"}
-                              onChange={(e) =>
-                                setContatos((prev) =>
-                                  prev.map((x, j) =>
-                                    j === i
-                                      ? { ...x, valor: maskContato(x.tipo, e.target.value) }
-                                      : x,
-                                  ),
-                                )
-                              }
-                              onBlur={() => setError(`contato_${i}`, validateContato(c.tipo, c.valor))}
-                              placeholder={c.tipo === "E-mail" ? "nome@email.com" : "(00) 00000-0000"}
-                              className="h-11 text-base"
-                            />
-                            {erro ? (
-                              <p className="text-xs font-medium text-destructive">{erro}</p>
-                            ) : null}
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Descrição</Label>
-                            <Input
-                              value={c.descricao ?? ""}
-                              onChange={(e) =>
-                                setContatos((prev) =>
-                                  prev.map((x, j) =>
-                                    j === i ? { ...x, descricao: e.target.value } : x,
-                                  ),
-                                )
-                              }
-                              className="h-11 text-base"
-                            />
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="tap-target justify-self-end md:mt-6"
-                            aria-label="Remover contato"
-                            onClick={() => setContatos((prev) => prev.filter((_, j) => j !== i))}
+                <div className="space-y-3 md:col-span-full">
+                  <div className="flex items-center justify-between gap-3">
+                    <Label className="text-sm">Outros contatos</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="tap-target"
+                      onClick={() =>
+                        setContatos((prev) => [
+                          ...prev,
+                          { tipo: "WhatsApp", valor: "", descricao: "" },
+                        ])
+                      }
+                    >
+                      <Plus className="mr-2 h-4 w-4" /> Adicionar
+                    </Button>
+                  </div>
+
+                  {contatos.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Nenhum contato adicional.</p>
+                  ) : (
+                    <ul className="space-y-3">
+                      {contatos.map((c, i) => {
+                        const erro = errors[`contato_${i}`];
+                        return (
+                          <li
+                            key={i}
+                            className="grid gap-3 rounded-lg border border-border p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)_auto] md:items-start"
                           >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </div>
-            </Section>
+                            <div className="space-y-2">
+                              <Label className="text-xs">Tipo</Label>
+                              <Select
+                                value={c.tipo || "WhatsApp"}
+                                onValueChange={(v) => {
+                                  setContatos((prev) =>
+                                    prev.map((x, j) =>
+                                      j === i
+                                        ? { ...x, tipo: v, valor: maskContato(v, x.valor) }
+                                        : x,
+                                    ),
+                                  );
+                                  setError(`contato_${i}`, null);
+                                }}
+                              >
+                                <SelectTrigger className="h-11 text-base">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {CONTATO_TIPOS.map((t) => (
+                                    <SelectItem key={t} value={t}>
+                                      {t}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-xs">Valor</Label>
+                              <Input
+                                value={c.valor}
+                                inputMode={c.tipo === "E-mail" ? "email" : "tel"}
+                                onChange={(e) =>
+                                  setContatos((prev) =>
+                                    prev.map((x, j) =>
+                                      j === i
+                                        ? { ...x, valor: maskContato(x.tipo, e.target.value) }
+                                        : x,
+                                    ),
+                                  )
+                                }
+                                onBlur={() =>
+                                  setError(`contato_${i}`, validateContato(c.tipo, c.valor))
+                                }
+                                placeholder={
+                                  c.tipo === "E-mail" ? "nome@email.com" : "(00) 00000-0000"
+                                }
+                                className="h-11 text-base"
+                              />
+                              {erro ? (
+                                <p className="text-xs font-medium text-destructive">{erro}</p>
+                              ) : null}
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-xs">Descrição</Label>
+                              <Input
+                                value={c.descricao ?? ""}
+                                onChange={(e) =>
+                                  setContatos((prev) =>
+                                    prev.map((x, j) =>
+                                      j === i ? { ...x, descricao: e.target.value } : x,
+                                    ),
+                                  )
+                                }
+                                className="h-11 text-base"
+                              />
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="tap-target justify-self-end md:mt-6"
+                              aria-label="Remover contato"
+                              onClick={() => setContatos((prev) => prev.filter((_, j) => j !== i))}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              </Section>
             )}
 
             {showStep(3) && (
-            <Section title="Acesso ao sistema (usuário administrador)">
-              <Field
-                label="E-mail"
-                required={!editing}
-                error={errors.email}
-                hint={
-                  editing
-                    ? "E-mail do usuário administrador (não editável)."
-                    : checkingEmail
-                      ? "Verificando disponibilidade…"
-                      : emailChecked
-                        ? "E-mail disponível."
-                        : undefined
-                }
-              >
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setEmailChecked(false);
-                    setError("email", null);
-                  }}
-                  onBlur={() => void validarEmailAcesso()}
-                  disabled={editing}
-                  readOnly={editing}
-                  autoComplete="off"
-                  className="h-11 text-base disabled:opacity-100"
+              <Section title="Acesso ao sistema (usuário administrador)">
+                <Field
+                  label="E-mail"
                   required={!editing}
-                />
-              </Field>
-              <Field
-                label={editing ? "Nova senha (opcional)" : "Senha"}
-                required={!editing}
-                error={senha && !senhaOk ? "Mínimo de 8 caracteres" : null}
-              >
-                <div className="flex gap-2">
+                  error={errors.email}
+                  hint={
+                    editing
+                      ? "E-mail do usuário administrador (não editável)."
+                      : checkingEmail
+                        ? "Verificando disponibilidade…"
+                        : emailChecked
+                          ? "E-mail disponível."
+                          : undefined
+                  }
+                >
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setEmailChecked(false);
+                      setError("email", null);
+                    }}
+                    onBlur={() => void validarEmailAcesso()}
+                    disabled={editing}
+                    readOnly={editing}
+                    autoComplete="off"
+                    className="h-11 text-base disabled:opacity-100"
+                    required={!editing}
+                  />
+                </Field>
+                <Field
+                  label={editing ? "Nova senha (opcional)" : "Senha"}
+                  required={!editing}
+                  error={senha && !senhaOk ? "Mínimo de 8 caracteres" : null}
+                >
+                  <div className="flex gap-2">
+                    <Input
+                      type={showSenha ? "text" : "password"}
+                      value={senha}
+                      onChange={(e) => setSenha(e.target.value)}
+                      autoComplete="new-password"
+                      className="h-11 text-base"
+                      required={!editing}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="tap-target h-11 w-11 shrink-0"
+                      aria-label={showSenha ? "Ocultar senha" : "Revelar senha"}
+                      onClick={() => setShowSenha((v) => !v)}
+                    >
+                      {showSenha ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="tap-target h-11 w-11 shrink-0"
+                      aria-label="Gerar senha"
+                      onClick={gerarSenha}
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </Field>
+                <Field
+                  label="Confirmar senha"
+                  required={!editing}
+                  error={confirmar && !confirmarOk ? "As senhas não conferem" : null}
+                >
                   <Input
                     type={showSenha ? "text" : "password"}
-                    value={senha}
-                    onChange={(e) => setSenha(e.target.value)}
+                    value={confirmar}
+                    onChange={(e) => setConfirmar(e.target.value)}
                     autoComplete="new-password"
                     className="h-11 text-base"
                     required={!editing}
                   />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="tap-target h-11 w-11 shrink-0"
-                    aria-label={showSenha ? "Ocultar senha" : "Revelar senha"}
-                    onClick={() => setShowSenha((v) => !v)}
-                  >
-                    {showSenha ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="tap-target h-11 w-11 shrink-0"
-                    aria-label="Gerar senha"
-                    onClick={gerarSenha}
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
-                </div>
-              </Field>
-              <Field
-                label="Confirmar senha"
-                required={!editing}
-                error={confirmar && !confirmarOk ? "As senhas não conferem" : null}
-              >
-                <Input
-                  type={showSenha ? "text" : "password"}
-                  value={confirmar}
-                  onChange={(e) => setConfirmar(e.target.value)}
-                  autoComplete="new-password"
-                  className="h-11 text-base"
-                  required={!editing}
-                />
-              </Field>
-            </Section>
+                </Field>
+              </Section>
             )}
 
             {showStep(4) && (
@@ -1147,7 +1148,6 @@ export default function EmpresaForm() {
                 <Button
                   type="button"
                   onClick={() => void handleSubmit()}
-
                   className="tap-target"
                   disabled={saving || checkingEmail || (!editing && !acessoOk)}
                 >
