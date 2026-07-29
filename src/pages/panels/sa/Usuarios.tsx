@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Loader2, Power, ShieldCheck, UserCog, Users } from "lucide-react";
+import { LogOut, Loader2, Power, ShieldCheck, UserCog, Users } from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
@@ -21,6 +21,7 @@ import { notifyError, notifySuccess } from "@/lib/system-message";
 import {
   useUsuarios,
   useToggleUsuarioAtivo,
+  useLogoffUsuario,
   type UsuarioSistema,
   type UsuarioRole,
 } from "@/hooks/use-usuarios";
@@ -75,9 +76,11 @@ export default function UsuariosList() {
 
   const { data, isLoading, error } = useUsuarios();
   const toggle = useToggleUsuarioAtivo();
+  const logoff = useLogoffUsuario();
   const [busca, setBusca] = useState("");
   const [filtro, setFiltro] = useState<Filtro>("TODOS");
   const [alvo, setAlvo] = useState<UsuarioSistema | null>(null);
+  const [alvoLogoff, setAlvoLogoff] = useState<UsuarioSistema | null>(null);
 
   const lista = useMemo(() => {
     let list = data ?? [];
@@ -117,6 +120,23 @@ export default function UsuariosList() {
       },
     );
     setAlvo(null);
+  }
+
+  function confirmarLogoff() {
+    if (!alvoLogoff) return;
+    const usuario = alvoLogoff;
+    logoff.mutate(usuario.id, {
+      onSuccess: (sessoes) =>
+        notifySuccess(
+          "Logoff realizado",
+          sessoes > 0
+            ? `${usuario.nome} teve ${sessoes} sessão(ões) encerrada(s).`
+            : `${usuario.nome} não possuía sessões ativas.`,
+        ),
+      onError: (err) =>
+        notifyError(err, { description: "Não foi possível encerrar as sessões do usuário." }),
+    });
+    setAlvoLogoff(null);
   }
 
   return (
@@ -239,10 +259,16 @@ export default function UsuariosList() {
                     <Badge cor={u.ativo ? "var(--brand-green)" : "hsl(var(--destructive))"}>
                       {u.ativo ? "Ativo" : "Inativo"}
                     </Badge>
-                    <Button variant="outline" size="sm" onClick={() => setAlvo(u)}>
-                      <Power className="mr-1.5 h-4 w-4" />
-                      {u.ativo ? "Inativar" : "Ativar"}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setAlvoLogoff(u)}>
+                        <LogOut className="mr-1.5 h-4 w-4" />
+                        Logoff
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => setAlvo(u)}>
+                        <Power className="mr-1.5 h-4 w-4" />
+                        {u.ativo ? "Inativar" : "Ativar"}
+                      </Button>
+                    </div>
                   </div>
                 </li>
               ))}
@@ -288,10 +314,16 @@ export default function UsuariosList() {
                         </Badge>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <Button variant="outline" size="sm" onClick={() => setAlvo(u)}>
-                          <Power className="mr-1.5 h-4 w-4" />
-                          {u.ativo ? "Inativar" : "Ativar"}
-                        </Button>
+                        <div className="flex items-center justify-end gap-2">
+                          <Button variant="outline" size="sm" onClick={() => setAlvoLogoff(u)}>
+                            <LogOut className="mr-1.5 h-4 w-4" />
+                            Logoff
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => setAlvo(u)}>
+                            <Power className="mr-1.5 h-4 w-4" />
+                            {u.ativo ? "Inativar" : "Ativar"}
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -317,6 +349,21 @@ export default function UsuariosList() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={confirmar}>Confirmar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={Boolean(alvoLogoff)} onOpenChange={(open) => !open && setAlvoLogoff(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Encerrar sessões do usuário?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {`Todas as sessões ativas de ${alvoLogoff?.nome ?? ""} serão encerradas e será necessário fazer login novamente. O acesso do usuário continua ativo.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmarLogoff}>Fazer logoff</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
