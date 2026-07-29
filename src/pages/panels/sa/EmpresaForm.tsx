@@ -226,9 +226,11 @@ export default function EmpresaForm() {
   const [checkingCnpj, setCheckingCnpj] = useState(false);
   const [cnpjChecked, setCnpjChecked] = useState(false);
   const [step, setStep] = useState(0);
+  const [tab, setTab] = useState<TabId>("empresa");
 
-  /** Na edição todas as seções aparecem; na criação, uma por etapa. */
-  const showStep = (index: number) => editing || step === index;
+  /** Na edição as seções são agrupadas em abas; na criação, uma por etapa. */
+  const showStep = (index: number, tabId: TabId) => (editing ? tab === tabId : step === index);
+
 
   useEffect(() => {
     if (!data) return;
