@@ -222,7 +222,11 @@ export function useLeadsEvolucao() {
   return useQuery({
     queryKey: ["leads-evolucao", empresaId],
     enabled: Boolean(empresaId),
-    staleTime: 60 * 1000,
+    // Igual à lista: sempre buscar dados frescos para o gráfico acompanhar em tempo real.
+    staleTime: 0,
+    refetchInterval: 20 * 1000,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
     queryFn: async (): Promise<LeadMes[]> => {
       const inicio = new Date();
       inicio.setDate(1);
