@@ -60,6 +60,12 @@ function PlanoCard({ plano, arrastavel, onEditar, onExcluir }: CardProps) {
     disabled: !arrastavel,
   });
 
+  const valorTexto = plano.gratuito
+    ? "Gratuito"
+    : plano.valor !== null
+      ? BRL.format(plano.valor)
+      : "—";
+
   return (
     <article
       ref={setNodeRef}
@@ -69,69 +75,87 @@ function PlanoCard({ plano, arrastavel, onEditar, onExcluir }: CardProps) {
         opacity: isDragging ? 0.6 : 1,
         zIndex: isDragging ? 20 : undefined,
       }}
-      className="relative flex items-start justify-between gap-3 rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.25rem)] transition-colors hover:border-[var(--panel-accent)]"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:border-[var(--panel-accent)] hover:shadow-md"
     >
-      <div className="flex min-w-0 items-center gap-2">
-        {arrastavel && (
-          <button
-            type="button"
-            aria-label={`Reordenar plano ${plano.nome}`}
-            className="tap-target -ml-1 shrink-0 cursor-grab touch-none rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing"
-            {...attributes}
-            {...listeners}
-          >
-            <GripVertical className="h-4 w-4" />
-          </button>
-        )}
+      {arrastavel && (
+        <button
+          type="button"
+          aria-label={`Reordenar plano ${plano.nome}`}
+          className="absolute left-2 top-2 z-10 cursor-grab touch-none rounded-md p-1.5 text-muted-foreground opacity-60 transition-all hover:bg-muted hover:text-foreground hover:opacity-100 active:cursor-grabbing"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+      )}
+
+      <div className="flex flex-1 flex-col items-center p-6 pt-8 text-center">
         <span
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+          className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl"
           style={{
-            background: "color-mix(in oklab, var(--panel-accent) 14%, transparent)",
+            background: "color-mix(in oklab, var(--panel-accent) 12%, transparent)",
             color: "var(--panel-accent)",
           }}
         >
-          <Layers className="h-5 w-5" />
+          <Layers className="h-7 w-7" />
         </span>
-        <div className="min-w-0">
-          <h2 className="truncate font-semibold leading-tight">{plano.nome}</h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            {plano.gratuito ? "Gratuito" : plano.valor !== null ? BRL.format(plano.valor) : "—"}
-          </p>
-          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+
+        <h2 className="w-full text-lg font-semibold leading-tight tracking-tight break-words">
+          {plano.nome}
+        </h2>
+
+        <p
+          className="mt-2 text-2xl font-bold tracking-tight"
+          style={{ color: "var(--panel-accent)" }}
+        >
+          {valorTexto}
+        </p>
+
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${
+              plano.ativo
+                ? "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
             <span
-              className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.7rem] font-medium ${
-                plano.ativo
-                  ? "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400"
-                  : "bg-muted text-muted-foreground"
+              className={`h-1.5 w-1.5 rounded-full ${
+                plano.ativo ? "bg-emerald-500" : "bg-muted-foreground/60"
               }`}
-            >
-              {plano.ativo ? "Ativo" : "Inativo"}
+            />
+            {plano.ativo ? "Ativo" : "Inativo"}
+          </span>
+
+          {plano.gratuito && (
+            <span className="inline-flex items-center rounded-full bg-[color-mix(in_oklab,var(--panel-accent)_14%,transparent)] px-3 py-1 text-xs font-medium text-[var(--panel-accent)]">
+              Plano gratuito
             </span>
-            {plano.gratuito && (
-              <span className="inline-flex items-center rounded-full bg-[color-mix(in_oklab,var(--panel-accent)_14%,transparent)] px-2 py-0.5 text-[0.7rem] font-medium text-[var(--panel-accent)]">
-                Plano gratuito
-              </span>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center gap-1">
-        <IconAction
-          label="Editar"
-          ariaLabel={`Editar plano ${plano.nome}`}
+      <div className="flex items-center justify-center gap-2 border-t border-border bg-muted/30 px-4 py-3">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="tap-target h-8 gap-1.5 text-xs"
           onClick={() => onEditar(plano)}
         >
-          <Pencil className="h-4 w-4" />
-        </IconAction>
-        <IconAction
-          label="Excluir"
-          ariaLabel={`Excluir plano ${plano.nome}`}
-          className="text-destructive hover:text-destructive"
+          <Pencil className="h-3.5 w-3.5" />
+          Editar
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="tap-target h-8 gap-1.5 text-xs text-destructive hover:text-destructive"
           onClick={() => onExcluir(plano)}
         >
-          <Trash2 className="h-4 w-4" />
-        </IconAction>
+          <Trash2 className="h-3.5 w-3.5" />
+          Excluir
+        </Button>
       </div>
     </article>
   );
