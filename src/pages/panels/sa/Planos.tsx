@@ -344,7 +344,7 @@ export default function PlanosList() {
                     arrastavel={arrastavel}
                     onEditar={abrirEdicao}
                     onExcluir={setAlvo}
-                    onToggleStatus={alternarStatus}
+                    onToggleStatus={abrirConfirmacaoToggle}
                   />
                 ))}
               </div>
@@ -356,6 +356,30 @@ export default function PlanosList() {
           <p className="text-sm text-muted-foreground">Nenhum plano encontrado para essa busca.</p>
         )}
       </div>
+
+      <AlertDialog open={Boolean(toggleAlvo)} onOpenChange={(open) => !open && setToggleAlvo(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{toggleAlvo?.ativo ? "Inativar plano" : "Ativar plano"}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deseja {toggleAlvo?.ativo ? "inativar" : "ativar"} o plano <strong>{toggleAlvo?.nome}</strong>?
+              A ordem de exibição dos planos será preservada.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="tap-target">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="tap-target"
+              onClick={(e) => {
+                e.preventDefault();
+                void confirmarToggle();
+              }}
+            >
+              {toggleAlvo?.ativo ? "Inativar" : "Ativar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={Boolean(alvo)} onOpenChange={(open) => !open && setAlvo(null)}>
         <AlertDialogContent>
