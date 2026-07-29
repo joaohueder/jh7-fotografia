@@ -6,6 +6,7 @@ import {
   Phone,
   Plus,
   Clock,
+  Eye,
   Heart,
   StickyNote,
   Trash2,
