@@ -149,8 +149,11 @@ function AuthPage() {
 
 
       <div className="relative z-10 grid min-h-dvh grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
-        {/* Left — brand narrative (somente desktop) */}
-        <section className="relative order-2 hidden flex-col justify-between gap-10 px-[var(--gutter)] pb-12 pt-4 lg:order-1 lg:flex lg:gap-16 lg:py-16">
+        {/* Left — brand narrative (somente desktop)
+            Ritmo vertical: marca › narrativa › provas › rodapé.
+            A lista deixou de ser um bloco único pesado: agora são cartões
+            translúcidos independentes, com marcador numerado e hover sutil. */}
+        <section className="relative order-2 hidden flex-col justify-between gap-10 px-[var(--gutter)] pb-12 pt-4 lg:order-1 lg:flex lg:gap-14 lg:py-16 xl:pl-[max(var(--gutter),4rem)]">
           <header className="order-first flex min-w-0 items-center gap-3 animate-fade-in">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-border bg-surface">
               <Camera className="h-[1.125rem] w-[1.125rem] text-gold" />
@@ -160,41 +163,47 @@ function AuthPage() {
             </span>
           </header>
 
-          <div className="max-w-xl stagger">
-            <p className="text-[0.6875rem] font-bold uppercase tracking-[0.24em] text-gold">
+          <div className="max-w-[34rem] stagger">
+            <p className="flex items-center gap-3 text-[0.6875rem] font-bold uppercase tracking-[0.24em] text-gold">
+              <span aria-hidden className="h-px w-8 bg-gold/50" />
               Plataforma para estúdios
             </p>
 
-            <h1 className="mt-6 text-[clamp(2.25rem,4vw+0.5rem,3.75rem)] leading-[1.05]">
+            <h1 className="mt-5 text-[clamp(2.25rem,3.6vw+0.5rem,3.5rem)] leading-[1.03] tracking-[-0.02em]">
               Gerencie seu estúdio
               <br />
               com <span className="text-gradient-gold">clareza</span>
             </h1>
 
-            <p className="mt-6 max-w-[38ch] text-[clamp(0.9375rem,0.4vw+0.85rem,1.0625rem)] leading-[1.7] text-foreground/70">
+            <p className="mt-5 max-w-[44ch] text-[clamp(0.9375rem,0.35vw+0.85rem,1.0625rem)] leading-[1.65] text-foreground/65">
               Sessões, clientes, contratos e entregas em um único fluxo — pensado
               para fotógrafos que tratam o próprio negócio com o mesmo cuidado
               que tratam a luz.
             </p>
 
-
-            <ul className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-border bg-border/60">
-              {HIGHLIGHTS.map((item) => (
+            <ul className="mt-9 grid gap-2.5">
+              {HIGHLIGHTS.map((item, i) => (
                 <li
                   key={item}
-                  className="group flex items-center gap-4 bg-surface/70 px-5 py-4 text-[0.9375rem] font-medium text-foreground/85 transition-colors duration-300 hover:bg-surface-elevated"
+                  className="group flex items-center gap-4 rounded-xl border border-border/70 bg-surface/50 px-4 py-3.5 text-[0.9375rem] font-medium text-foreground/80 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:border-gold/35 hover:bg-surface-elevated hover:text-foreground"
                 >
-                  <span className="h-1 w-6 shrink-0 rounded-full bg-gold/45 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:w-10 group-hover:bg-gold" />
+                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-border/80 bg-background/50 text-[0.6875rem] font-bold tabular-nums text-gold/80 transition-colors duration-300 group-hover:border-gold/40 group-hover:text-gold">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
                   <span className="min-w-0">{item}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <p className="text-xs tracking-wide text-muted-foreground/70 animate-fade-in">
-            © {new Date().getFullYear()} JH7 Gestão Fotográfica
-          </p>
+          <div className="flex items-center gap-3 animate-fade-in">
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand-green" />
+            <p className="text-xs tracking-wide text-muted-foreground/70">
+              © {new Date().getFullYear()} JH7 Gestão Fotográfica
+            </p>
+          </div>
         </section>
+
 
         {/* Right — sign in */}
         <section className="order-1 flex items-center justify-center px-[var(--gutter)] py-[clamp(1.5rem,6vw,4rem)] lg:order-2">
