@@ -213,6 +213,66 @@ export default function ClienteForm() {
   const [contatos, setContatos] = useState<ClienteContato[]>([]);
   const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [step, setStep] = useState(0);
+  /** Cliente já cadastrado com o mesmo CPF/CNPJ, aguardando confirmação. */
+  const [duplicado, setDuplicado] = useState<{
+    cliente: Cliente;
+    contatos: ClienteContato[];
+  } | null>(null);
+  /** Quando preenchido, o cadastro será unificado neste cliente já existente. */
+  const [mesclarId, setMesclarId] = useState<string | null>(null);
+
+  /**
+   * Confere se o CPF/CNPJ já pertence a outro cliente da empresa.
+   * Ao converter um lead, oferece puxar os dados do cadastro encontrado.
+   */
+  async function conferirDocumento(): Promise<boolean> {
+    if (!empresaId || !form.documento?.trim() || !isValidCpfCnpj(form.documento)) return true;
+    try {
+      const achado = await buscarClientePorDocumento(empresaId, form.documento, registroId);
+      if (!achado || achado.cliente.id === mesclarId) return true;
+      setDuplicado(achado);
+      setError("documento", "Já existe um cliente com este CPF/CNPJ.");
+      return false;
+    } catch {
+      return true; // a restrição do banco garante a unicidade
+    }
+  }
+
+  /** Preenche o formulário com os dados do cliente já cadastrado. */
+  function puxarDadosDuplicado() {
+    if (!duplicado) return;
+    const { cliente, contatos: lista } = duplicado;
+    setForm({
+      nome: cliente.nome ?? "",
+      nascimento: cliente.nascimento ?? "",
+      status: cliente.status,
+      origem: cliente.origem ?? "CLIENTE",
+      documento: maskCpfCnpj(cliente.documento ?? ""),
+      cep: maskCep(cliente.cep ?? ""),
+      endereco: cliente.endereco ?? "",
+      complemento: cliente.complemento ?? "",
+      numero: cliente.numero ?? "",
+      bairro: cliente.bairro ?? "",
+      cidade: cliente.cidade ?? "",
+      uf: cliente.uf ?? "",
+      contato_whatsapp: maskPhone(cliente.contato_whatsapp ?? ""),
+      contato_email: cliente.contato_email ?? "",
+      observacoes: cliente.observacoes ?? "",
+    });
+    setContatos(
+      (lista ?? []).map((c) => ({
+        tipo: CONTATO_TIPOS.includes(c.tipo as never) ? c.tipo : "Telefone",
+        valor: maskContato(c.tipo, c.valor),
+        descricao: c.descricao ?? "",
+      })),
+    );
+    setMesclarId(cliente.id);
+    setError("documento", null);
+    setDuplicado(null);
+    notifySuccess(
+      "Dados do cliente existente carregados. As notas do lead serão transferidas quando você salvar.",
+    );
+  }
 
   useEffect(() => {
     if (!data) return;
