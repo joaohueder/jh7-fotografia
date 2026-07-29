@@ -507,17 +507,29 @@ export function EmpresaAssinaturas({ empresaId }: { empresaId: string }) {
         )}
       </section>
 
-      <SelecionarPlanoDialog
+      <ContratarPlanoDialog
         open={modalOpen}
-        onOpenChange={setModalOpen}
+        onOpenChange={(v) => {
+          setModalOpen(v);
+          if (!v) {
+            setPlano(null);
+            setObservacao("");
+            setInicio(hoje());
+          }
+        }}
         planos={planos ?? []}
         loading={loadingPlanos}
-        selecionado={plano?.id ?? null}
-        onSelecionar={(p) => {
-          setPlano(p);
-          setModalOpen(false);
-        }}
+        temAtiva={Boolean(ativa)}
+        plano={plano}
+        onPlano={setPlano}
+        inicio={inicio}
+        onInicio={setInicio}
+        observacao={observacao}
+        onObservacao={setObservacao}
+        salvando={definir.isPending}
+        onConfirmar={abrirConfirmacao}
       />
+
 
       <AlertDialog open={confirmarTroca} onOpenChange={setConfirmarTroca}>
         <AlertDialogContent>
