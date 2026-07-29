@@ -247,50 +247,8 @@ export default function ClienteForm() {
       notifyError(err, { title: "Não foi possível salvar o cliente" });
     }
   }
-
-  if (editando && isLoading) {
-    return (
-      <PanelLayout accent="admin" menu={ADMIN_MENU}>
-        <div className="flex items-center gap-2 py-12 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" /> Carregando cliente…
-        </div>
-      </PanelLayout>
-    );
-  }
-
-  return (
-    <PanelLayout accent="admin" menu={ADMIN_MENU}>
-      <div className="mx-auto w-full max-w-[var(--app-max-w)] space-y-[clamp(1.5rem,4vw,2rem)]">
-        <header className="space-y-3">
-          <Button
-            type="button"
-            variant="ghost"
-            className="tap-target -ml-2 gap-2"
-            onClick={() => navigate("/admin/clientes")}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Voltar para clientes
-          </Button>
-          <div className="space-y-1">
-            <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">
-              {editando ? "Editar cliente" : "Novo cliente"}
-            </h1>
-            <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
-              Dados cadastrais, endereço e contatos do cliente do estúdio.
-            </p>
-          </div>
-        </header>
-
-        <form onSubmit={handleSubmit} className="space-y-[clamp(1rem,3vw,1.5rem)]">
-          <Tabs defaultValue="dados" className="space-y-5">
-            <TabsList className="flex-wrap">
-              <TabsTrigger value="dados">Dados básicos</TabsTrigger>
-              <TabsTrigger value="endereco">Endereço</TabsTrigger>
-              <TabsTrigger value="contatos">Contatos</TabsTrigger>
-              <TabsTrigger value="observacoes">Observações</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="dados" className="mt-0">
+  const secoes = [
+    { value: "dados", label: "Dados básicos", node: (
               <Section title="Dados básicos" icon={UserRound}>
                 <Field label="Nome" required>
                   <Input
@@ -356,9 +314,8 @@ export default function ClienteForm() {
                   />
                 </Field>
               </Section>
-            </TabsContent>
-
-            <TabsContent value="endereco" className="mt-0">
+    ) },
+    { value: "endereco", label: "Endereço", node: (
               <Section title="Endereço" icon={MapPin}>
                 <Field label="CEP" error={errors.cep}>
                   <Input
@@ -414,9 +371,8 @@ export default function ClienteForm() {
                   />
                 </Field>
               </Section>
-            </TabsContent>
-
-            <TabsContent value="contatos" className="mt-0">
+    ) },
+    { value: "contatos", label: "Contatos", node: (
               <Section title="Contatos" icon={Phone}>
                 <Field label="WhatsApp" error={errors.contato_whatsapp}>
                   <Input
@@ -570,9 +526,8 @@ export default function ClienteForm() {
                   )}
                 </div>
               </Section>
-            </TabsContent>
-
-            <TabsContent value="observacoes" className="mt-0">
+    ) },
+    { value: "observacoes", label: "Observações", node: (
               <Section title="Observações" icon={StickyNote}>
                 <div className="col-span-full space-y-2">
                   <Label className="text-sm">Anotações internas</Label>
@@ -584,27 +539,202 @@ export default function ClienteForm() {
                   />
                 </div>
               </Section>
-            </TabsContent>
-          </Tabs>
+    ) },
+  ];
 
-          <div className="flex flex-wrap items-center gap-3">
-            <Button type="submit" disabled={salvar.isPending} className="tap-target gap-2">
-              {salvar.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4" />
-              )}
-              {editando ? "Salvar alterações" : "Cadastrar cliente"}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              className="tap-target"
-              onClick={() => navigate("/admin/clientes")}
-            >
-              Cancelar
-            </Button>
+  const ultimo = secoes.length - 1;
+
+  function validarEtapa(indice: number) {
+    if (indice === 0) {
+      if (!form.nome.trim()) {
+        notifyValidation("Informe o nome do cliente.");
+        return false;
+      }
+      if (form.documento?.trim() && !isValidCpfCnpj(form.documento)) {
+        notifyValidation("CPF/CNPJ inválido.");
+        return false;
+      }
+    }
+    if (indice === 1 && form.cep?.trim() && !isValidCep(form.cep)) {
+      notifyValidation("CEP inválido.");
+      return false;
+    }
+    if (indice === 2) {
+      if (form.contato_whatsapp?.trim() && !isValidPhone(form.contato_whatsapp)) {
+        notifyValidation("WhatsApp inválido.");
+        return false;
+      }
+      if (form.contato_email?.trim() && !isValidEmail(form.contato_email)) {
+        notifyValidation("E-mail inválido.");
+        return false;
+      }
+      if (contatos.some((c) => validateContato(c.tipo, c.valor))) {
+        notifyValidation("Verifique os contatos adicionais.");
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function avancar() {
+    if (!validarEtapa(step)) return;
+    setStep((s) => Math.min(ultimo, s + 1));
+  }
+
+  if (editando && isLoading) {
+    return (
+      <PanelLayout accent="admin" menu={ADMIN_MENU}>
+        <div className="flex items-center gap-2 py-12 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" /> Carregando cliente…
+        </div>
+      </PanelLayout>
+    );
+  }
+
+  return (
+    <PanelLayout accent="admin" menu={ADMIN_MENU}>
+      <div className="mx-auto w-full max-w-[var(--app-max-w)] space-y-[clamp(1.5rem,4vw,2rem)]">
+        <header className="space-y-3">
+          <Button
+            type="button"
+            variant="ghost"
+            className="tap-target -ml-2 gap-2"
+            onClick={() => navigate("/admin/clientes")}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar para clientes
+          </Button>
+          <div className="space-y-1">
+            <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">
+              {editando ? "Editar cliente" : "Novo cliente"}
+            </h1>
+            <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
+              {editando
+                ? "Dados cadastrais, endereço e contatos do cliente do estúdio."
+                : `Etapa ${step + 1} de ${secoes.length} — ${secoes[step].label}`}
+            </p>
           </div>
+        </header>
+
+        {!editando && (
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+              {secoes.map((s, i) => (
+                <span
+                  key={s.value}
+                  className="inline-flex items-center gap-2 font-semibold"
+                  style={{
+                    color:
+                      i === step
+                        ? "var(--panel-accent)"
+                        : i < step
+                          ? "hsl(var(--foreground))"
+                          : "hsl(var(--muted-foreground))",
+                  }}
+                >
+                  <span
+                    className="inline-flex h-6 w-6 items-center justify-center rounded-full border text-[11px]"
+                    style={{
+                      borderColor: i <= step ? "var(--panel-accent)" : "hsl(var(--border))",
+                      background:
+                        i === step
+                          ? "color-mix(in oklab, var(--panel-accent) 16%, transparent)"
+                          : undefined,
+                    }}
+                  >
+                    {i + 1}
+                  </span>
+                  <span className="hidden sm:inline">{s.label}</span>
+                </span>
+              ))}
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{
+                  width: `${((step + 1) / secoes.length) * 100}%`,
+                  background: "var(--panel-accent)",
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (editando || step === ultimo) void handleSubmit(e);
+          }}
+          className="space-y-[clamp(1rem,3vw,1.5rem)]"
+        >
+          {editando ? (
+            <Tabs defaultValue="dados" className="space-y-5">
+              <TabsList className="flex-wrap">
+                {secoes.map((s) => (
+                  <TabsTrigger key={s.value} value={s.value}>
+                    {s.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              {secoes.map((s) => (
+                <TabsContent key={s.value} value={s.value} className="mt-0">
+                  {s.node}
+                </TabsContent>
+              ))}
+            </Tabs>
+          ) : (
+            secoes[step].node
+          )}
+
+          {editando ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <Button type="submit" disabled={salvar.isPending} className="tap-target gap-2">
+                {salvar.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                Salvar alterações
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="tap-target"
+                onClick={() => navigate("/admin/clientes")}
+              >
+                Cancelar
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="tap-target gap-2"
+                disabled={step === 0}
+                onClick={() => setStep((s) => Math.max(0, s - 1))}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Voltar
+              </Button>
+
+              {step === ultimo ? (
+                <Button type="submit" disabled={salvar.isPending} className="tap-target gap-2">
+                  {salvar.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                  Cadastrar cliente
+                </Button>
+              ) : (
+                <Button type="button" className="tap-target gap-2" onClick={avancar}>
+                  Continuar
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          )}
         </form>
       </div>
     </PanelLayout>
