@@ -300,7 +300,7 @@ export default function PlanosList() {
             onDragEnd={(e) => void aoSoltar(e)}
           >
             <SortableContext items={planos.map((p) => p.id)} strategy={rectSortingStrategy}>
-              <div className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(min(16rem,100%),1fr))]">
+              <div className="grid gap-5 [grid-template-columns:repeat(auto-fill,minmax(min(18rem,100%),1fr))]">
                 {planos.map((plano) => (
                   <PlanoCard
                     key={plano.id}
