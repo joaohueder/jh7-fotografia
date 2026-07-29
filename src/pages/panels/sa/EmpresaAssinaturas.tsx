@@ -7,6 +7,9 @@ import {
   Loader2,
   Search,
   Sparkles,
+  Infinity as InfinityIcon,
+  UserPlus,
+  Users,
 } from "lucide-react";
 
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
@@ -73,6 +76,75 @@ function diasRestantes(fimIso: string) {
   return Math.round((fim - agora) / 86400000);
 }
 
+/** Formata um limite do plano (null/vazio = ilimitado). */
+function limiteLabel(valor: number | null | undefined) {
+  if (valor === null || valor === undefined) return "Ilimitado";
+  return valor.toLocaleString("pt-BR");
+}
+
+/** Bloco visual com os limites de leads e clientes do plano. */
+function LimitesPlano({
+  plano,
+  compact = false,
+}: {
+  plano: Pick<Plano, "limite_leads" | "limite_clientes"> | null | undefined;
+  compact?: boolean;
+}) {
+  const itens = [
+    { icon: UserPlus, label: "Leads", valor: plano?.limite_leads ?? null },
+    { icon: Users, label: "Clientes", valor: plano?.limite_clientes ?? null },
+  ];
+  if (compact) {
+    return (
+      <div className="flex flex-wrap gap-1.5">
+        {itens.map((i) => (
+          <span
+            key={i.label}
+            className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
+          >
+            <i.icon className="h-3 w-3" />
+            {i.label}: {limiteLabel(i.valor)}
+          </span>
+        ))}
+      </div>
+    );
+  }
+  return (
+    <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(min(10rem,100%),1fr))]">
+      {itens.map((i) => (
+        <div
+          key={i.label}
+          className="flex items-center gap-2 rounded-xl border border-border bg-background/60 px-3 py-2"
+        >
+          <span
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+            style={{
+              background: "color-mix(in oklab, var(--panel-accent) 12%, transparent)",
+              color: "var(--panel-accent)",
+            }}
+          >
+            <i.icon className="h-4 w-4" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+              Limite de {i.label}
+            </p>
+            <p className="flex items-center gap-1 text-sm font-bold">
+              {i.valor === null || i.valor === undefined ? (
+                <>
+                  <InfinityIcon className="h-4 w-4" /> Ilimitado
+                </>
+              ) : (
+                limiteLabel(i.valor)
+              )}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function precoLabel(gratuito: boolean, valor: number | null) {
   if (gratuito) return "Gratuito";
   if (valor === null || valor === undefined) return "—";
@@ -82,10 +154,12 @@ function precoLabel(gratuito: boolean, valor: number | null) {
 /** Card de uma assinatura do histórico. */
 function AssinaturaCard({
   item,
+  plano,
   onEncerrar,
   encerrando,
 }: {
   item: Assinatura;
+  plano?: Plano | null;
   onEncerrar: () => void;
   encerrando: boolean;
 }) {
@@ -152,6 +226,19 @@ function AssinaturaCard({
           <dd className="font-medium">{item.vigencia_dias || 30} dias</dd>
         </div>
       </dl>
+
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Limites do plano
+        </p>
+        {plano ? (
+          <LimitesPlano plano={plano} />
+        ) : (
+          <p className="rounded-xl border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
+            Plano não encontrado no cadastro atual — limites indisponíveis.
+          </p>
+        )}
+      </div>
 
       {ativo ? (
         <p
@@ -292,6 +379,7 @@ function ContratarPlanoDialog({
                       <span className="text-lg font-bold" style={{ color: "var(--panel-accent)" }}>
                         {precoLabel(p.gratuito, p.valor)}
                       </span>
+                      <LimitesPlano plano={p} compact />
                     </button>
                   );
                 })}
@@ -355,6 +443,12 @@ export function EmpresaAssinaturas({ empresaId }: { empresaId: string }) {
   const [observacao, setObservacao] = useState("");
   const [confirmarTroca, setConfirmarTroca] = useState(false);
   const [encerrarAlvo, setEncerrarAlvo] = useState<Assinatura | null>(null);
+
+  const planoPorId = useMemo(() => {
+    const map = new Map<string, Plano>();
+    (planos ?? []).forEach((p) => map.set(p.id, p));
+    return map;
+  }, [planos]);
 
   const lista = assinaturas ?? [];
   const ativa = lista.find((a) => a.ativo) ?? null;
@@ -437,6 +531,7 @@ export function EmpresaAssinaturas({ empresaId }: { empresaId: string }) {
         ) : ativa ? (
           <AssinaturaCard
             item={ativa}
+            plano={ativa.plano_id ? (planoPorId.get(ativa.plano_id) ?? null) : null}
             onEncerrar={() => setEncerrarAlvo(ativa)}
             encerrando={encerrar.isPending}
           />
@@ -482,7 +577,13 @@ export function EmpresaAssinaturas({ empresaId }: { empresaId: string }) {
         ) : (
           <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(18rem,100%),1fr))]">
             {historico.map((a) => (
-              <AssinaturaCard key={a.id} item={a} onEncerrar={() => undefined} encerrando={false} />
+              <AssinaturaCard
+                key={a.id}
+                item={a}
+                plano={a.plano_id ? (planoPorId.get(a.plano_id) ?? null) : null}
+                onEncerrar={() => undefined}
+                encerrando={false}
+              />
             ))}
           </div>
         )}
