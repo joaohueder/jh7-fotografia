@@ -25,6 +25,8 @@ import {
   fetchEmpresaDependencias,
   type Empresa,
 } from "@/hooks/use-empresas";
+import { useAssinaturasAtivas } from "@/hooks/use-assinaturas";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
