@@ -139,8 +139,24 @@ function TemaCard() {
 
 /** Paleta de cores individual do usuário. */
 function TemplatesCard() {
-  const { paletteId, systemPalette, customColors, setPalette, setCustomColors, resetPalette, isDefault } =
+  const { paletteId, systemPalette, customColors, savePalette, setCustomColors, resetPalette, isDefault } =
     usePalette();
+  const [pending, setPending] = useState<string | null>(null);
+  const [salvando, setSalvando] = useState(false);
+
+  async function confirmar() {
+    if (!pending) return;
+    setSalvando(true);
+    const { error } = await savePalette(pending);
+    setSalvando(false);
+    const nome = paletteName(pending);
+    setPending(null);
+    if (error) {
+      notifyError(error, { title: "Não foi possível salvar a paleta" });
+      return;
+    }
+    notifySuccess(`A paleta ${nome} foi salva no seu perfil.`, "Paleta aplicada");
+  }
 
   return (
     <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
@@ -165,7 +181,7 @@ function TemplatesCard() {
       <PaletteGrid
         value={paletteId}
         custom={customColors}
-        onChange={setPalette}
+        onChange={(id) => setPending(id)}
         onCustomChange={setCustomColors}
       />
 
@@ -181,9 +197,33 @@ function TemplatesCard() {
           Usar padrão do sistema ({paletteName(systemPalette)})
         </Button>
       </div>
+
+      <AlertDialog open={pending !== null} onOpenChange={(open) => !open && setPending(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Aplicar a paleta {pending ? paletteName(pending) : ""}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              As cores do sistema mudam imediatamente e a escolha fica salva no seu perfil.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={salvando}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void confirmar();
+              }}
+              disabled={salvando}
+            >
+              {salvando ? "Salvando..." : "Confirmar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 }
+
 
 export default function MeuPerfil() {
   usePageMeta("Meu perfil — JH7 Gestão Fotográfica", "Dados da sua conta.");
