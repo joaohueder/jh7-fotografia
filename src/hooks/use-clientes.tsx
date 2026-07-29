@@ -71,7 +71,8 @@ export function useClientes() {
         .from("clientes")
         .select("*")
         .eq("empresa_id", empresaId!)
-        .eq("origem", "CLIENTE")
+        // Clientes = cadastros completos (leads só viram cliente após preencher os dados)
+        .not("documento", "is", null)
         .order("nome", { ascending: true });
 
       if (error) throw error;
