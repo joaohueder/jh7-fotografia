@@ -680,43 +680,18 @@ export default function LeadsList() {
               </p>
             </div>
 
-            {/* Na edição, as ações ficam acima do histórico para não precisar
-                rolar até o fim da tela depois de mudar nome/WhatsApp/interesse. */}
-            {editando ? (
-              <div className="flex flex-wrap justify-end gap-2 border-t border-border pt-4">
-                <Button variant="outline" className="tap-target" onClick={() => setAberto(false)}>
-                  Cancelar
-                </Button>
-                <Button className="tap-target gap-2" onClick={handleSalvar} disabled={salvar.isPending}>
-                  {salvar.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  Salvar lead
-                </Button>
-              </div>
-            ) : null}
-
-            {editando ? (
-              <div className="border-t border-border pt-4">
-                <ClienteNotas
-                  clienteId={editando.id}
-                  modulo="LEADS"
-                  titulo="Histórico de movimentações"
-                  placeholder="Novo retorno, combinado ou andamento da negociação."
-                />
-              </div>
-            ) : null}
           </div>
 
-          {!editando ? (
-            <DialogFooter>
-              <Button variant="outline" className="tap-target" onClick={() => setAberto(false)}>
-                Cancelar
-              </Button>
-              <Button className="tap-target gap-2" onClick={handleSalvar} disabled={salvar.isPending}>
-                {salvar.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                Salvar lead
-              </Button>
-            </DialogFooter>
-          ) : null}
+          <DialogFooter>
+            <Button variant="outline" className="tap-target" onClick={() => setAberto(false)}>
+              Cancelar
+            </Button>
+            <Button className="tap-target gap-2" onClick={handleSalvar} disabled={salvar.isPending}>
+              {salvar.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Salvar lead
+            </Button>
+          </DialogFooter>
+
         </DialogContent>
       </Dialog>
 
