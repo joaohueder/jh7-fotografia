@@ -178,7 +178,16 @@ export default function App() {
                 </RequireAuth>
               }
             />
+            <Route
+              path="/configuracoes"
+              element={
+                <RequireAuth>
+                  <Configuracoes />
+                </RequireAuth>
+              }
+            />
             <Route path="*" element={<NotFoundPage />} />
+
           </Routes>
           <SystemMessageDialog />
         </AuthProvider>
