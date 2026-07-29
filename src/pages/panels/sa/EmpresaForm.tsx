@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Eye, EyeOff, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ClipboardCopy,
+  Eye,
+  EyeOff,
+  Loader2,
+  Plus,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
@@ -246,6 +255,28 @@ export default function EmpresaForm() {
       [`${prefix}cidade`]: found.cidade,
       [`${prefix}uf`]: found.uf,
     }));
+  }
+
+  /** Replica o endereço da empresa nos campos de endereço do responsável. */
+  function copiarEnderecoEmpresa() {
+    const temEndereco = [form.cep, form.endereco, form.numero, form.bairro, form.cidade, form.uf]
+      .map((v) => (v ?? "").trim())
+      .some(Boolean);
+    if (!temEndereco) {
+      notifyValidation("Preencha o endereço da empresa antes de copiar para o responsável.");
+      return;
+    }
+    setForm((prev) => ({
+      ...prev,
+      resp_cep: prev.cep ?? "",
+      resp_endereco: prev.endereco ?? "",
+      resp_numero: prev.numero ?? "",
+      resp_complemento: prev.complemento ?? "",
+      resp_bairro: prev.bairro ?? "",
+      resp_cidade: prev.cidade ?? "",
+      resp_uf: prev.uf ?? "",
+    }));
+    setError("resp_cep", null);
   }
 
   async function validarEmailAcesso() {
@@ -728,6 +759,20 @@ export default function EmpresaForm() {
                     className="h-11 text-base"
                   />
                 </Field>
+                <div className="col-span-full flex flex-wrap items-center gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={copiarEnderecoEmpresa}
+                    className="tap-target"
+                  >
+                    <ClipboardCopy className="mr-2 h-4 w-4" />
+                    Copiar endereço da empresa
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Preenche CEP, endereço, número, complemento, bairro, cidade e UF do responsável.
+                  </p>
+                </div>
                 <Field label="CEP" error={errors.resp_cep}>
                   <Input
                     value={form.resp_cep ?? ""}
