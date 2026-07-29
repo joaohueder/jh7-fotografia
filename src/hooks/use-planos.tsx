@@ -115,6 +115,7 @@ export function useCreatePlano() {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["planos"] });
+      void qc.invalidateQueries({ queryKey: ["plano"] });
       void qc.invalidateQueries({ queryKey: ["plano-gratuito-ativo"] });
     },
   });
@@ -132,6 +133,7 @@ export function useUpdatePlano() {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["planos"] });
+      void qc.invalidateQueries({ queryKey: ["plano"] });
       void qc.invalidateQueries({ queryKey: ["plano-gratuito-ativo"] });
     },
   });
@@ -146,6 +148,7 @@ export function useTogglePlanoStatus() {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["planos"] });
+      void qc.invalidateQueries({ queryKey: ["plano"] });
       void qc.invalidateQueries({ queryKey: ["plano-gratuito-ativo"] });
     },
   });
@@ -160,6 +163,7 @@ export function useDeletePlano() {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["planos"] });
+      void qc.invalidateQueries({ queryKey: ["plano"] });
       void qc.invalidateQueries({ queryKey: ["plano-gratuito-ativo"] });
     },
   });
@@ -182,6 +186,7 @@ export function useReordenarPlanos() {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["planos"] });
+      void qc.invalidateQueries({ queryKey: ["plano"] });
       void qc.invalidateQueries({ queryKey: ["plano-gratuito-ativo"] });
     },
   });
