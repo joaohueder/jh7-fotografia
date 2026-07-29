@@ -55,6 +55,17 @@ function formataData(iso: string | null) {
   return new Date(iso).toLocaleDateString("pt-BR");
 }
 
+function formataDataHora(iso: string | null) {
+  if (!iso) return "Nunca acessou";
+  return new Date(iso).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 function Badge({ cor, children }: { cor: string; children: React.ReactNode }) {
   return (
     <span
