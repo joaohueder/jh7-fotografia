@@ -24,7 +24,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { SA_MENU } from "@/pages/panels/sa/menu";
-import { notifyError, notifySuccess } from "@/lib/system-message";
+import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 import {
   usePlanos,
   useDeletePlano,
@@ -219,6 +219,16 @@ export default function PlanosList() {
   }
 
   function abrirConfirmacaoToggle(plano: Plano) {
+    // Só pode existir um plano gratuito ativo por vez.
+    if (!plano.ativo && plano.gratuito) {
+      const conflito = (data ?? []).find((p) => p.gratuito && p.ativo && p.id !== plano.id);
+      if (conflito) {
+        notifyValidation(
+          `Já existe um plano gratuito ativo (${conflito.nome}). Inative ou altere esse plano antes de continuar.`,
+        );
+        return;
+      }
+    }
     setToggleAlvo(plano);
   }
 

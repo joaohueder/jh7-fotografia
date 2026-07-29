@@ -9,6 +9,7 @@ import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-messa
 import { formatMoney, maskMoney, parseMoney } from "@/lib/br-masks";
 import {
   usePlano,
+  usePlanoGratuitoAtivo,
   useCreatePlano,
   useUpdatePlano,
   type PlanoInput,
@@ -147,6 +148,33 @@ export default function PlanoForm() {
   const { data, isLoading } = usePlano(id);
   const create = useCreatePlano();
   const update = useUpdatePlano();
+  const { data: gratuitoAtivo } = usePlanoGratuitoAtivo(id);
+
+  const MSG_GRATUITO = gratuitoAtivo
+    ? `Já existe um plano gratuito ativo (${gratuitoAtivo.nome}). Inative ou altere esse plano antes de continuar.`
+    : "Já existe um plano gratuito ativo. Inative ou altere esse plano antes de continuar.";
+
+  /** Só permite marcar gratuito se não houver outro gratuito ativo. */
+  function alternarGratuito(v: boolean) {
+    if (v && gratuitoAtivo && ativo) {
+      notifyValidation(MSG_GRATUITO);
+      return;
+    }
+    setGratuito(v);
+    if (v) {
+      setValor("");
+      setErroValor(null);
+    }
+  }
+
+  /** Só permite ativar o plano se ele não conflitar com o gratuito ativo. */
+  function alternarAtivo(v: boolean) {
+    if (v && gratuito && gratuitoAtivo) {
+      notifyValidation(MSG_GRATUITO);
+      return;
+    }
+    setAtivo(v);
+  }
 
   const [nome, setNome] = useState("");
   const [ativo, setAtivo] = useState(true);
@@ -218,6 +246,10 @@ export default function PlanoForm() {
     }
     if (!validarValor()) {
       notifyValidation("Corrija o valor do plano.");
+      return;
+    }
+    if (gratuito && ativo && gratuitoAtivo) {
+      notifyValidation(MSG_GRATUITO);
       return;
     }
     const payload: PlanoInput = {
@@ -343,7 +375,7 @@ export default function PlanoForm() {
                         ativo ? "Ativo — disponível para contratação." : "Inativo — não é oferecido."
                       }
                       checked={ativo}
-                      onChange={setAtivo}
+                      onChange={alternarAtivo}
                     />
                   </Section>
                 </TabsContent>
@@ -355,13 +387,7 @@ export default function PlanoForm() {
                       label="Plano gratuito"
                       description={gratuito ? "Sim — sem cobrança." : "Não — informe o valor mensal."}
                       checked={gratuito}
-                      onChange={(v) => {
-                        setGratuito(v);
-                        if (v) {
-                          setValor("");
-                          setErroValor(null);
-                        }
-                      }}
+                      onChange={alternarGratuito}
                     />
                     {!gratuito && (
                       <Field
@@ -412,13 +438,7 @@ export default function PlanoForm() {
                       label="Plano gratuito"
                       description={gratuito ? "Sim — sem cobrança." : "Não — informe o valor mensal."}
                       checked={gratuito}
-                      onChange={(v) => {
-                        setGratuito(v);
-                        if (v) {
-                          setValor("");
-                          setErroValor(null);
-                        }
-                      }}
+                      onChange={alternarGratuito}
                     />
                     {!gratuito && (
                       <Field
@@ -454,7 +474,7 @@ export default function PlanoForm() {
                         ativo ? "Ativo — disponível para contratação." : "Inativo — não é oferecido."
                       }
                       checked={ativo}
-                      onChange={setAtivo}
+                      onChange={alternarAtivo}
                     />
                   </Section>
                 )}
