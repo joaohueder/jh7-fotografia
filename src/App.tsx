@@ -13,13 +13,15 @@ import EmpresasList from "@/pages/panels/sa/Empresas";
 import EmpresaForm from "@/pages/panels/sa/EmpresaForm";
 import SaConfiguracoes from "@/pages/panels/sa/Configuracoes";
 import AdminDashboard from "@/pages/panels/AdminDashboard";
+import AdminConfiguracoes from "@/pages/panels/admin/Configuracoes";
 import UsuarioDashboard from "@/pages/panels/UsuarioDashboard";
 import { RoleRedirect, RequireRole } from "@/components/role-routing";
 import MeuPerfil from "@/pages/conta/Perfil";
 import Seguranca from "@/pages/conta/Seguranca";
 import AlterarSenha from "@/pages/conta/AlterarSenha";
-import Configuracoes from "@/pages/conta/Configuracoes";
+import ConfiguracoesRedirect from "@/pages/ConfiguracoesRedirect";
 import NotFoundPage from "@/pages/NotFound";
+
 import { AppLayoutProvider } from "@/hooks/use-app-layout";
 
 
@@ -148,6 +150,16 @@ export default function App() {
               }
             />
             <Route
+              path="/admin/configuracoes"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <AdminConfiguracoes />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
               path="/admin/dashboard"
               element={
                 <RequireAuth>
@@ -157,6 +169,7 @@ export default function App() {
                 </RequireAuth>
               }
             />
+
             <Route
               path="/usuario/dashboard"
               element={
@@ -195,11 +208,12 @@ export default function App() {
               path="/configuracoes"
               element={
                 <RequireAuth>
-                  <Configuracoes />
+                  <ConfiguracoesRedirect />
                 </RequireAuth>
               }
             />
             <Route path="*" element={<NotFoundPage />} />
+
 
           </Routes>
           <SystemMessageDialog />
