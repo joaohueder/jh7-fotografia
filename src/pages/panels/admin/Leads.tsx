@@ -118,6 +118,15 @@ export default function LeadsList() {
   const limiteAtingido = limiteLeads !== null && usadoLeads >= limiteLeads;
   const restantes = limiteLeads === null ? null : Math.max(limiteLeads - usadoLeads, 0);
 
+  // Regra de limite de clientes: converter um lead cria um cliente novo, então
+  // só é permitido se ainda houver vaga de cliente no plano da empresa.
+  const limiteClientes = limites?.limite_clientes ?? null;
+  const usadoClientes = limites?.usado_clientes ?? 0;
+  const limiteClientesAtingido = limiteClientes !== null && usadoClientes >= limiteClientes;
+  const avisoLimiteClientes = limiteClientesAtingido
+    ? `Limite de clientes do plano atingido (${usadoClientes} de ${limiteClientes}). Para transformar este lead em cliente, contrate um plano maior ou libere espaço. Veja o consumo em Configurações › Limites.`
+    : "Abre o cadastro completo de cliente já preenchido com os dados do lead.";
+
 
 
 
