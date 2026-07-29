@@ -138,6 +138,16 @@ export default function App() {
               }
             />
             <Route
+              path="/sa/configuracoes"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["sa_admin"]}>
+                    <SaConfiguracoes />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
               path="/admin/dashboard"
               element={
                 <RequireAuth>
