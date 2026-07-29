@@ -1,6 +1,17 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AlertTriangle, Loader2, Mail, Pencil, Phone, Plus, Power, Trash2, Users } from "lucide-react";
+import {
+  AlertTriangle,
+  Loader2,
+  Mail,
+  Pencil,
+  Phone,
+  Plus,
+  Power,
+  Trash2,
+  UserPlus,
+  Users,
+} from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
