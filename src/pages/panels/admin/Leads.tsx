@@ -687,7 +687,7 @@ export default function LeadsList() {
                   </span>
                 ) : (
                   <span>
-                    Novas conversas devem ser adicionadas no histórico de movimentações, após salvar o lead.
+                    Novas conversas devem ser registradas no botão "Notas do lead", na lista.
                   </span>
                 )}
               </p>
