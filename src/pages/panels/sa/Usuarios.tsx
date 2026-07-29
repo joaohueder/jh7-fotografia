@@ -344,7 +344,7 @@ export default function UsuariosList() {
                 <thead className="bg-surface/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
                     <th className="px-3 py-2">Usuário</th>
-                    <th className="px-3 py-2">Tipo / Empresa</th>
+                    <th className="px-3 py-2">Tipo</th>
                     <th className="px-3 py-2">Acesso</th>
                     <th className="px-3 py-2 text-right">Ações</th>
                   </tr>
@@ -352,6 +352,7 @@ export default function UsuariosList() {
                 <tbody>
                   {lista.map((u) => (
                     <Fragment key={u.id}>
+                      {/* 1ª linha: nome / tipo / acesso (logado + último acesso/tempo) / ações */}
                       <tr className="border-t border-border">
                         <td className="px-3 py-2 align-top">
                           <p className="font-semibold leading-tight">{u.nome}</p>
@@ -360,15 +361,32 @@ export default function UsuariosList() {
                           <Badge cor={ROLE_COR[u.role]}>{ROLE_LABEL[u.role]}</Badge>
                         </td>
                         <td className="px-3 py-2 align-top">
-                          <ConexaoBadge logado={Boolean(u.logado)} desde={u.sessao_desde} agora={agora} />
+                          <div className="flex flex-col gap-1 leading-tight">
+                            <ConexaoBadge logado={Boolean(u.logado)} desde={u.sessao_desde} agora={agora} />
+                            <span className="text-xs text-muted-foreground">
+                              {u.logado ? "Total logado" : "Último acesso"}: {formataDataHora(u.ultimo_login)}
+                              {u.ultimo_login ? (
+                                <span className="ml-1 opacity-80">
+                                  ({tempoDecorrido(u.ultimo_login, agora) ?? "—"})
+                                </span>
+                              ) : null}
+                            </span>
+                          </div>
                         </td>
                         <td className="px-3 py-2 text-right align-top">
-                          <Button variant="outline" size="sm" className="h-8" onClick={() => setAlvoLogoff(u)}>
-                            <LogOut className="mr-1.5 h-4 w-4" />
-                            Logoff
-                          </Button>
+                          <div className="flex items-center justify-end gap-2">
+                            <Button variant="outline" size="sm" className="h-8" onClick={() => setAlvoLogoff(u)}>
+                              <LogOut className="mr-1.5 h-4 w-4" />
+                              Logoff
+                            </Button>
+                            <Button variant="outline" size="sm" className="h-8" onClick={() => setAlvo(u)}>
+                              <Power className="mr-1.5 h-4 w-4" />
+                              {u.ativo ? "Inativar" : "Ativar"}
+                            </Button>
+                          </div>
                         </td>
                       </tr>
+                      {/* 2ª linha: e-mail / empresa / status */}
                       <tr className="border-b border-border">
                         <td className="px-3 py-2 align-top">
                           <p className="text-muted-foreground leading-tight">{u.email ?? "—"}</p>
@@ -383,21 +401,11 @@ export default function UsuariosList() {
                           )}
                         </td>
                         <td className="px-3 py-2 align-top">
-                          <div className="flex flex-wrap items-center gap-2 leading-tight">
-                            <Badge cor={u.ativo ? "var(--brand-green)" : "hsl(var(--destructive))"}>
-                              {u.ativo ? "Ativo" : "Inativo"}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {formataDataHora(u.ultimo_login)}
-                            </span>
-                          </div>
+                          <Badge cor={u.ativo ? "var(--brand-green)" : "hsl(var(--destructive))"}>
+                            {u.ativo ? "Ativo" : "Inativo"}
+                          </Badge>
                         </td>
-                        <td className="px-3 py-2 text-right align-top">
-                          <Button variant="outline" size="sm" className="h-8" onClick={() => setAlvo(u)}>
-                            <Power className="mr-1.5 h-4 w-4" />
-                            {u.ativo ? "Inativar" : "Ativar"}
-                          </Button>
-                        </td>
+                        <td className="px-3 py-2 text-right align-top" />
                       </tr>
                     </Fragment>
                   ))}
