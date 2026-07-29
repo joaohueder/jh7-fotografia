@@ -321,7 +321,7 @@ export default function UsuariosList() {
                       <Badge cor={u.ativo ? "var(--brand-green)" : "hsl(var(--destructive))"}>
                         {u.ativo ? "Ativo" : "Inativo"}
                       </Badge>
-                      <ConexaoBadge logado={Boolean(u.logado)} />
+                      <ConexaoBadge logado={Boolean(u.logado)} desde={u.sessao_desde} agora={agora} />
                     </div>
                     <div className="flex items-center gap-2">
                       <Button variant="outline" size="sm" className="h-8" onClick={() => setAlvoLogoff(u)}>
@@ -360,7 +360,7 @@ export default function UsuariosList() {
                           <Badge cor={ROLE_COR[u.role]}>{ROLE_LABEL[u.role]}</Badge>
                         </td>
                         <td className="px-3 py-2 align-top">
-                          <ConexaoBadge logado={Boolean(u.logado)} />
+                          <ConexaoBadge logado={Boolean(u.logado)} desde={u.sessao_desde} agora={agora} />
                         </td>
                         <td className="px-3 py-2 text-right align-top">
                           <Button variant="outline" size="sm" className="h-8" onClick={() => setAlvoLogoff(u)}>
