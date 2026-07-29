@@ -481,8 +481,13 @@ export default function EmpresasList() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate font-semibold">{e.nome_fantasia}</p>
-                      <p className="truncate text-sm text-muted-foreground">{e.razao_social}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">{e.cnpj}</p>
+                      <p className="mt-1 truncate text-sm text-muted-foreground">
+                        <span className="font-medium text-foreground">Resp.:</span> {e.resp_nome}
+                      </p>
+                      <p className="mt-1 truncate text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground">WhatsApp:</span>{" "}
+                        {e.contato_whatsapp || "—"}
+                      </p>
                     </div>
                     <StatusBadge status={e.status} />
                   </div>
