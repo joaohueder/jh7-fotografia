@@ -11,6 +11,7 @@ import AuthPage from "@/pages/Auth";
 import SaDashboard from "@/pages/panels/SaDashboard";
 import EmpresasList from "@/pages/panels/sa/Empresas";
 import EmpresaForm from "@/pages/panels/sa/EmpresaForm";
+import SaConfiguracoes from "@/pages/panels/sa/Configuracoes";
 import AdminDashboard from "@/pages/panels/AdminDashboard";
 import UsuarioDashboard from "@/pages/panels/UsuarioDashboard";
 import { RoleRedirect, RequireRole } from "@/components/role-routing";
