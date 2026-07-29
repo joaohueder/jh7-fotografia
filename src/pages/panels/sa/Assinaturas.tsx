@@ -100,6 +100,7 @@ export default function AssinaturasList() {
         empresaId: assinaturaAlvo.empresa_id,
         observacao: "Assinatura expirada manualmente pelo painel SA.",
       });
+      await refetch();
       notifySuccess(`Assinatura de ${assinaturaAlvo.empresa_nome} expirada com sucesso.`);
       setAssinaturaAlvo(null);
     } catch (err) {
