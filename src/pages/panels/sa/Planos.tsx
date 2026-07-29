@@ -184,6 +184,7 @@ export default function PlanosList() {
   const { data, isLoading, error } = usePlanos();
   const remover = useDeletePlano();
   const reordenar = useReordenarPlanos();
+  const toggleStatus = useTogglePlanoStatus();
 
   const [busca, setBusca] = useState("");
   const [alvo, setAlvo] = useState<Plano | null>(null);
