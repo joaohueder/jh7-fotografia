@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { Camera, KeyRound, LogOut, Menu, ShieldCheck, User, ChevronDown } from "lucide-react";
+import { Camera, KeyRound, LogOut, Menu, ShieldCheck, User, ChevronDown, ArrowLeft } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -14,6 +14,7 @@ import {
 
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
+import { useImpersonacao } from "@/hooks/use-impersonacao";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -83,6 +84,7 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const theme = ACCENTS[accent];
+  const { empresa, impersonando, encerrar } = useImpersonacao();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const initials = (displayName ?? user?.email ?? "?").slice(0, 2);
@@ -193,6 +195,22 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
           </div>
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            {impersonando ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="tap-target gap-2 px-2 sm:px-3"
+                onClick={() => {
+                  encerrar();
+                  queryClient.clear();
+                  navigate("/sa/empresas", { replace: true });
+                }}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Voltar ao painel SA</span>
+              </Button>
+            ) : null}
+
             <ThemeToggle />
 
             {/* Menu da conta — avatar/iniciais no mobile, e-mail a partir de lg */}
@@ -280,6 +298,19 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
 
         </div>
       </header>
+
+      {impersonando && empresa ? (
+        <div
+          className="fixed inset-x-0 top-[var(--app-header-h)] z-40 border-b border-border"
+          style={{ background: "color-mix(in oklab, var(--panel-accent) 14%, var(--background))" }}
+        >
+          <div className="container-page flex h-8 items-center gap-2 overflow-hidden text-xs font-semibold">
+            <span className="truncate" style={{ color: "var(--panel-accent)" }}>
+              Visualizando como administrador de {empresa.nome}
+            </span>
+          </div>
+        </div>
+      ) : null}
 
       {/* Menu superior fixo — somente >= md (no mobile vive no drawer) */}
       <nav
