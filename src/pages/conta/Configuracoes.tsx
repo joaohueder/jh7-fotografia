@@ -19,7 +19,7 @@ function LayoutTab() {
   async function handleSaveDefault() {
     const { error } = await saveAsSystemDefault();
     if (error) {
-      notifyError(error, "Não foi possível salvar o padrão do sistema");
+      notifyError(error, { title: "Não foi possível salvar o padrão do sistema" });
       return;
     }
     notifySuccess(
