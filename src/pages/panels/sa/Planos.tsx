@@ -51,17 +51,20 @@ const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" 
 
 interface CardProps {
   plano: Plano;
+  uso: PlanoUso;
   arrastavel: boolean;
   onEditar: (p: Plano) => void;
   onExcluir: (p: Plano) => void;
   onToggleStatus: (p: Plano) => void;
 }
 
-function PlanoCard({ plano, arrastavel, onEditar, onExcluir, onToggleStatus }: CardProps) {
+function PlanoCard({ plano, uso, arrastavel, onEditar, onExcluir, onToggleStatus }: CardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: plano.id,
     disabled: !arrastavel,
   });
+
+  const bloqueiaExclusao = uso.total > 0;
 
   const valorTexto = plano.gratuito
     ? "Gratuito"
