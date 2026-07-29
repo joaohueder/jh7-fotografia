@@ -25,11 +25,14 @@ import { HelpTip } from "@/components/page-help";
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 import { lookupCep } from "@/hooks/use-empresas";
 import {
+  buscarClientePorDocumento,
   documentoDuplicado,
   isMenorDeIdade,
+  mesclarLeadEmCliente,
   useCliente,
   useEmpresaAtual,
   useSalvarCliente,
+  type Cliente,
   type ClienteContato,
   type ClientePayload,
   type ClienteStatus,
