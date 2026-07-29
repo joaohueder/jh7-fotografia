@@ -109,7 +109,7 @@ export default function AssinaturasList() {
   }, [data]);
 
   return (
-    <PanelLayout title="Painel SA" menu={SA_MENU}>
+    <PanelLayout accent="sa" menu={SA_MENU}>
       <div className="space-y-6">
         <header>
           <h1 className="text-[clamp(1.375rem,5vw,1.75rem)] font-bold tracking-tight">
