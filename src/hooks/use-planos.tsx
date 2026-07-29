@@ -65,6 +65,19 @@ export function usePlanos() {
   });
 }
 
+export function usePlano(id: string | undefined) {
+  return useQuery({
+    queryKey: ["plano", id],
+    enabled: Boolean(id),
+    queryFn: async (): Promise<Plano> => {
+      const { data, error } = await db.from("planos").select(COLUNAS).eq("id", id!).single();
+      if (error) throw error;
+      const p = data as Plano;
+      return { ...p, valor: p.valor === null || p.valor === undefined ? null : Number(p.valor) };
+    },
+  });
+}
+
 export function useCreatePlano() {
   const qc = useQueryClient();
   return useMutation({
