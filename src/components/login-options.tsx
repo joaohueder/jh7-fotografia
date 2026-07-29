@@ -49,7 +49,7 @@ const FacebookIcon = () => (
   </svg>
 );
 
-const PROVIDERS: { id: SocialProvider; label: string; Icon: () => JSX.Element }[] = [
+const PROVIDERS: { id: SocialProvider; label: string; Icon: React.FC }[] = [
   { id: "google", label: "Entrar com Google", Icon: GoogleIcon },
   { id: "linkedin", label: "Entrar com LinkedIn", Icon: LinkedInIcon },
   { id: "facebook", label: "Entrar com Facebook", Icon: FacebookIcon },
