@@ -423,7 +423,12 @@ export default function ClienteForm() {
                   label="CPF / CNPJ"
                   required
                   error={errors.documento}
-                  hint="Comece por aqui: se o CPF/CNPJ já estiver cadastrado, o sistema oferece puxar os dados do cliente."
+                  hint={
+                    leadId
+                      ? "Comece por aqui: se o CPF/CNPJ já estiver cadastrado, o sistema oferece puxar os dados do cliente."
+                      : "Comece por aqui: se o CPF/CNPJ já estiver cadastrado nesta empresa, o sistema avisa e não permite duplicar."
+                  }
+
                 >
                   <Input
                     value={form.documento ?? ""}
