@@ -1,3 +1,4 @@
+import { LoginOptions } from "@/components/login-options";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
