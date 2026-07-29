@@ -39,7 +39,7 @@ function traduzErro(err: unknown) {
   return err instanceof Error ? err : new Error(String(err));
 }
 
-const COLUNAS = "id, nome, ativo, gratuito, valor, created_at";
+const COLUNAS = "id, nome, ativo, gratuito, valor, ordem, created_at";
 
 function normaliza(input: PlanoInput) {
   return {
@@ -57,6 +57,7 @@ export function usePlanos() {
       const { data, error } = await db
         .from("planos")
         .select(COLUNAS)
+        .order("ordem", { ascending: true, nullsFirst: false })
         .order("nome", { ascending: true });
       if (error) throw error;
       return (data ?? []).map((p) => ({
@@ -66,6 +67,7 @@ export function usePlanos() {
     },
   });
 }
+
 
 export function usePlano(id: string | undefined) {
   return useQuery({
