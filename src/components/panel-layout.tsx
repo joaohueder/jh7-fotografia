@@ -154,18 +154,39 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
                   <SheetTitle className="text-base">{theme.label}</SheetTitle>
                 </SheetHeader>
                 <nav className="flex flex-col gap-1">
-                  {menu.map((item) => (
-                    <NavLink
-                      key={item.to}
-                      to={item.to}
-                      end
-                      onClick={() => setMobileNavOpen(false)}
-                      className={navItemClass}
-                      style={navItemStyle}
-                    >
-                      {item.label}
-                    </NavLink>
-                  ))}
+                  {menu.map((item) =>
+                    item.children?.length ? (
+                      <div key={item.to} className="space-y-1">
+                        <p className="px-3 pt-2 text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                          {item.label}
+                        </p>
+                        {item.children.map((sub) => (
+                          <NavLink
+                            key={sub.to}
+                            to={sub.to}
+                            end
+                            onClick={() => setMobileNavOpen(false)}
+                            className={({ isActive }) => cn(navItemClass({ isActive }), "pl-5")}
+                            style={navItemStyle}
+                          >
+                            {sub.label}
+                          </NavLink>
+                        ))}
+                      </div>
+                    ) : (
+                      <NavLink
+                        key={item.to}
+                        to={item.to}
+                        end
+                        onClick={() => setMobileNavOpen(false)}
+                        className={navItemClass}
+                        style={navItemStyle}
+                      >
+                        {item.label}
+                      </NavLink>
+                    ),
+                  )}
+
                 </nav>
 
 
