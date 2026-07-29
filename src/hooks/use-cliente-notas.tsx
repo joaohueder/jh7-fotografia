@@ -63,10 +63,19 @@ export function useNotaInicial(clienteId: string | undefined) {
   });
 }
 
-/** Nome amigável do usuário logado para assinar a nota. */
+/**
+ * Nome amigável do usuário logado para assinar a nota.
+ * O resultado fica em cache na memória: sem isso, cada nota salva fazia duas
+ * idas ao servidor (sessão + perfil), deixando o salvamento lento.
+ */
+let autorCache: { id: string | null; nome: string | null } | null = null;
+
 async function autorAtual(): Promise<{ id: string | null; nome: string | null }> {
-  const { data } = await db.auth.getUser();
-  const user = data?.user;
+  if (autorCache) return autorCache;
+
+  // getSession lê a sessão local (sem rede), diferente de getUser.
+  const { data } = await db.auth.getSession();
+  const user = data?.session?.user;
   if (!user) return { id: null, nome: null };
 
   const { data: perfil } = await db
@@ -76,8 +85,15 @@ async function autorAtual(): Promise<{ id: string | null; nome: string | null }>
     .maybeSingle();
 
   const p = (perfil ?? {}) as { display_name?: string | null; full_name?: string | null };
-  return { id: user.id, nome: p.display_name || p.full_name || user.email || null };
+  autorCache = { id: user.id, nome: p.display_name || p.full_name || user.email || null };
+  return autorCache;
 }
+
+// Ao trocar de usuário (login/logout), o cache do autor precisa ser descartado.
+db.auth.onAuthStateChange(() => {
+  autorCache = null;
+});
+
 
 export async function criarNotaCliente(
   clienteId: string,
