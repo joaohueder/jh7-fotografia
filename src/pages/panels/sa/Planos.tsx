@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GripVertical, Layers, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { GripVertical, Layers, Loader2, Pencil, Plus, Power, Trash2 } from "lucide-react";
 import {
   DndContext,
   KeyboardSensor,
