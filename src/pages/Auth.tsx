@@ -3,7 +3,10 @@ import { useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ArrowRight, Camera, Eye, EyeOff, Loader2 } from "lucide-react";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/selfhosted/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,7 +23,7 @@ const HIGHLIGHTS = [
 function AuthPage() {
 
   usePageMeta("Entrar — JH7 Gestão Fotográfica", "Acesse sua conta do JH7 Gestão Fotográfica.");
-  const { user, isLoading, signIn } = useAuth();
+  const { user, isLoading, signIn, signOut } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -52,12 +55,30 @@ function AuthPage() {
 
     setIsSubmitting(true);
     const { error } = await signIn(email, password);
-    setIsSubmitting(false);
 
     if (error) {
+      setIsSubmitting(false);
       setFormError("E-mail ou senha inválidos.");
       return;
     }
+
+    // Bloqueia acesso de usuário ou empresa inativos
+    const { data: acesso } = await (supabase as unknown as SupabaseClient).rpc(
+      "meu_acesso",
+    );
+    const liberado = (acesso as { ativo?: boolean } | null)?.ativo ?? true;
+    if (!liberado) {
+      await signOut();
+      setIsSubmitting(false);
+      setFormError(
+        (acesso as { motivo?: string } | null)?.motivo ??
+          "Acesso bloqueado. Fale com o administrador.",
+      );
+      return;
+    }
+
+    setIsSubmitting(false);
+
 
     if (rememberMe) {
       localStorage.setItem("auth_email", email);
