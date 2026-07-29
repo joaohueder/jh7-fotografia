@@ -136,7 +136,13 @@ function ResumoBloco({
 const STEPS = ["Identificação", "Cobrança", "Status", "Resumo"] as const;
 const RESUMO = STEPS.length - 1;
 
+/** Remonta o formulário sempre que o plano em edição muda. */
 export default function PlanoForm() {
+  const { id } = useParams<{ id: string }>();
+  return <PlanoFormInner key={id ?? "novo"} />;
+}
+
+function PlanoFormInner() {
   const { id } = useParams<{ id: string }>();
   const editing = Boolean(id);
   usePageMeta(
