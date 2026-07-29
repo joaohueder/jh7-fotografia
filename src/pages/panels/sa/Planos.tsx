@@ -27,10 +27,12 @@ import { SA_MENU } from "@/pages/panels/sa/menu";
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 import {
   usePlanos,
+  usePlanosUso,
   useDeletePlano,
   useReordenarPlanos,
   useTogglePlanoStatus,
   type Plano,
+  type PlanoUso,
 } from "@/hooks/use-planos";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
