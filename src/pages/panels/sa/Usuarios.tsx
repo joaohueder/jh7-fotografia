@@ -247,7 +247,7 @@ function UsuarioCard({
           <Button
             variant="outline"
             size="sm"
-            className="h-9 text-xs font-semibold bg-white/5 border-white/10 hover:bg-white/10 hover:text-foreground"
+            className="h-9 text-xs font-semibold bg-muted/40 border-border text-foreground hover:bg-muted hover:text-foreground"
             onClick={() => onLogoff(u)}
           >
             <LogOut className="mr-1.5 h-3.5 w-3.5" />
