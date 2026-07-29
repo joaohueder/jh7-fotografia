@@ -170,13 +170,17 @@ begin
   insert into auth.users (
     instance_id, id, aud, role, email, encrypted_password,
     email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
-    created_at, updated_at
+    created_at, updated_at,
+    confirmation_token, recovery_token, email_change,
+    email_change_token_new, email_change_token_current,
+    phone_change, phone_change_token, reauthentication_token
   ) values (
     v_instance, v_user_id, 'authenticated', 'authenticated', lower(trim(p_email)),
     extensions.crypt(p_password, extensions.gen_salt('bf')),
     now(), '{"provider":"email","providers":["email"]}'::jsonb,
     jsonb_build_object('full_name', p_empresa->>'resp_nome'),
-    now(), now()
+    now(), now(),
+    '', '', '', '', '', '', '', ''
   );
 
   insert into auth.identities (
