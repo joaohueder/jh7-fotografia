@@ -29,6 +29,8 @@ function AuthPage() {
   usePageMeta("Entrar — JH7 Gestão Fotográfica", "Acesse sua conta do JH7 Gestão Fotográfica.");
   const { user, isLoading, signIn, signOut } = useAuth();
   const navigate = useNavigate();
+  // A tela de login é sempre escura, independente da preferência do usuário.
+  useForcedTheme("dark");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
