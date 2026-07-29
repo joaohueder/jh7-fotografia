@@ -187,7 +187,7 @@ function UsuarioCard({
           </span>
         </div>
 
-        <h3 className="font-display text-white font-semibold text-lg leading-tight">{u.nome}</h3>
+        <h3 className="font-display text-foreground font-semibold text-lg leading-tight">{u.nome}</h3>
         <p className="text-muted-foreground text-sm mb-4 truncate">{u.email ?? "—"}</p>
 
         <div className="space-y-3 pt-4 border-t border-border/50">
