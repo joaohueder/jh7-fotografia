@@ -262,11 +262,14 @@ export default function ClienteForm() {
                 </Field>
 
                 <div className="space-y-2">
-                  <Label className="text-sm">Data de nascimento</Label>
+                  <Label className="text-sm">
+                    Data de nascimento<span className="ml-0.5 text-destructive">*</span>
+                  </Label>
                   <Input
                     type="date"
                     value={form.nascimento ?? ""}
                     onChange={(e) => set("nascimento", e.target.value)}
+                    required
                     className={
                       menor
                         ? "h-11 animate-pulse border-2 border-destructive text-base ring-2 ring-destructive/40"
@@ -296,7 +299,7 @@ export default function ClienteForm() {
                   </Select>
                 </Field>
 
-                <Field label="CPF / CNPJ" error={errors.documento}>
+                <Field label="CPF / CNPJ" required error={errors.documento}>
                   <Input
                     value={form.documento ?? ""}
                     onChange={(e) => set("documento", maskCpfCnpj(e.target.value))}
@@ -304,7 +307,7 @@ export default function ClienteForm() {
                       setError(
                         "documento",
                         !form.documento?.trim()
-                          ? null
+                          ? "Informe o CPF/CNPJ"
                           : isValidCpfCnpj(form.documento)
                             ? null
                             : "CPF/CNPJ inválido",
@@ -312,9 +315,11 @@ export default function ClienteForm() {
                     }
                     placeholder="000.000.000-00"
                     inputMode="numeric"
+                    required
                     className="h-11 text-base"
                   />
                 </Field>
+
               </Section>
     ) },
     { value: "endereco", label: "Endereço", node: (
