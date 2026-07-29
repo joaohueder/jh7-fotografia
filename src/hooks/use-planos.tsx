@@ -148,6 +148,8 @@ export function usePlanos() {
       return (data ?? []).map((p) => ({
         ...(p as Plano),
         valor: p.valor === null || p.valor === undefined ? null : Number(p.valor),
+        limite_leads: p.limite_leads ?? null,
+        limite_clientes: p.limite_clientes ?? null,
       }));
     },
   });
@@ -166,7 +168,12 @@ export function usePlano(id: string | undefined) {
       const { data, error } = await db.from("planos").select(COLUNAS).eq("id", id!).single();
       if (error) throw error;
       const p = data as Plano;
-      return { ...p, valor: p.valor === null || p.valor === undefined ? null : Number(p.valor) };
+      return {
+        ...p,
+        valor: p.valor === null || p.valor === undefined ? null : Number(p.valor),
+        limite_leads: p.limite_leads ?? null,
+        limite_clientes: p.limite_clientes ?? null,
+      };
     },
   });
 }
