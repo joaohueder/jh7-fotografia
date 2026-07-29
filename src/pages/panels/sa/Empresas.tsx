@@ -535,22 +535,22 @@ export default function EmpresasList() {
                 <thead className="bg-surface/60 text-left text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3 font-semibold">Nome fantasia</th>
-                    <th className="px-4 py-3 font-semibold">Razão social</th>
-                    <th className="px-4 py-3 font-semibold">CPF/CNPJ</th>
+                    <th className="px-4 py-3 font-semibold">WhatsApp</th>
+                    <th className="px-4 py-3 font-semibold">Responsável</th>
                     <th className="px-4 py-3 font-semibold">Cidade/UF</th>
                     <th className="px-4 py-3 font-semibold">Status</th>
                     <th className="px-4 py-3 font-semibold">Assinatura</th>
                     <th className="px-4 py-3 text-right font-semibold">Ações</th>
-
-
                   </tr>
                 </thead>
                 <tbody>
                   {empresas.map((e) => (
                     <tr key={e.id} className="border-t border-border">
                       <td className="px-4 py-3 font-medium">{e.nome_fantasia}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{e.razao_social}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{e.cnpj}</td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {e.contato_whatsapp || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{e.resp_nome}</td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {[e.cidade, e.uf].filter(Boolean).join("/") || "—"}
                       </td>
@@ -560,7 +560,6 @@ export default function EmpresasList() {
                       <td className="px-4 py-3">
                         <AssinaturaBadge plano={planoDe(e.id)} />
                       </td>
-
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-2">
                           <IconAction
@@ -595,7 +594,6 @@ export default function EmpresasList() {
                           </IconAction>
                         </div>
                       </td>
-
                     </tr>
                   ))}
                 </tbody>
