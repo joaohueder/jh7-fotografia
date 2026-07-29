@@ -347,6 +347,7 @@ function AuthPage() {
               </Link>
             </p>
             </div>
+            </div>
           </div>
         </section>
       </div>
