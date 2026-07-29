@@ -131,48 +131,66 @@ export default function MeuPerfil() {
 
   return (
     <AccountShell title="Meu perfil" subtitle="Consulte e atualize os dados da sua conta." width="full">
-      <form onSubmit={salvar} className="space-y-5 rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
-        <div className="grid gap-1.5">
-          <Label>E-mail de acesso</Label>
-          <Input value={user?.email ?? ""} disabled />
-          <p className="text-xs text-muted-foreground">
-            O e-mail de acesso só pode ser alterado pelo administrador.
-          </p>
-        </div>
+      <Tabs defaultValue="conta" className="space-y-5">
+        <TabsList>
+          <TabsTrigger value="conta" className="gap-2">
+            <UserRound className="h-4 w-4" />
+            Dados da Conta
+          </TabsTrigger>
+          <TabsTrigger value="layout" className="gap-2">
+            <Monitor className="h-4 w-4" />
+            Layout
+          </TabsTrigger>
+        </TabsList>
 
-        <div className="grid gap-1.5">
-          <Label>Tipo de usuário</Label>
-          <Input value={role ? ROLE_LABELS[role] : "—"} disabled />
-        </div>
+        <TabsContent value="conta" className="mt-0">
+          <form onSubmit={salvar} className="space-y-5 rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
+            <div className="grid gap-1.5">
+              <Label>E-mail de acesso</Label>
+              <Input value={user?.email ?? ""} disabled />
+              <p className="text-xs text-muted-foreground">
+                O e-mail de acesso só pode ser alterado pelo administrador.
+              </p>
+            </div>
 
-        <div className="grid gap-1.5">
-          <Label htmlFor="full_name">Nome completo</Label>
-          <Input
-            id="full_name"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            placeholder="Seu nome completo"
-            disabled={loading}
-          />
-        </div>
+            <div className="grid gap-1.5">
+              <Label>Tipo de usuário</Label>
+              <Input value={role ? ROLE_LABELS[role] : "—"} disabled />
+            </div>
 
-        <div className="grid gap-1.5">
-          <Label htmlFor="display_name">Como quer ser chamado</Label>
-          <Input
-            id="display_name"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="Apelido ou primeiro nome"
-            disabled={loading}
-          />
-        </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="full_name">Nome completo</Label>
+              <Input
+                id="full_name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Seu nome completo"
+                disabled={loading}
+              />
+            </div>
 
-        <Button type="submit" disabled={saving || loading} className="w-full sm:w-auto">
-          {saving ? "Salvando..." : "Salvar alterações"}
-        </Button>
-      </form>
+            <div className="grid gap-1.5">
+              <Label htmlFor="display_name">Como quer ser chamado</Label>
+              <Input
+                id="display_name"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Apelido ou primeiro nome"
+                disabled={loading}
+              />
+            </div>
 
-      <LarguraMaximaCard />
+            <Button type="submit" disabled={saving || loading} className="w-full sm:w-auto">
+              {saving ? "Salvando..." : "Salvar alterações"}
+            </Button>
+          </form>
+        </TabsContent>
+
+        <TabsContent value="layout" className="mt-0">
+          <LarguraMaximaCard />
+        </TabsContent>
+      </Tabs>
+
     </AccountShell>
   );
 }
