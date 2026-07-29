@@ -181,7 +181,12 @@ export default function LeadsList() {
       notifyValidation("Informe um WhatsApp válido com DDD.");
       return;
     }
+    if (!interesse.trim()) {
+      notifyValidation("Descreva o interesse do lead para registrar o motivo do primeiro contato.");
+      return;
+    }
     if (!empresaId) return;
+
 
     try {
       const leadId = await salvar.mutateAsync({ id: editando?.id, empresaId, nome, whatsapp });
@@ -571,13 +576,14 @@ export default function LeadsList() {
 
             <div className="space-y-1">
               <label htmlFor="lead-interesse" className="text-xs font-semibold text-muted-foreground">
-                Interesse inicial do lead
+                Interesse inicial do lead <span className="text-destructive">*</span>
               </label>
               <Textarea
                 id="lead-interesse"
                 value={interesse}
                 onChange={(e) => setInteresse(e.target.value)}
                 rows={3}
+                required
                 placeholder={
                   notaInicial.isLoading && editando
                     ? "Carregando…"
@@ -593,8 +599,8 @@ export default function LeadsList() {
                 </p>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  É o motivo pelo qual o lead entrou em contato pela primeira vez. Fica salvo com data,
-                  hora e autor. Novas conversas devem ir para o histórico.
+                  É obrigatório descrever o motivo pelo qual o lead entrou em contato. Fica salvo com
+                  data, hora e autor. Novas conversas devem ir para o histórico.
                 </p>
               )}
             </div>
