@@ -67,6 +67,8 @@ export default function LeadsList() {
   const [interesse, setInteresse] = useState("");
   const [alvoExclusao, setAlvoExclusao] = useState<Lead | null>(null);
 
+  const notaInicial = useNotaInicial(editando?.id);
+
   const lista = useMemo(() => {
     const termo = busca.trim().toLowerCase();
     if (!termo) return leads ?? [];
