@@ -140,13 +140,19 @@ export default function EmpresasList() {
 
   async function confirmarStatus() {
     if (!alvoStatus) return;
-    if (nota.trim().length < 5) {
+    const inativando = alvoStatus.status === "ATIVO";
+    // Justificativa só é exigida ao inativar; ativar é uma ação positiva e direta.
+    if (inativando && nota.trim().length < 5) {
       notifyValidation("Informe uma nota com pelo menos 5 caracteres.");
       return;
     }
-    const novo = alvoStatus.status === "ATIVO" ? "INATIVO" : "ATIVO";
+    const novo = inativando ? "INATIVO" : "ATIVO";
     try {
-      await setStatus.mutateAsync({ id: alvoStatus.id, status: novo, nota: nota.trim() });
+      await setStatus.mutateAsync({
+        id: alvoStatus.id,
+        status: novo,
+        nota: nota.trim() || (inativando ? "" : "Empresa reativada."),
+      });
       notifySuccess(novo === "ATIVO" ? "Empresa ativada." : "Empresa inativada.");
       setAlvoStatus(null);
       setNota("");
@@ -550,26 +556,29 @@ export default function EmpresasList() {
             <AlertDialogDescription>
               {alvoStatus?.status === "ATIVO"
                 ? `A empresa "${alvoStatus?.nome_fantasia}" ficará inativa. Descreva o motivo desta alteração.`
-                : `A empresa "${alvoStatus?.nome_fantasia}" voltará a ficar ativa. Descreva o motivo desta alteração.`}
+                : `A empresa "${alvoStatus?.nome_fantasia}" voltará a ficar ativa. Deseja confirmar?`}
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          <div className="space-y-2">
-            <Label htmlFor="nota-status">
-              Nota <span style={{ color: "var(--panel-accent)" }}>*</span>
-            </Label>
-            <Textarea
-              id="nota-status"
-              value={nota}
-              onChange={(ev) => setNota(ev.target.value)}
-              placeholder="Ex.: contrato encerrado em 01/2026 por solicitação do cliente."
-              rows={3}
-              className="text-base"
-            />
-            <p className="text-xs text-muted-foreground">
-              A nota é obrigatória (mínimo 5 caracteres) e fica registrada no histórico da empresa.
-            </p>
-          </div>
+          {alvoStatus?.status === "ATIVO" && (
+            <div className="space-y-2">
+              <Label htmlFor="nota-status">
+                Nota <span style={{ color: "var(--panel-accent)" }}>*</span>
+              </Label>
+              <Textarea
+                id="nota-status"
+                value={nota}
+                onChange={(ev) => setNota(ev.target.value)}
+                placeholder="Ex.: contrato encerrado em 01/2026 por solicitação do cliente."
+                rows={3}
+                className="text-base"
+              />
+              <p className="text-xs text-muted-foreground">
+                A nota é obrigatória (mínimo 5 caracteres) e fica registrada no histórico da
+                empresa.
+              </p>
+            </div>
+          )}
 
           <AlertDialogFooter>
             <AlertDialogCancel className="tap-target">Cancelar</AlertDialogCancel>
@@ -579,7 +588,9 @@ export default function EmpresasList() {
                 ev.preventDefault();
                 void confirmarStatus();
               }}
-              disabled={setStatus.isPending || nota.trim().length < 5}
+              disabled={
+                setStatus.isPending || (alvoStatus?.status === "ATIVO" && nota.trim().length < 5)
+              }
             >
               {setStatus.isPending
                 ? "Salvando…"
