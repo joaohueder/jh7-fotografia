@@ -218,6 +218,15 @@ export default function PlanosList() {
     navigate(`/sa/planos/${plano.id}`);
   }
 
+  async function alternarStatus(plano: Plano) {
+    try {
+      await toggleStatus.mutateAsync({ id: plano.id, ativo: !plano.ativo });
+      notifySuccess(`Plano ${plano.ativo ? "inativado" : "ativado"} com sucesso.`);
+    } catch (err) {
+      notifyError(err);
+    }
+  }
+
   async function confirmarExclusao() {
     if (!alvo) return;
     try {
