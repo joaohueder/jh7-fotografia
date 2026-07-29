@@ -4,6 +4,8 @@ import {
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
+  ClipboardCheck,
+
   Loader2,
   MapPin,
   Phone,
