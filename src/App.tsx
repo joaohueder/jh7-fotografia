@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-route
 
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/selfhosted/client";
-import { Toaster } from "@/components/ui/sonner";
+import { SystemMessageDialog } from "@/components/system-message-dialog";
 import LandingPage from "@/pages/Landing";
 import AuthPage from "@/pages/Auth";
 import SaDashboard from "@/pages/panels/SaDashboard";
@@ -137,7 +137,7 @@ export default function App() {
             />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
-          <Toaster position="top-right" richColors />
+          <SystemMessageDialog />
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
