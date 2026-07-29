@@ -109,7 +109,7 @@ export default function LeadsList() {
 
 
   const [busca, setBusca] = useState("");
-  const [filtro, setFiltro] = useState<"TODOS" | LeadSituacao>("TODOS");
+  const [filtro, setFiltro] = useState<"TODOS" | LeadSituacao>("AGUARDANDO");
   const [aberto, setAberto] = useState(false);
   const [editando, setEditando] = useState<Lead | null>(null);
   const [nome, setNome] = useState("");
