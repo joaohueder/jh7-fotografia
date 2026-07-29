@@ -217,25 +217,32 @@ export default function LeadsList() {
             {lista.map((l) => (
               <li
                 key={l.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"
+                className="group flex items-start gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-accent/30"
               >
-                <div className="min-w-0 space-y-1">
-                  <button
-                    type="button"
-                    className="font-semibold leading-tight hover:underline"
-                    onClick={() => abrirEdicao(l)}
-                  >
-                    {l.nome}
-                  </button>
-                  {l.contato_whatsapp ? (
-                    <p className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                      <Phone className="h-3 w-3" />
-                      {maskPhone(l.contato_whatsapp)}
-                    </p>
-                  ) : null}
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
+                  <UserRound className="h-5 w-5 text-muted-foreground" />
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <span className="font-semibold text-foreground">{l.nome}</span>
+                    {l.contato_whatsapp ? (
+                      <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                        <Phone className="h-3.5 w-3.5" />
+                        {maskPhone(l.contato_whatsapp)}
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <div className="flex items-start gap-2 text-sm">
+                    <StickyNote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    <span className="line-clamp-2 text-muted-foreground">
+                      {l.ultima_nota?.descricao ?? "Nenhuma nota registrada ainda."}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex shrink-0 items-start gap-1">
                   <IconAction
                     label="Transformar em cliente (abre o cadastro completo)"
                     ariaLabel={`Converter ${l.nome} em cliente`}
@@ -254,6 +261,7 @@ export default function LeadsList() {
               </li>
             ))}
           </ul>
+
         )}
       </div>
 
