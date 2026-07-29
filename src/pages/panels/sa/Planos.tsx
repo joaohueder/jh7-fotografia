@@ -52,13 +52,15 @@ interface CardProps {
   arrastavel: boolean;
   onEditar: (p: Plano) => void;
   onExcluir: (p: Plano) => void;
+  onToggleStatus: (p: Plano) => void;
 }
 
-function PlanoCard({ plano, arrastavel, onEditar, onExcluir }: CardProps) {
+function PlanoCard({ plano, arrastavel, onEditar, onExcluir, onToggleStatus }: CardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: plano.id,
     disabled: !arrastavel,
   });
+
 
   const valorTexto = plano.gratuito
     ? "Gratuito"
