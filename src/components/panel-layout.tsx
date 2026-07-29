@@ -121,6 +121,8 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
           "--panel-accent-soft": theme.accentSoft,
           // navegação horizontal só existe a partir de md
           "--panel-nav-h": "0px",
+          // faixa de "acessando como empresa" (0 quando não há impersonação)
+          "--imp-h": impersonando ? "2rem" : "0px",
         } as React.CSSProperties
       }
     >
@@ -314,7 +316,7 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
 
       {/* Menu superior fixo — somente >= md (no mobile vive no drawer) */}
       <nav
-        className="fixed inset-x-0 top-[var(--app-header-h)] z-30 hidden border-b border-border bg-surface/80 backdrop-blur md:block"
+        className="fixed inset-x-0 top-[calc(var(--app-header-h)+var(--imp-h))] z-30 hidden border-b border-border bg-surface/80 backdrop-blur md:block"
         style={{ "--panel-nav-h": "var(--app-nav-h)" } as React.CSSProperties}
       >
         <div className="container-page flex h-[var(--app-nav-h)] items-center gap-1 overflow-x-auto">
@@ -339,8 +341,8 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
       <main
         className={cn(
           "container-page",
-          "pt-[calc(var(--app-header-h)+var(--gutter))]",
-          "md:pt-[calc(var(--app-header-h)+var(--app-nav-h)+var(--gutter))]",
+          "pt-[calc(var(--app-header-h)+var(--imp-h)+var(--gutter))]",
+          "md:pt-[calc(var(--app-header-h)+var(--imp-h)+var(--app-nav-h)+var(--gutter))]",
           "pb-[calc(var(--app-footer-h)+var(--gutter)*1.5)]",
         )}
       >
