@@ -115,3 +115,23 @@ export function useExcluirNota() {
       qc.invalidateQueries({ queryKey: ["cliente-notas", vars.clienteId] }),
   });
 }
+
+/** Cria ou atualiza a nota de interesse inicial do lead/cliente. */
+export async function salvarNotaInicial(
+  clienteId: string,
+  descricao: string,
+  modulo: NotaModulo,
+  notaId?: string | null,
+): Promise<void> {
+  const texto = descricao.trim();
+  if (!notaId) {
+    await criarNotaCliente(clienteId, texto, modulo);
+    return;
+  }
+  if (!texto) return;
+  const { error } = await db
+    .from("cliente_notas")
+    .update({ descricao: texto })
+    .eq("id", notaId);
+  if (error) throw error;
+}
