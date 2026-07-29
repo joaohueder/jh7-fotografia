@@ -123,3 +123,23 @@ export function validateContato(tipo: string, value: string) {
   if (tipo === "E-mail") return isValidEmail(value) ? null : "E-mail inválido";
   return null;
 }
+
+/** Máscara monetária brasileira: digita centavos da direita para a esquerda. */
+export function maskMoney(v: string) {
+  const d = onlyDigits(v).slice(0, 11);
+  if (!d) return "";
+  const n = Number(d) / 100;
+  return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/** Converte "1.234,56" em 1234.56; retorna null quando vazio/ inválido. */
+export function parseMoney(v: string): number | null {
+  const d = onlyDigits(v);
+  if (!d) return null;
+  return Number(d) / 100;
+}
+
+/** Formata um número em "1.234,56" para preencher o campo mascarado. */
+export function formatMoney(n: number) {
+  return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
