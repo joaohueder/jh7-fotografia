@@ -133,6 +133,44 @@ function Field({
   );
 }
 
+/** Formata "1990-05-20" em "20/05/1990". */
+function formataData(v?: string | null) {
+  if (!v?.trim()) return "";
+  const [a, m, d] = v.split("-");
+  return a && m && d ? `${d}/${m}/${a}` : v;
+}
+
+function ResumoBloco({
+  titulo,
+  itens,
+}: {
+  titulo: string;
+  itens: Array<[string, string | null | undefined]>;
+}) {
+  const preenchidos = itens.filter(([, v]) => v?.toString().trim());
+  return (
+    <div className="rounded-lg border border-border bg-muted/30 p-4">
+      <h3 className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+        {titulo}
+      </h3>
+      {preenchidos.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Não informado.</p>
+      ) : (
+        <dl className="space-y-2">
+          {preenchidos.map(([k, v], i) => (
+            <div key={`${k}-${i}`} className="flex flex-wrap items-baseline justify-between gap-2">
+              <dt className="text-xs text-muted-foreground">{k}</dt>
+              <dd className="text-sm font-medium text-foreground">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+    </div>
+  );
+}
+
+
+
 /** Cadastro de clientes da empresa (novo e edição na mesma tela em abas). */
 export default function ClienteForm() {
   const { id } = useParams<{ id: string }>();
