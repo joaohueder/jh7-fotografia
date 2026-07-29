@@ -133,6 +133,12 @@ export default function UsuariosList() {
   const toggle = useToggleUsuarioAtivo();
   const logoff = useLogoffUsuario();
   const [busca, setBusca] = useState("");
+  const [agora, setAgora] = useState(() => Date.now());
+
+  useEffect(() => {
+    const t = setInterval(() => setAgora(Date.now()), 10_000);
+    return () => clearInterval(t);
+  }, []);
   const [filtro, setFiltro] = useState<Filtro>("TODOS");
   const [alvo, setAlvo] = useState<UsuarioSistema | null>(null);
   const [alvoLogoff, setAlvoLogoff] = useState<UsuarioSistema | null>(null);
