@@ -275,7 +275,7 @@ export default function EmpresasList() {
           <Input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar por razão social, nome fantasia, CNPJ ou cidade"
+            placeholder="Buscar por razão social, nome fantasia, documento ou cidade"
             className="h-11 text-base"
             aria-label="Buscar empresas"
           />
@@ -374,7 +374,7 @@ export default function EmpresasList() {
                   <tr>
                     <th className="px-4 py-3 font-semibold">Nome fantasia</th>
                     <th className="px-4 py-3 font-semibold">Razão social</th>
-                    <th className="px-4 py-3 font-semibold">CNPJ</th>
+                    <th className="px-4 py-3 font-semibold">CPF/CNPJ</th>
                     <th className="px-4 py-3 font-semibold">Cidade/UF</th>
                     <th className="px-4 py-3 font-semibold">Status</th>
                     <th className="px-4 py-3 text-right font-semibold">Ações</th>
