@@ -62,6 +62,7 @@ interface PaletteContextValue {
   customColors: CustomColors;
   systemCustomColors: CustomColors;
   setPalette: (id: string) => void;
+  savePalette: (id: string, colors?: CustomColors) => Promise<{ error: Error | null }>;
   setCustomColors: (colors: CustomColors) => void;
   resetPalette: () => void;
   saveAsSystemPalette: (
@@ -154,6 +155,25 @@ export function PaletteProvider({ children }: { children: ReactNode }) {
     [persist, customColors],
   );
 
+  /** Salva imediatamente a paleta do usuário e devolve o erro, se houver. */
+  const savePalette = useCallback(
+    async (id: string, colors?: CustomColors) => {
+      const nextColors = sanitizeCustom(colors ?? customColors);
+      setPaletteId(id);
+      setCustomColorsState(nextColors);
+      if (!userId) return { error: null };
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      const { error } = await db
+        .from("usuario_preferencias")
+        .upsert(
+          { user_id: userId, paleta: id, paleta_cores: nextColors },
+          { onConflict: "user_id" },
+        );
+      return { error: (error as Error | null) ?? null };
+    },
+    [customColors, userId],
+  );
+
   const setCustomColors = useCallback(
     (colors: CustomColors) => {
       const next = sanitizeCustom(colors);
@@ -195,6 +215,7 @@ export function PaletteProvider({ children }: { children: ReactNode }) {
       customColors,
       systemCustomColors,
       setPalette,
+      savePalette,
       setCustomColors,
       resetPalette,
       saveAsSystemPalette,
@@ -207,6 +228,7 @@ export function PaletteProvider({ children }: { children: ReactNode }) {
       customColors,
       systemCustomColors,
       setPalette,
+      savePalette,
       setCustomColors,
       resetPalette,
       saveAsSystemPalette,
