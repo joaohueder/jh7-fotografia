@@ -323,21 +323,44 @@ export default function PlanosList() {
         </header>
 
         {!vazio && (
-          <div className="space-y-2">
-            <Input
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              placeholder="Buscar plano..."
-              aria-label="Buscar plano pelo nome"
-              className="max-w-sm"
-            />
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <Input
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                placeholder="Buscar plano..."
+                aria-label="Buscar plano pelo nome"
+                className="max-w-sm"
+              />
+              <div className="inline-flex rounded-lg border border-border p-1">
+                {([
+                  ["todos", "Todos"],
+                  ["ativos", "Ativos"],
+                  ["inativos", "Inativos"],
+                ] as const).map(([valor, rotulo]) => (
+                  <button
+                    key={valor}
+                    type="button"
+                    onClick={() => setFiltroStatus(valor)}
+                    className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                      filtroStatus === valor
+                        ? "bg-[var(--panel-accent)] text-white"
+                        : "text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {rotulo}
+                  </button>
+                ))}
+              </div>
+            </div>
             <p className="text-xs text-muted-foreground">
               {arrastavel
                 ? "Arraste os cards pela alça para definir a ordem de exibição dos planos."
-                : "Limpe a busca para reordenar os planos."}
+                : "Limpe a busca e o filtro para reordenar os planos."}
             </p>
           </div>
         )}
+
 
         {isLoading && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
