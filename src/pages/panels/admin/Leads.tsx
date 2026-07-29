@@ -1,6 +1,17 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Phone, Plus, Trash2, UserCheck, UserPlus, Users } from "lucide-react";
+import {
+  Loader2,
+  MessageSquare,
+  Phone,
+  Plus,
+  StickyNote,
+  Trash2,
+  UserCheck,
+  UserPlus,
+  Users,
+  UserRound,
+} from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
@@ -15,6 +26,7 @@ import { isValidPhone, maskPhone } from "@/lib/br-masks";
 import { criarNotaCliente } from "@/hooks/use-cliente-notas";
 import { ClienteNotas } from "@/components/cliente-notas";
 import { Textarea } from "@/components/ui/textarea";
+
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
