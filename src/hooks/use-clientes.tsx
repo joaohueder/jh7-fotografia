@@ -71,7 +71,9 @@ export function useClientes() {
         .from("clientes")
         .select("*")
         .eq("empresa_id", empresaId!)
+        .eq("origem", "CLIENTE")
         .order("nome", { ascending: true });
+
       if (error) throw error;
       return (data ?? []) as Cliente[];
     },
