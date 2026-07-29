@@ -381,7 +381,7 @@ export default function ClienteForm() {
     ) },
     { value: "contatos", label: "Contatos", node: (
               <Section title="Contatos" icon={Phone}>
-                <Field label="WhatsApp" error={errors.contato_whatsapp}>
+                <Field label="WhatsApp" required error={errors.contato_whatsapp}>
                   <Input
                     value={form.contato_whatsapp ?? ""}
                     onChange={(e) => set("contato_whatsapp", maskPhone(e.target.value))}
@@ -389,7 +389,7 @@ export default function ClienteForm() {
                       setError(
                         "contato_whatsapp",
                         !form.contato_whatsapp?.trim()
-                          ? null
+                          ? "Informe o WhatsApp"
                           : isValidPhone(form.contato_whatsapp)
                             ? null
                             : "Telefone inválido",
@@ -397,9 +397,11 @@ export default function ClienteForm() {
                     }
                     placeholder="(00) 00000-0000"
                     inputMode="tel"
+                    required
                     className="h-11 text-base"
                   />
                 </Field>
+
                 <Field label="E-mail" error={errors.contato_email}>
                   <Input
                     type="email"
