@@ -391,89 +391,14 @@ export function EmpresaAssinaturas({ empresaId }: { empresaId: string }) {
         )}
       </section>
 
-      {/* Contratar / trocar plano ------------------------------------- */}
-      <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
-        <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
-          <span
-            className="inline-flex h-7 w-7 items-center justify-center rounded-lg"
-            style={{
-              background: "color-mix(in oklab, var(--panel-accent) 14%, transparent)",
-              color: "var(--panel-accent)",
-            }}
-          >
-            <CreditCard className="h-4 w-4" />
-          </span>
-          {ativa ? "Trocar de plano" : "Contratar plano"}
-        </h2>
+      {/* Ação: contratar / trocar plano ------------------------------- */}
+      <div className="flex flex-wrap gap-3">
+        <Button type="button" className="tap-target" onClick={() => setModalOpen(true)}>
+          <CreditCard className="mr-2 h-4 w-4" />
+          {ativa ? "Trocar de plano" : "Novo plano"}
+        </Button>
+      </div>
 
-        <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(16rem,100%),1fr))]">
-          <div className="space-y-2 md:col-span-full">
-            <Label className="text-sm">
-              Plano<span className="ml-0.5 text-destructive">*</span>
-            </Label>
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                className="tap-target h-11"
-                onClick={() => setModalOpen(true)}
-              >
-                <Search className="mr-2 h-4 w-4" />
-                {plano ? "Alterar seleção" : "Selecionar plano"}
-              </Button>
-              {plano ? (
-                <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-semibold">
-                  {plano.nome}
-                  <span style={{ color: "var(--panel-accent)" }}>
-                    {precoLabel(plano.gratuito, plano.valor)}
-                  </span>
-                </span>
-              ) : (
-                <span className="text-sm text-muted-foreground">Nenhum plano selecionado</span>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-sm">
-              Início<span className="ml-0.5 text-destructive">*</span>
-            </Label>
-            <Input
-              type="date"
-              value={inicio}
-              onChange={(e) => setInicio(e.target.value)}
-              className="h-11 text-base"
-            />
-            <p className="text-xs text-muted-foreground">
-              Vigência de 30 dias — vence em{" "}
-              <strong>{formatDate(vencimento({ inicio, fim: null })) ?? "—"}</strong>
-            </p>
-          </div>
-
-          <div className="space-y-2 md:col-span-full">
-            <Label className="text-sm">Observação</Label>
-            <Textarea
-              value={observacao}
-              onChange={(e) => setObservacao(e.target.value)}
-              rows={3}
-              placeholder="Condições negociadas, motivo da troca…"
-              className="text-base"
-            />
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Button
-            type="button"
-            className="tap-target"
-            onClick={abrirConfirmacao}
-            disabled={!plano || definir.isPending}
-          >
-            {definir.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {ativa ? "Trocar plano" : "Contratar plano"}
-          </Button>
-        </div>
-      </section>
 
       {/* Histórico ---------------------------------------------------- */}
       <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
