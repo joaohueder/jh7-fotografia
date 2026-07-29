@@ -65,7 +65,11 @@ export default function AlterarSenha() {
   }
 
   return (
-    <AccountShell title="Alterar senha" subtitle="Escolha uma nova senha para acessar o sistema.">
+    <AccountShell
+      title="Alterar senha"
+      subtitle="Escolha uma nova senha para acessar o sistema."
+      width="full"
+    >
       <form
         onSubmit={salvar}
         className="space-y-5 rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]"
