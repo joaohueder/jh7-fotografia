@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState, Fragment } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { LogOut, Loader2, Power, ShieldCheck, UserCog, Users } from "lucide-react";
+import { motion } from "framer-motion";
+import { LogOut, Loader2, Power, ShieldCheck, UserCog, Users, Search } from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
@@ -43,11 +44,31 @@ const ROLE_LABEL: Record<UsuarioRole, string> = {
   sem_papel: "Sem papel",
 };
 
-const ROLE_COR: Record<UsuarioRole, string> = {
-  sa_admin: "var(--panel-accent)",
-  admin: "var(--brand-green)",
-  usuario: "hsl(var(--foreground))",
-  sem_papel: "hsl(var(--muted-foreground))",
+const ROLE_STYLES: Record<UsuarioRole, { border: string; text: string; bg: string; gradient: string }> = {
+  sa_admin: {
+    border: "var(--gold)",
+    text: "var(--gold)",
+    bg: "color-mix(in oklab, var(--gold) 10%, transparent)",
+    gradient: "linear-gradient(135deg, var(--gold) 0%, var(--gold-soft) 100%)",
+  },
+  admin: {
+    border: "var(--primary)",
+    text: "var(--primary)",
+    bg: "color-mix(in oklab, var(--primary) 10%, transparent)",
+    gradient: "linear-gradient(135deg, var(--primary) 0%, var(--gold-soft) 100%)",
+  },
+  usuario: {
+    border: "hsl(var(--muted-foreground))",
+    text: "hsl(var(--muted-foreground))",
+    bg: "color-mix(in oklab, hsl(var(--muted-foreground)) 10%, transparent)",
+    gradient: "linear-gradient(135deg, hsl(var(--muted-foreground)) 0%, hsl(var(--border)) 100%)",
+  },
+  sem_papel: {
+    border: "hsl(var(--muted-foreground))",
+    text: "hsl(var(--muted-foreground))",
+    bg: "color-mix(in oklab, hsl(var(--muted-foreground)) 10%, transparent)",
+    gradient: "linear-gradient(135deg, hsl(var(--muted-foreground)) 0%, hsl(var(--border)) 100%)",
+  },
 };
 
 /** Tempo decorrido em linguagem natural: agora, 30 segundos, 10 minutos, 1 hora, 3 dias… */
@@ -73,27 +94,6 @@ function tempoDecorrido(inicio: string | null | undefined, agora: number): strin
   return plural(anos, "ano", "anos");
 }
 
-function ConexaoBadge({ logado, desde, agora }: { logado: boolean; desde?: string | null; agora: number }) {
-  const cor = logado ? "var(--brand-green)" : "hsl(var(--muted-foreground))";
-  const tempo = logado ? tempoDecorrido(desde, agora) : null;
-  return (
-    <span className="inline-flex flex-wrap items-center gap-1.5">
-      <span
-        className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"
-        style={{ background: `color-mix(in oklab, ${cor} 15%, transparent)`, color: cor }}
-      >
-        <span className="h-2 w-2 rounded-full" style={{ background: cor }} />
-        {logado ? "Logado" : "Deslogado"}
-      </span>
-      {tempo ? (
-        <span className="text-xs text-muted-foreground" title="Tempo total logado">
-          há {tempo}
-        </span>
-      ) : null}
-    </span>
-  );
-}
-
 function formataData(iso: string | null) {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("pt-BR");
@@ -110,19 +110,164 @@ function formataDataHora(iso: string | null) {
   });
 }
 
-function Badge({ cor, children }: { cor: string; children: React.ReactNode }) {
+function iniciais(nome: string) {
+  return nome
+    .split(" ")
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+function InfoRow({ label, value, valueColor }: { label: string; value: React.ReactNode; valueColor?: string }) {
   return (
-    <span
-      className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold"
-      style={{
-        borderColor: `color-mix(in oklab, ${cor} 55%, transparent)`,
-        color: cor,
-        background: `color-mix(in oklab, ${cor} 12%, transparent)`,
+    <div className="flex justify-between items-center text-xs">
+      <span className="text-muted-foreground uppercase font-bold tracking-widest">{label}</span>
+      <span className="text-foreground font-medium" style={valueColor ? { color: valueColor } : undefined}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function UsuarioCard({
+  u,
+  agora,
+  onLogoff,
+  onToggle,
+  index,
+}: {
+  u: UsuarioSistema;
+  agora: number;
+  onLogoff: (u: UsuarioSistema) => void;
+  onToggle: (u: UsuarioSistema) => void;
+  index: number;
+}) {
+  const styles = ROLE_STYLES[u.role];
+  const logado = Boolean(u.logado);
+  const tempoLogado = logado ? tempoDecorrido(u.sessao_desde, agora) : null;
+  const tempoUltimoAcesso = u.ultimo_login ? tempoDecorrido(u.ultimo_login, agora) : null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.45,
+        delay: index * 0.06,
+        ease: [0.22, 1, 0.36, 1],
       }}
+      className="group relative rounded-2xl border border-border/60 bg-card/40 backdrop-blur-xl overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.45)] hover:border-[var(--gold)]/40"
+      style={{ borderColor: `color-mix(in oklab, ${styles.border} 35%, var(--border))` }}
     >
-      <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: cor }} />
-      {children}
-    </span>
+      <div
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        style={{
+          background: `linear-gradient(135deg, color-mix(in oklab, ${styles.border} 8%, transparent) 0%, transparent 60%)`,
+        }}
+      />
+
+      <div className="p-5 relative z-10">
+        <div className="flex justify-between items-start mb-4">
+          <div
+            className="h-12 w-12 rounded-xl flex items-center justify-center font-display text-white font-bold text-lg shadow-lg"
+            style={{ background: styles.gradient }}
+          >
+            {iniciais(u.nome)}
+          </div>
+          <span
+            className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border"
+            style={{
+              background: styles.bg,
+              color: styles.text,
+              borderColor: `color-mix(in oklab, ${styles.border} 30%, transparent)`,
+            }}
+          >
+            {ROLE_LABEL[u.role]}
+          </span>
+        </div>
+
+        <h3 className="font-display text-white font-semibold text-lg leading-tight">{u.nome}</h3>
+        <p className="text-muted-foreground text-sm mb-4 truncate">{u.email ?? "—"}</p>
+
+        <div className="space-y-3 pt-4 border-t border-border/50">
+          <InfoRow
+            label="Status"
+            value={
+              <span className="inline-flex items-center gap-1.5">
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{
+                    background: logado ? "var(--brand-green)" : "hsl(var(--muted-foreground))",
+                    boxShadow: logado ? "0 0 8px var(--brand-green)" : undefined,
+                  }}
+                />
+                <span style={{ color: logado ? "var(--brand-green)" : "hsl(var(--muted-foreground))" }}>
+                  {logado ? "Logado" : "Deslogado"}
+                </span>
+                {tempoLogado ? (
+                  <span className="text-muted-foreground font-normal" title="Tempo total logado">
+                    há {tempoLogado}
+                  </span>
+                ) : null}
+              </span>
+            }
+          />
+          <InfoRow
+            label="Empresa"
+            value={
+              u.empresa_id ? (
+                <Link to={`/sa/empresas/${u.empresa_id}`} className="hover:underline">
+                  {u.empresa_nome ?? "—"}
+                </Link>
+              ) : (
+                "—"
+              )
+            }
+          />
+          <InfoRow
+            label="Último acesso"
+            value={
+              <span title={formataDataHora(u.ultimo_login)}>
+                {formataDataHora(u.ultimo_login)}
+                {tempoUltimoAcesso ? (
+                  <span className="text-muted-foreground font-normal ml-1">(há {tempoUltimoAcesso})</span>
+                ) : null}
+              </span>
+            }
+          />
+          <InfoRow
+            label="Situação"
+            value={u.ativo ? "Ativo" : "Inativo"}
+            valueColor={u.ativo ? "var(--brand-green)" : "hsl(var(--destructive))"}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mt-6">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 text-xs font-semibold bg-white/5 border-white/10 hover:bg-white/10 hover:text-foreground"
+            onClick={() => onLogoff(u)}
+          >
+            <LogOut className="mr-1.5 h-3.5 w-3.5" />
+            Logoff
+          </Button>
+          <Button
+            size="sm"
+            className="h-9 text-xs font-bold"
+            style={{
+              background: u.ativo ? "hsl(var(--destructive))" : "var(--primary)",
+              color: "white",
+            }}
+            onClick={() => onToggle(u)}
+          >
+            <Power className="mr-1.5 h-3.5 w-3.5" />
+            {u.ativo ? "Inativar" : "Ativar"}
+          </Button>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -139,6 +284,7 @@ export default function UsuariosList() {
     const t = setInterval(() => setAgora(Date.now()), 10_000);
     return () => clearInterval(t);
   }, []);
+
   const [filtro, setFiltro] = useState<Filtro>("TODOS");
   const [alvo, setAlvo] = useState<UsuarioSistema | null>(null);
   const [alvoLogoff, setAlvoLogoff] = useState<UsuarioSistema | null>(null);
@@ -202,48 +348,68 @@ export default function UsuariosList() {
 
   return (
     <PanelLayout accent="sa" menu={SA_MENU}>
-      <div className="space-y-6">
-        <header>
-          <h1 className="text-[clamp(1.375rem,5vw,1.75rem)] font-bold tracking-tight">Usuários</h1>
+      <div className="space-y-8">
+        <motion.header
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight font-display">Gestão de Usuários</h1>
           <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
-            Todos os acessos do sistema: SaaS, administradores e usuários das empresas.
+            Controle de acessos e permissões do JH7 Gestão Fotográfica.
           </p>
-        </header>
+        </motion.header>
 
-        <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(11rem,100%),1fr))]">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+          className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(11rem,100%),1fr))]"
+        >
           {[
-            { label: "Total", valor: resumo.total, cor: "var(--panel-accent)", Icon: Users },
-            { label: "Admin do SaaS", valor: resumo.sa, cor: "var(--panel-accent)", Icon: ShieldCheck },
-            { label: "Admin da empresa", valor: resumo.admin, cor: "var(--brand-green)", Icon: UserCog },
+            { label: "Total", valor: resumo.total, cor: "var(--gold)", Icon: Users },
+            { label: "Admin do SaaS", valor: resumo.sa, cor: "var(--gold)", Icon: ShieldCheck },
+            { label: "Admin da empresa", valor: resumo.admin, cor: "var(--primary)", Icon: UserCog },
             { label: "Usuários", valor: resumo.usuario, cor: "hsl(var(--foreground))", Icon: Users },
           ].map((c) => (
-            <div key={c.label} className="rounded-xl border border-border bg-card p-[clamp(0.875rem,3vw,1.25rem)]">
+            <div
+              key={c.label}
+              className="rounded-2xl border border-border/60 bg-card/50 p-[clamp(0.875rem,3vw,1.25rem)] backdrop-blur-sm transition-all duration-300 hover:border-[var(--gold)]/30 hover:bg-card/70"
+            >
               <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                 <c.Icon className="h-4 w-4" aria-hidden />
                 {c.label}
               </h3>
               <p
-                className="mt-2 text-[clamp(1.5rem,6vw,2rem)] font-bold leading-tight"
+                className="mt-2 text-[clamp(1.5rem,6vw,2rem)] font-bold leading-tight font-display"
                 style={{ color: c.cor }}
               >
                 {c.valor}
               </p>
             </div>
           ))}
-        </div>
+        </motion.div>
 
-        <div className="space-y-3">
-          <Input
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar por nome, e-mail ou empresa"
-            className="h-11 text-base"
-            aria-label="Buscar usuários"
-          />
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          className="space-y-3"
+        >
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Buscar por nome, e-mail ou empresa"
+              className="h-12 pl-10 text-base bg-white/5 border-white/10 focus-visible:ring-[var(--gold)]/50"
+              aria-label="Buscar usuários"
+            />
+          </div>
           <div
             role="group"
             aria-label="Filtrar por tipo de usuário"
-            className="flex flex-wrap gap-1 rounded-xl border border-border bg-surface/50 p-1"
+            className="flex flex-wrap gap-1.5 rounded-xl border border-border/60 bg-surface/50 p-1.5"
           >
             {FILTROS.map((op) => {
               const ativo = filtro === op.key;
@@ -253,12 +419,11 @@ export default function UsuariosList() {
                   type="button"
                   aria-pressed={ativo}
                   onClick={() => setFiltro(op.key)}
-                  className="min-h-[var(--tap)] flex-1 whitespace-nowrap rounded-lg px-3 text-[0.8125rem] font-semibold transition-colors"
+                  className="min-h-[var(--tap)] flex-1 whitespace-nowrap rounded-lg px-3 text-[0.8125rem] font-semibold transition-all duration-300"
                   style={{
-                    background: ativo
-                      ? "color-mix(in oklab, var(--panel-accent) 15%, transparent)"
-                      : undefined,
-                    color: ativo ? "var(--panel-accent)" : "hsl(var(--muted-foreground))",
+                    background: ativo ? "color-mix(in oklab, var(--gold) 15%, transparent)" : undefined,
+                    color: ativo ? "var(--gold)" : "hsl(var(--muted-foreground))",
+                    border: ativo ? "1px solid color-mix(in oklab, var(--gold) 30%, transparent)" : "1px solid transparent",
                   }}
                 >
                   {op.label}
@@ -266,153 +431,40 @@ export default function UsuariosList() {
               );
             })}
           </div>
-        </div>
+        </motion.div>
 
         {isLoading ? (
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" /> Carregando…
+          <div className="flex items-center gap-2 text-muted-foreground py-12">
+            <Loader2 className="h-5 w-5 animate-spin" /> Carregando usuários…
           </div>
         ) : error ? (
-          <p className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm">
+          <p className="rounded-2xl border border-destructive/40 bg-destructive/10 p-6 text-sm">
             Não foi possível carregar os usuários: {(error as Error).message}
           </p>
         ) : lista.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border p-8 text-center">
-            <Users className="mx-auto mb-3 h-6 w-6 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="rounded-2xl border border-dashed border-border p-10 text-center"
+          >
+            <Users className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
+            <p className="text-muted-foreground">
               Nenhum usuário encontrado para este filtro.
             </p>
-          </div>
+          </motion.div>
         ) : (
-          <>
-            {/* Mobile: cards */}
-            <ul className="grid gap-2 md:hidden">
-              {lista.map((u) => (
-                <li key={u.id} className="rounded-xl border border-border bg-card p-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold leading-tight">{u.nome}</p>
-                      <p className="truncate text-sm leading-tight text-muted-foreground">{u.email ?? "—"}</p>
-                    </div>
-                    <Badge cor={ROLE_COR[u.role]}>{ROLE_LABEL[u.role]}</Badge>
-                  </div>
-                  <div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1 text-xs text-muted-foreground">
-                    <p className="col-span-2 truncate leading-tight">
-                      <span className="font-medium text-foreground">Empresa:</span>{" "}
-                      {u.empresa_id ? (
-                        <Link to={`/sa/empresas/${u.empresa_id}`} className="hover:underline">
-                          {u.empresa_nome ?? "—"}
-                        </Link>
-                      ) : (
-                        "—"
-                      )}
-                    </p>
-                    <p className="leading-tight">
-                      <span className="font-medium text-foreground">Último acesso:</span>{" "}
-                      {formataDataHora(u.ultimo_login)}
-                    </p>
-                    <p className="leading-tight">
-                      <span className="font-medium text-foreground">Criado em:</span>{" "}
-                      {formataData(u.created_at)}
-                    </p>
-                  </div>
-                  <div className="mt-2 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <Badge cor={u.ativo ? "var(--brand-green)" : "hsl(var(--destructive))"}>
-                        {u.ativo ? "Ativo" : "Inativo"}
-                      </Badge>
-                      <ConexaoBadge logado={Boolean(u.logado)} desde={u.sessao_desde} agora={agora} />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" className="h-8" onClick={() => setAlvoLogoff(u)}>
-                        <LogOut className="mr-1.5 h-4 w-4" />
-                        Logoff
-                      </Button>
-                      <Button variant="outline" size="sm" className="h-8" onClick={() => setAlvo(u)}>
-                        <Power className="mr-1.5 h-4 w-4" />
-                        {u.ativo ? "Inativar" : "Ativar"}
-                      </Button>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            {/* Desktop: tabela em 2 linhas por usuário */}
-            <div className="hidden overflow-x-auto rounded-xl border border-border md:block">
-              <table className="w-full text-sm leading-tight">
-                <thead className="bg-surface/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
-                  <tr>
-                    <th className="px-3 py-2">Usuário</th>
-                    <th className="px-3 py-2">Tipo</th>
-                    <th className="px-3 py-2">Acesso</th>
-                    <th className="px-3 py-2 text-right">Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {lista.map((u) => (
-                    <Fragment key={u.id}>
-                      {/* 1ª linha: nome / tipo / acesso (logado + último acesso/tempo) / ações */}
-                      <tr className="border-t border-border">
-                        <td className="px-3 py-2 align-top">
-                          <p className="font-semibold leading-tight">{u.nome}</p>
-                        </td>
-                        <td className="px-3 py-2 align-top">
-                          <Badge cor={ROLE_COR[u.role]}>{ROLE_LABEL[u.role]}</Badge>
-                        </td>
-                        <td className="px-3 py-2 align-top">
-                          <div className="flex flex-col gap-1 leading-tight">
-                            <ConexaoBadge logado={Boolean(u.logado)} desde={u.sessao_desde} agora={agora} />
-                            <span className="text-xs text-muted-foreground">
-                              Último acesso: {formataDataHora(u.ultimo_login)}
-                              {u.ultimo_login ? (
-                                <span className="ml-1 opacity-80">
-                                  ({tempoDecorrido(u.ultimo_login, agora) ?? "—"})
-                                </span>
-                              ) : null}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-3 py-2 text-right align-top">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button variant="outline" size="sm" className="h-8" onClick={() => setAlvoLogoff(u)}>
-                              <LogOut className="mr-1.5 h-4 w-4" />
-                              Logoff
-                            </Button>
-                            <Button variant="outline" size="sm" className="h-8" onClick={() => setAlvo(u)}>
-                              <Power className="mr-1.5 h-4 w-4" />
-                              {u.ativo ? "Inativar" : "Ativar"}
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                      {/* 2ª linha: e-mail / empresa / status */}
-                      <tr className="border-b border-border">
-                        <td className="px-3 py-2 align-top">
-                          <p className="text-muted-foreground leading-tight">{u.email ?? "—"}</p>
-                        </td>
-                        <td className="px-3 py-2 align-top text-muted-foreground leading-tight">
-                          {u.empresa_id ? (
-                            <Link to={`/sa/empresas/${u.empresa_id}`} className="hover:underline">
-                              {u.empresa_nome ?? "—"}
-                            </Link>
-                          ) : (
-                            "—"
-                          )}
-                        </td>
-                        <td className="px-3 py-2 align-top">
-                          <Badge cor={u.ativo ? "var(--brand-green)" : "hsl(var(--destructive))"}>
-                            {u.ativo ? "Ativo" : "Inativo"}
-                          </Badge>
-                        </td>
-                        <td className="px-3 py-2 text-right align-top" />
-                      </tr>
-                    </Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {lista.map((u, i) => (
+              <UsuarioCard
+                key={u.id}
+                u={u}
+                agora={agora}
+                onLogoff={setAlvoLogoff}
+                onToggle={setAlvo}
+                index={i}
+              />
+            ))}
+          </div>
         )}
       </div>
 
