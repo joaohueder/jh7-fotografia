@@ -150,7 +150,7 @@ export default function ClientesList() {
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Clientes</h1>
-              <HelpTip text="Aqui ficam as pessoas e empresas que você atende. Clique em “Novo cliente” para cadastrar, use a busca para encontrar alguém e os botões de cada linha para editar, ativar/inativar ou excluir." />
+              <HelpTip text="Aqui ficam as pessoas e empresas que você atende. Clique em “Novo cliente” para cadastrar, use a busca para encontrar alguém e os botões de cada linha para editar, ativar/inativar ou excluir. Esta tela se atualiza sozinha: se alguém da sua equipe cadastrar ou alterar um cliente, a lista e o gráfico mudam automaticamente, sem precisar recarregar a página." />
             </div>
             <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
               Cadastro dos clientes atendidos pelo estúdio.
