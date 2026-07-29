@@ -132,3 +132,60 @@ export function useAssinaturasAtivas() {
     },
   });
 }
+
+export interface AssinaturaComEmpresa extends Assinatura {
+  empresa_nome: string;
+  empresa_cidade: string | null;
+  empresa_uf: string | null;
+  /** Dias restantes até o fim da vigência (null quando não há data fim). */
+  dias_restantes: number | null;
+  /** Vigente = ativa e ainda dentro do prazo. */
+  vigente: boolean;
+}
+
+/** Todas as assinaturas do SaaS, com dados da empresa e dias restantes. */
+export function useTodasAssinaturas() {
+  return useQuery({
+    queryKey: ["assinaturas-todas"],
+    staleTime: 0,
+    queryFn: async (): Promise<AssinaturaComEmpresa[]> => {
+      const [assinaturas, empresas] = await Promise.all([
+        db
+          .from("empresa_assinaturas")
+          .select(COLUNAS)
+          .order("ativo", { ascending: false })
+          .order("inicio", { ascending: false }),
+        db.from("empresas").select("id, nome_fantasia, razao_social, cidade, uf"),
+      ]);
+      if (assinaturas.error) throw traduzErro(assinaturas.error);
+      if (empresas.error) throw traduzErro(empresas.error);
+
+      const mapaEmpresas = new Map<string, Record<string, string | null>>();
+      for (const e of empresas.data ?? []) {
+        mapaEmpresas.set((e as { id: string }).id, e as Record<string, string | null>);
+      }
+
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+
+      return (assinaturas.data ?? []).map((row) => {
+        const a = normaliza(row as Record<string, unknown>);
+        const emp = mapaEmpresas.get(a.empresa_id);
+        let dias: number | null = null;
+        if (a.fim) {
+          const fim = new Date(`${a.fim}T00:00:00`);
+          dias = Math.ceil((fim.getTime() - hoje.getTime()) / 86_400_000);
+        }
+        return {
+          ...a,
+          empresa_nome:
+            (emp?.nome_fantasia as string) || (emp?.razao_social as string) || "Empresa removida",
+          empresa_cidade: (emp?.cidade as string) ?? null,
+          empresa_uf: (emp?.uf as string) ?? null,
+          dias_restantes: dias,
+          vigente: a.ativo && (dias === null || dias >= 0),
+        };
+      });
+    },
+  });
+}
