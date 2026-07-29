@@ -110,6 +110,15 @@ export default function LeadsList() {
   const salvar = useSalvarLead();
   const remover = useDeleteLead();
   const situacaoLead = useSituacaoLead();
+  const { data: limites } = useLimitesEmpresa();
+
+  // Regra de limite: o plano da empresa define quantos leads podem existir.
+  const limiteLeads = limites?.limite_leads ?? null;
+  const usadoLeads = limites?.usado_leads ?? 0;
+  const limiteAtingido = limiteLeads !== null && usadoLeads >= limiteLeads;
+  const restantes = limiteLeads === null ? null : Math.max(limiteLeads - usadoLeads, 0);
+
+
 
 
   const [busca, setBusca] = useState("");
