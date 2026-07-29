@@ -17,6 +17,7 @@ interface ThemeContextValue {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
+  setForcedTheme: (theme: Theme | null) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
@@ -38,10 +39,12 @@ export function applyTheme(theme: Theme) {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(readStoredTheme);
+  // Telas que impõem um tema (ex.: login sempre escuro) sem alterar a preferência
+  const [forcedTheme, setForcedTheme] = useState<Theme | null>(null);
 
   useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
+    applyTheme(forcedTheme ?? theme);
+  }, [theme, forcedTheme]);
 
   const setTheme = useCallback((next: Theme) => {
     setThemeState(next);
@@ -68,6 +71,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       theme,
       setTheme,
       toggleTheme: () => setTheme(theme === "dark" ? "light" : "dark"),
+      setForcedTheme,
     }),
     [theme, setTheme],
   );
@@ -86,10 +90,10 @@ export function useTheme() {
  * restaurando a preferência do usuário ao sair.
  */
 export function useForcedTheme(forced: Theme) {
-  const { theme } = useTheme();
+  const { setForcedTheme } = useTheme();
 
   useEffect(() => {
-    applyTheme(forced);
-    return () => applyTheme(theme);
-  }, [forced, theme]);
+    setForcedTheme(forced);
+    return () => setForcedTheme(null);
+  }, [forced, setForcedTheme]);
 }
