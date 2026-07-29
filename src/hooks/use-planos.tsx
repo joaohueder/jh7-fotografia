@@ -12,8 +12,10 @@ export interface Plano {
   ativo: boolean;
   gratuito: boolean;
   valor: number | null;
+  ordem: number | null;
   created_at: string;
 }
+
 
 export interface PlanoInput {
   nome: string;
