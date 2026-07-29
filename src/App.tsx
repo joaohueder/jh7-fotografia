@@ -11,6 +11,7 @@ import AuthPage from "@/pages/Auth";
 import SaDashboard from "@/pages/panels/SaDashboard";
 import EmpresasList from "@/pages/panels/sa/Empresas";
 import EmpresaForm from "@/pages/panels/sa/EmpresaForm";
+import PlanosList from "@/pages/panels/sa/Planos";
 import SaConfiguracoes from "@/pages/panels/sa/Configuracoes";
 import AdminDashboard from "@/pages/panels/AdminDashboard";
 import AdminConfiguracoes from "@/pages/panels/admin/Configuracoes";
@@ -137,6 +138,16 @@ export default function App() {
                 <RequireAuth>
                   <RequireRole allow={["sa_admin"]}>
                     <EmpresaForm />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/sa/planos"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["sa_admin"]}>
+                    <PlanosList />
                   </RequireRole>
                 </RequireAuth>
               }
