@@ -60,6 +60,21 @@ function StatusBadge({ status }: { status: Cliente["status"] }) {
   );
 }
 
+function OrigemBadge({ origem }: { origem: Cliente["origem"] }) {
+  return (
+    <span
+      className="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide"
+      style={{
+        borderColor: "hsl(var(--border))",
+        color: "hsl(var(--muted-foreground))",
+        background: "color-mix(in oklab, hsl(var(--muted)) 50%, transparent)",
+      }}
+    >
+      {origem === "CLIENTE" ? "Cadastro de clientes" : "Lead"}
+    </span>
+  );
+}
+
 /** Listagem de clientes da empresa do administrador logado. */
 export default function ClientesList() {
   usePageMeta("Clientes — JH7 Gestão Fotográfica", "Gestão dos clientes do estúdio.");
