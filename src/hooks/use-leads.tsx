@@ -8,6 +8,27 @@ import { type NotaModulo } from "@/hooks/use-cliente-notas";
 
 const db = supabase as unknown as SupabaseClient;
 
+/** Situação do lead dentro do funil de atendimento. */
+export type LeadSituacao = "AGUARDANDO" | "DESISTIU" | "CLIENTE";
+
+export const LEAD_SITUACOES: { valor: LeadSituacao; rotulo: string; ajuda: string }[] = [
+  {
+    valor: "AGUARDANDO",
+    rotulo: "Aguardando",
+    ajuda: "Contatos ainda em negociação, que não fecharam nem desistiram.",
+  },
+  {
+    valor: "DESISTIU",
+    rotulo: "Desistiu",
+    ajuda: "Contatos que avisaram que não têm mais interesse no momento.",
+  },
+  {
+    valor: "CLIENTE",
+    rotulo: "Virou cliente",
+    ajuda: "Leads que já preencheram o cadastro completo e viraram clientes.",
+  },
+];
+
 export interface Lead {
   id: string;
   empresa_id: string;
@@ -16,6 +37,8 @@ export interface Lead {
   status: "ATIVO" | "INATIVO";
   origem: string;
   created_at: string;
+  /** Situação do lead no funil: aguardando, desistiu ou já virou cliente. */
+  situacao: LeadSituacao;
   ultima_nota?: {
     descricao: string;
     modulo: NotaModulo;
@@ -61,12 +84,10 @@ export function useLeads() {
       const { data, error } = await db
         .from("clientes")
         .select(
-          "id, empresa_id, nome, contato_whatsapp, status, origem, created_at, cliente_notas(descricao, modulo, criado_por_nome, created_at, tipo), interesse:cliente_notas(descricao, criado_por_nome, created_at, tipo)",
+          "id, empresa_id, nome, contato_whatsapp, status, origem, created_at, documento, lead_status, cliente_notas(descricao, modulo, criado_por_nome, created_at, tipo), interesse:cliente_notas(descricao, criado_por_nome, created_at, tipo)",
         )
         .eq("empresa_id", empresaId!)
         .eq("origem", "LEAD")
-        // Somente leads ainda não convertidos (sem cadastro completo)
-        .is("documento", null)
         .eq("interesse.tipo", "INTERESSE")
         .order("created_at", { ascending: false, foreignTable: "cliente_notas" })
         .limit(10, { foreignTable: "cliente_notas" })
@@ -85,9 +106,16 @@ export function useLeads() {
               n?.tipo !== "INTERESSE" &&
               !(interesse && n?.created_at === interesse.created_at && n?.descricao === interesse.descricao),
           ) ?? null;
-        const { cliente_notas: _n, interesse: _i, ...rest } = l;
+        const { cliente_notas: _n, interesse: _i, documento, lead_status, ...rest } = l;
+        // Quem já preencheu o cadastro completo (documento) virou cliente.
+        const situacao: LeadSituacao = documento
+          ? "CLIENTE"
+          : lead_status === "DESISTIU"
+            ? "DESISTIU"
+            : "AGUARDANDO";
         return {
           ...rest,
+          situacao,
           ultima_nota: ultima,
           interesse,
         } as Lead;
@@ -127,6 +155,18 @@ export function useSalvarLead() {
         .single();
       if (error) throw error;
       return (data as { id: string }).id;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["leads"], refetchType: "active" }),
+  });
+}
+
+/** Marca o lead como "aguardando" ou "desistiu". */
+export function useSituacaoLead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, situacao }: { id: string; situacao: "AGUARDANDO" | "DESISTIU" }) => {
+      const { error } = await db.from("clientes").update({ lead_status: situacao }).eq("id", id);
+      if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["leads"], refetchType: "active" }),
   });
