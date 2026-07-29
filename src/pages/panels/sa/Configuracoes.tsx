@@ -1,4 +1,4 @@
-import { Check, Maximize2, Monitor, RotateCcw } from "lucide-react";
+import { Check, Maximize2, Monitor, Palette as PaletteIcon, RotateCcw } from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { notifyError, notifySuccess } from "@/lib/system-message";
@@ -8,6 +8,51 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MAX_MAX_WIDTH, MIN_MAX_WIDTH, useAppLayout } from "@/hooks/use-app-layout";
+import { usePalette } from "@/hooks/use-palette";
+import { PaletteGrid } from "@/components/palette-grid";
+import { getPalette } from "@/lib/palettes";
+
+
+/** Grupo Templates — paleta de cores padrão do sistema. */
+function TemplatesSection() {
+  const { systemPalette, saveAsSystemPalette } = usePalette();
+
+  async function handleSelect(id: string) {
+    const { error } = await saveAsSystemPalette(id);
+    if (error) {
+      notifyError(error, { title: "Não foi possível salvar a paleta padrão" });
+      return;
+    }
+    notifySuccess(
+      `A paleta ${getPalette(id).name} passa a ser o padrão para todos os usuários que não escolheram uma paleta própria.`,
+      "Template aplicado",
+    );
+  }
+
+  return (
+    <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
+      <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
+        <span
+          className="inline-flex h-7 w-7 items-center justify-center rounded-lg"
+          style={{
+            background: "color-mix(in oklab, var(--panel-accent) 14%, transparent)",
+            color: "var(--panel-accent)",
+          }}
+        >
+          <PaletteIcon className="h-4 w-4" />
+        </span>
+        Templates
+      </h2>
+
+      <p className="mb-5 text-sm text-muted-foreground">
+        Escolha a paleta padrão do sistema — altera apenas as cores primária, secundária e de
+        destaque. Cada usuário pode definir a própria paleta nas configurações da conta.
+      </p>
+
+      <PaletteGrid value={systemPalette} onChange={handleSelect} />
+    </section>
+  );
+}
 
 /** Aba Layout — padrão global da largura máxima. */
 function LayoutTab() {
@@ -98,6 +143,8 @@ function LayoutTab() {
           </div>
         </div>
       </section>
+
+      <TemplatesSection />
     </div>
   );
 }
