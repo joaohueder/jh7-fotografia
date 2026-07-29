@@ -42,12 +42,16 @@ function AuthPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [blockMessage, setBlockMessage] = useState<string | null>(null);
+  // Trava o redirecionamento automático enquanto validamos o acesso (usuário/empresa
+  // inativos) — sem isso a tela dava "refresh" indo para /dashboard antes da checagem.
+  const [isCheckingAccess, setIsCheckingAccess] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && user) {
+    if (!isLoading && user && !isCheckingAccess && !blockMessage) {
       navigate("/dashboard", { replace: true });
     }
-  }, [user, isLoading, navigate]);
+  }, [user, isLoading, navigate, isCheckingAccess, blockMessage]);
+
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("auth_email");
