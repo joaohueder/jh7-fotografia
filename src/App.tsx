@@ -143,6 +143,16 @@ export default function App() {
               }
             />
             <Route
+              path="/sa/planos"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["sa_admin"]}>
+                    <PlanosList />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
               path="/sa/configuracoes"
               element={
                 <RequireAuth>
