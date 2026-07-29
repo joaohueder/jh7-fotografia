@@ -101,10 +101,14 @@ export function useEncerrarAssinatura() {
       });
       if (error) throw traduzErro(error);
     },
-    onSuccess: (_data, vars) => {
-      void qc.invalidateQueries({ queryKey: ["empresa-assinaturas", vars.empresaId] });
-      void qc.invalidateQueries({ queryKey: ["empresa-assinaturas-ativas"] });
-      void qc.invalidateQueries({ queryKey: ["planos-uso"] });
+    onSuccess: async (_data, vars) => {
+      qc.removeQueries({ queryKey: ["assinaturas-todas"] });
+      await Promise.all([
+        qc.refetchQueries({ queryKey: ["assinaturas-todas"], type: "active" }),
+        qc.invalidateQueries({ queryKey: ["empresa-assinaturas", vars.empresaId] }),
+        qc.invalidateQueries({ queryKey: ["empresa-assinaturas-ativas"] }),
+        qc.invalidateQueries({ queryKey: ["planos-uso"] }),
+      ]);
     },
   });
 }

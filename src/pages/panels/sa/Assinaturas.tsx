@@ -85,7 +85,7 @@ function VencimentoTexto({ a }: { a: AssinaturaComEmpresa }) {
 export default function AssinaturasList() {
   usePageMeta("Assinaturas — JH7 Gestão Fotográfica", "Assinaturas das empresas do SaaS.");
 
-  const { data, isLoading, error } = useTodasAssinaturas();
+  const { data, isLoading, error, refetch } = useTodasAssinaturas();
   const expirar = useEncerrarAssinatura();
   const [busca, setBusca] = useState("");
   const [filtro, setFiltro] = useState<Filtro>("TODAS");
@@ -100,6 +100,7 @@ export default function AssinaturasList() {
         empresaId: assinaturaAlvo.empresa_id,
         observacao: "Assinatura expirada manualmente pelo painel SA.",
       });
+      await refetch();
       notifySuccess(`Assinatura de ${assinaturaAlvo.empresa_nome} expirada com sucesso.`);
       setAssinaturaAlvo(null);
     } catch (err) {
