@@ -149,6 +149,7 @@ export default function ClienteForm() {
   const [form, setForm] = useState<ClientePayload>(EMPTY);
   const [contatos, setContatos] = useState<ClienteContato[]>([]);
   const [errors, setErrors] = useState<Record<string, string | null>>({});
+  const [step, setStep] = useState(0);
 
   useEffect(() => {
     if (!data) return;
