@@ -60,6 +60,21 @@ function StatusBadge({ status }: { status: Cliente["status"] }) {
   );
 }
 
+function OrigemBadge({ origem }: { origem: Cliente["origem"] }) {
+  return (
+    <span
+      className="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide"
+      style={{
+        borderColor: "hsl(var(--border))",
+        color: "hsl(var(--muted-foreground))",
+        background: "color-mix(in oklab, hsl(var(--muted)) 50%, transparent)",
+      }}
+    >
+      {origem === "CLIENTE" ? "Cadastro de clientes" : "Lead"}
+    </span>
+  );
+}
+
 /** Listagem de clientes da empresa do administrador logado. */
 export default function ClientesList() {
   usePageMeta("Clientes — JH7 Gestão Fotográfica", "Gestão dos clientes do estúdio.");
@@ -279,6 +294,7 @@ export default function ClientesList() {
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-semibold leading-tight">{c.nome}</span>
                       <StatusBadge status={c.status} />
+                      <OrigemBadge origem={c.origem} />
                       {menor ? (
                         <span className="inline-flex animate-pulse items-center gap-1 rounded-full border border-destructive px-2 py-0.5 text-[11px] font-bold uppercase text-destructive">
                           <AlertTriangle className="h-3 w-3" />
