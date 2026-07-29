@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -21,11 +22,36 @@ export interface UsuarioSistema {
   created_at: string;
 }
 
-/** Todos os usuários do sistema (somente sa_admin). */
+/** Todos os usuários do sistema (somente sa_admin), em tempo real. */
 export function useUsuarios() {
+  const qc = useQueryClient();
+
+  // Atualiza a lista assim que perfis, papéis ou sessões mudarem no banco.
+  useEffect(() => {
+    const invalidar = () => qc.invalidateQueries({ queryKey: ["usuarios"] });
+    const channel = supabase
+      .channel("usuarios-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, invalidar)
+      .on("postgres_changes", { event: "*", schema: "public", table: "user_roles" }, invalidar)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "sessoes_revogadas" },
+        invalidar,
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [qc]);
+
   return useQuery({
     queryKey: ["usuarios"],
-    staleTime: 30 * 1000,
+    staleTime: 0,
+    refetchInterval: 15 * 1000,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
+    refetchOnMount: "always",
     queryFn: async (): Promise<UsuarioSistema[]> => {
       const { data, error } = await db.rpc("sa_listar_usuarios");
       if (error) throw error;
