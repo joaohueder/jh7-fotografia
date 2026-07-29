@@ -229,8 +229,10 @@ export default function ClientesList() {
           </div>
         ) : error ? (
           <p className="rounded-2xl border border-destructive/40 bg-destructive/10 p-6 text-sm">
-            Não foi possível carregar os clientes: {(error as Error).message}
+            Não conseguimos carregar a lista de clientes agora. Verifique sua conexão com a internet
+            e atualize a página. Se continuar assim, fale com o suporte JH7.
           </p>
+
         ) : totais.total === 0 ? (
           <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-border bg-card px-6 py-[clamp(2.5rem,8vw,4rem)] text-center">
             <span
