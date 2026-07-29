@@ -16,6 +16,7 @@ import {
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
+import { IconAction } from "@/components/icon-action";
 import { SA_MENU } from "@/pages/panels/sa/menu";
 import {
   useEmpresas,
@@ -415,24 +416,26 @@ export default function EmpresasList() {
                     >
                       <Pencil className="mr-2 h-4 w-4" /> Editar
                     </Button>
-                    <Button
+                    <IconAction
                       variant="outline"
                       size="sm"
                       className="tap-target"
-                      aria-label={`${e.status === "ATIVO" ? "Inativar" : "Ativar"} ${e.nome_fantasia}`}
+                      label={e.status === "ATIVO" ? "Desativar empresa" : "Ativar empresa"}
+                      ariaLabel={`${e.status === "ATIVO" ? "Desativar" : "Ativar"} ${e.nome_fantasia}`}
                       onClick={() => abrirStatus(e)}
                     >
                       <Power className="h-4 w-4" />
-                    </Button>
-                    <Button
+                    </IconAction>
+                    <IconAction
                       variant="outline"
                       size="sm"
-                      className="tap-target"
-                      aria-label={`Excluir ${e.nome_fantasia}`}
+                      className="tap-target text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      label="Excluir empresa"
+                      ariaLabel={`Excluir ${e.nome_fantasia}`}
                       onClick={() => abrirExclusao(e)}
                     >
                       <Trash2 className="h-4 w-4" />
-                    </Button>
+                    </IconAction>
                   </div>
                 </li>
               ))}
