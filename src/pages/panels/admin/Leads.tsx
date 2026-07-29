@@ -591,17 +591,20 @@ export default function LeadsList() {
                           Retomar negociação
                         </Button>
                       )}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="tap-target gap-2"
-                        title="Abre o cadastro completo de cliente já preenchido com os dados do lead."
-                        aria-label={`Transformar ${l.nome} em cliente`}
-                        onClick={() => navigate(`/admin/clientes/novo?lead=${l.id}`)}
-                      >
-                        <UserCheck className="h-4 w-4" />
-                        Transformar em cliente
-                      </Button>
+                      <span title={avisoLimiteClientes} className="inline-flex">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="tap-target gap-2"
+                          disabled={limiteClientesAtingido}
+                          title={avisoLimiteClientes}
+                          aria-label={`Transformar ${l.nome} em cliente`}
+                          onClick={() => navigate(`/admin/clientes/novo?lead=${l.id}`)}
+                        >
+                          <UserCheck className="h-4 w-4" />
+                          Transformar em cliente
+                        </Button>
+                      </span>
                       <Button
                         variant="outline"
                         size="sm"
