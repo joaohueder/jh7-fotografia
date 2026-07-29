@@ -1,30 +1,15 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Layers, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { IconAction } from "@/components/icon-action";
 import { SA_MENU } from "@/pages/panels/sa/menu";
-import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
-import {
-  usePlanos,
-  useCreatePlano,
-  useUpdatePlano,
-  useDeletePlano,
-  type Plano,
-} from "@/hooks/use-planos";
+import { notifyError, notifySuccess } from "@/lib/system-message";
+import { usePlanos, useDeletePlano, type Plano } from "@/hooks/use-planos";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,21 +34,12 @@ const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" 
 export default function PlanosList() {
   usePageMeta("Planos — JH7 Gestão Fotográfica", "Planos comerciais do SaaS.");
 
+  const navigate = useNavigate();
   const { data, isLoading, error } = usePlanos();
-  const criar = useCreatePlano();
-  const atualizar = useUpdatePlano();
   const remover = useDeletePlano();
 
   const [busca, setBusca] = useState("");
-  const [aberto, setAberto] = useState(false);
-  const [editando, setEditando] = useState<Plano | null>(null);
-  const [nome, setNome] = useState("");
-  const [ativo, setAtivo] = useState(true);
-  const [gratuito, setGratuito] = useState(false);
-  const [valor, setValor] = useState("");
   const [alvo, setAlvo] = useState<Plano | null>(null);
-
-  const salvando = criar.isPending || atualizar.isPending;
 
   const planos = useMemo(() => {
     const term = busca.trim().toLowerCase();
@@ -75,64 +51,11 @@ export default function PlanosList() {
   const vazio = !isLoading && !error && (data?.length ?? 0) === 0;
 
   function abrirNovo() {
-    setEditando(null);
-    setNome("");
-    setAtivo(true);
-    setGratuito(false);
-    setValor("");
-    setAberto(true);
+    navigate("/sa/planos/novo");
   }
 
   function abrirEdicao(plano: Plano) {
-    setEditando(plano);
-    setNome(plano.nome);
-    setAtivo(plano.ativo);
-    setGratuito(plano.gratuito);
-    setValor(plano.valor === null ? "" : plano.valor.toFixed(2).replace(".", ","));
-    setAberto(true);
-  }
-
-  async function salvar() {
-    const nomeLimpo = nome.trim();
-    if (nomeLimpo.length < 2) {
-      notifyValidation("Informe um nome com pelo menos 2 caracteres.");
-      return;
-    }
-    if (nomeLimpo.length > 60) {
-      notifyValidation("O nome do plano deve ter no máximo 60 caracteres.");
-      return;
-    }
-
-    let valorNumero: number | null = null;
-    if (!gratuito) {
-      valorNumero = parseValor(valor);
-      if (valorNumero === null) {
-        notifyValidation("Informe o valor do plano (ex.: 149,90).");
-        return;
-      }
-      if (valorNumero < 0 || valorNumero > 999999.99) {
-        notifyValidation("O valor do plano deve estar entre 0 e 999.999,99.");
-        return;
-      }
-    }
-
-    const payload = { nome: nomeLimpo, ativo, gratuito, valor: valorNumero };
-
-    try {
-      if (editando) {
-        await atualizar.mutateAsync({ id: editando.id, ...payload });
-        notifySuccess("Plano atualizado.");
-      } else {
-        await criar.mutateAsync(payload);
-        notifySuccess("Plano criado.");
-      }
-      setAberto(false);
-      setEditando(null);
-      setNome("");
-      setValor("");
-    } catch (err) {
-      notifyError(err);
-    }
+    navigate(`/sa/planos/${plano.id}`);
   }
 
   async function confirmarExclusao() {
@@ -266,85 +189,6 @@ export default function PlanosList() {
           <p className="text-sm text-muted-foreground">Nenhum plano encontrado para essa busca.</p>
         )}
       </div>
-
-      <Dialog open={aberto} onOpenChange={(open) => !salvando && setAberto(open)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{editando ? "Editar plano" : "Novo plano"}</DialogTitle>
-            <DialogDescription>Defina nome, status, gratuidade e valor do plano.</DialogDescription>
-          </DialogHeader>
-
-          <form
-            className="space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              void salvar();
-            }}
-          >
-            <div className="space-y-2">
-              <Label htmlFor="plano-nome">Nome do plano</Label>
-              <Input
-                id="plano-nome"
-                value={nome}
-                maxLength={60}
-                autoFocus
-                onChange={(e) => setNome(e.target.value)}
-                placeholder="Ex.: Essencial"
-              />
-            </div>
-
-            <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-3">
-              <div>
-                <Label htmlFor="plano-ativo">Status</Label>
-                <p className="text-xs text-muted-foreground">
-                  {ativo ? "Plano ativo e disponível." : "Plano inativo."}
-                </p>
-              </div>
-              <Switch id="plano-ativo" checked={ativo} onCheckedChange={setAtivo} />
-            </div>
-
-            <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-3">
-              <div>
-                <Label htmlFor="plano-gratuito">Plano gratuito</Label>
-                <p className="text-xs text-muted-foreground">
-                  {gratuito ? "Sim — sem cobrança." : "Não — informe o valor."}
-                </p>
-              </div>
-              <Switch id="plano-gratuito" checked={gratuito} onCheckedChange={setGratuito} />
-            </div>
-
-            {!gratuito && (
-              <div className="space-y-2">
-                <Label htmlFor="plano-valor">Valor do plano (R$)</Label>
-                <Input
-                  id="plano-valor"
-                  inputMode="decimal"
-                  value={valor}
-                  maxLength={12}
-                  onChange={(e) => setValor(e.target.value)}
-                  placeholder="Ex.: 149,90"
-                />
-              </div>
-            )}
-          </form>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              className="tap-target"
-              disabled={salvando}
-              onClick={() => setAberto(false)}
-            >
-              Cancelar
-            </Button>
-            <Button type="button" className="tap-target" disabled={salvando} onClick={() => void salvar()}>
-              {salvando && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Salvar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <AlertDialog open={Boolean(alvo)} onOpenChange={(open) => !open && setAlvo(null)}>
         <AlertDialogContent>
