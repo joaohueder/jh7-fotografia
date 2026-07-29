@@ -14,12 +14,18 @@ export function panelPathForRole(role: AppRole | null) {
   }
 }
 
-/** Papel de maior privilégio do usuário. */
+/**
+ * Papel de maior privilégio do usuário.
+ * Durante o "acessar como empresa", o sa_admin passa a ser tratado como admin
+ * da empresa em todo o app (menus, módulos e redirecionamentos).
+ */
 export function usePrimaryRole() {
   const { roles, isLoading } = useRoles();
+  const { impersonando } = useImpersonacao();
   const priority: AppRole[] = ["sa_admin", "admin", "usuario"];
-  const role = priority.find((r) => roles.includes(r)) ?? null;
-  return { role, isLoading };
+  const real = priority.find((r) => roles.includes(r)) ?? null;
+  const role: AppRole | null = impersonando && real === "sa_admin" ? "admin" : real;
+  return { role, realRole: real, isLoading };
 }
 
 /** Redireciona o usuário para o painel do seu tipo. */
