@@ -301,62 +301,68 @@ export default function UsuariosList() {
               ))}
             </ul>
 
-            {/* Desktop: tabela */}
+            {/* Desktop: tabela em 2 linhas por usuário */}
             <div className="hidden overflow-x-auto rounded-xl border border-border md:block">
               <table className="w-full text-sm">
                 <thead className="bg-surface/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
-                    <th className="px-4 py-3">Nome</th>
-                    <th className="px-4 py-3">E-mail</th>
-                    <th className="px-4 py-3">Tipo</th>
-                    <th className="px-4 py-3">Empresa</th>
-                    <th className="px-4 py-3">Último acesso</th>
-                    <th className="px-4 py-3">Conexão</th>
-                    <th className="px-4 py-3">Situação</th>
+                    <th className="px-4 py-3">Usuário</th>
+                    <th className="px-4 py-3">Tipo / Empresa</th>
+                    <th className="px-4 py-3">Acesso</th>
                     <th className="px-4 py-3 text-right">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {lista.map((u) => (
-                    <tr key={u.id} className="border-t border-border">
-                      <td className="px-4 py-3 font-medium">{u.nome}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{u.email ?? "—"}</td>
-                      <td className="px-4 py-3">
-                        <Badge cor={ROLE_COR[u.role]}>{ROLE_LABEL[u.role]}</Badge>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {u.empresa_id ? (
-                          <Link to={`/sa/empresas/${u.empresa_id}`} className="hover:underline">
-                            {u.empresa_nome ?? "—"}
-                          </Link>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {formataDataHora(u.ultimo_login)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <ConexaoBadge logado={Boolean(u.logado)} />
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge cor={u.ativo ? "var(--brand-green)" : "hsl(var(--destructive))"}>
-                          {u.ativo ? "Ativo" : "Inativo"}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                    <>
+                      <tr key={`${u.id}-1`} className="border-t border-border">
+                        <td className="px-4 py-3 align-top">
+                          <p className="font-semibold">{u.nome}</p>
+                        </td>
+                        <td className="px-4 py-3 align-top">
+                          <Badge cor={ROLE_COR[u.role]}>{ROLE_LABEL[u.role]}</Badge>
+                        </td>
+                        <td className="px-4 py-3 align-top">
+                          <ConexaoBadge logado={Boolean(u.logado)} />
+                        </td>
+                        <td className="px-4 py-3 text-right align-top">
                           <Button variant="outline" size="sm" onClick={() => setAlvoLogoff(u)}>
                             <LogOut className="mr-1.5 h-4 w-4" />
                             Logoff
                           </Button>
+                        </td>
+                      </tr>
+                      <tr key={`${u.id}-2`} className="border-b border-border">
+                        <td className="px-4 py-3 align-top">
+                          <p className="text-muted-foreground">{u.email ?? "—"}</p>
+                        </td>
+                        <td className="px-4 py-3 align-top text-muted-foreground">
+                          {u.empresa_id ? (
+                            <Link to={`/sa/empresas/${u.empresa_id}`} className="hover:underline">
+                              {u.empresa_nome ?? "—"}
+                            </Link>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+                        <td className="px-4 py-3 align-top">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge cor={u.ativo ? "var(--brand-green)" : "hsl(var(--destructive))"}>
+                              {u.ativo ? "Ativo" : "Inativo"}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {formataDataHora(u.ultimo_login)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-right align-top">
                           <Button variant="outline" size="sm" onClick={() => setAlvo(u)}>
                             <Power className="mr-1.5 h-4 w-4" />
                             {u.ativo ? "Inativar" : "Ativar"}
                           </Button>
-                        </div>
-                      </td>
-                    </tr>
+                        </td>
+                      </tr>
+                    </>
                   ))}
                 </tbody>
               </table>
