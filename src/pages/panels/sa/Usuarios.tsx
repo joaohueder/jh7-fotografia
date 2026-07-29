@@ -1,4 +1,4 @@
-import { useMemo, useState, Fragment } from "react";
+import { useEffect, useMemo, useState, Fragment } from "react";
 import { Link } from "react-router-dom";
 import { LogOut, Loader2, Power, ShieldCheck, UserCog, Users } from "lucide-react";
 
@@ -50,15 +50,46 @@ const ROLE_COR: Record<UsuarioRole, string> = {
   sem_papel: "hsl(var(--muted-foreground))",
 };
 
-function ConexaoBadge({ logado }: { logado: boolean }) {
+/** Tempo decorrido em linguagem natural: agora, 30 segundos, 10 minutos, 1 hora, 3 dias… */
+function tempoDecorrido(inicio: string | null | undefined, agora: number): string | null {
+  if (!inicio) return null;
+  const ms = agora - new Date(inicio).getTime();
+  if (!Number.isFinite(ms)) return null;
+  const s = Math.max(0, Math.floor(ms / 1000));
+  if (s < 10) return "agora";
+  const plural = (n: number, um: string, muitos: string) => `${n} ${n === 1 ? um : muitos}`;
+  if (s < 60) return plural(s, "segundo", "segundos");
+  const min = Math.floor(s / 60);
+  if (min < 60) return plural(min, "minuto", "minutos");
+  const h = Math.floor(min / 60);
+  if (h < 24) return plural(h, "hora", "horas");
+  const d = Math.floor(h / 24);
+  if (d < 7) return plural(d, "dia", "dias");
+  const sem = Math.floor(d / 7);
+  if (d < 30) return plural(sem, "semana", "semanas");
+  const meses = Math.floor(d / 30);
+  if (meses < 12) return plural(meses, "mês", "meses");
+  const anos = Math.floor(d / 365);
+  return plural(anos, "ano", "anos");
+}
+
+function ConexaoBadge({ logado, desde, agora }: { logado: boolean; desde?: string | null; agora: number }) {
   const cor = logado ? "var(--brand-green)" : "hsl(var(--muted-foreground))";
+  const tempo = logado ? tempoDecorrido(desde, agora) : null;
   return (
-    <span
-      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"
-      style={{ background: `color-mix(in oklab, ${cor} 15%, transparent)`, color: cor }}
-    >
-      <span className="h-2 w-2 rounded-full" style={{ background: cor }} />
-      {logado ? "Logado" : "Deslogado"}
+    <span className="inline-flex flex-wrap items-center gap-1.5">
+      <span
+        className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"
+        style={{ background: `color-mix(in oklab, ${cor} 15%, transparent)`, color: cor }}
+      >
+        <span className="h-2 w-2 rounded-full" style={{ background: cor }} />
+        {logado ? "Logado" : "Deslogado"}
+      </span>
+      {tempo ? (
+        <span className="text-xs text-muted-foreground" title="Tempo total logado">
+          há {tempo}
+        </span>
+      ) : null}
     </span>
   );
 }
