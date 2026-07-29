@@ -259,7 +259,7 @@ export default function UsuariosList() {
                     </p>
                     <p>
                       <span className="font-medium text-foreground">Último acesso:</span>{" "}
-                      {formataData(u.ultimo_login)}
+                      {formataDataHora(u.ultimo_login)}
                     </p>
                     <p>
                       <span className="font-medium text-foreground">Criado em:</span>{" "}
@@ -317,7 +317,7 @@ export default function UsuariosList() {
                         )}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
-                        {formataData(u.ultimo_login)}
+                        {formataDataHora(u.ultimo_login)}
                       </td>
                       <td className="px-4 py-3">
                         <Badge cor={u.ativo ? "var(--brand-green)" : "hsl(var(--destructive))"}>
