@@ -106,7 +106,11 @@ export default function LeadsList() {
 
     try {
       const leadId = await salvar.mutateAsync({ id: editando?.id, empresaId, nome, whatsapp });
-      if (interesse.trim()) await criarNotaCliente(leadId, interesse, "LEADS");
+      const interesseMudou = interesse.trim() !== (notaInicial.data?.descricao ?? "").trim();
+      if (interesse.trim() && interesseMudou) {
+        await salvarNotaInicial(leadId, interesse, "LEADS", editando ? notaInicial.data?.id : null);
+        await notaInicial.refetch();
+      }
       notifySuccess(editando ? "Lead atualizado." : "Lead cadastrado com sucesso.");
       setAberto(false);
     } catch (err) {
