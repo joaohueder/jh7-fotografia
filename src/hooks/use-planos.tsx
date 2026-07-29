@@ -9,16 +9,43 @@ const db = supabase as unknown as SupabaseClient;
 export interface Plano {
   id: string;
   nome: string;
+  ativo: boolean;
+  gratuito: boolean;
+  valor: number | null;
   created_at: string;
 }
 
-/** Mensagem amigável para o índice único de nome. */
+export interface PlanoInput {
+  nome: string;
+  ativo: boolean;
+  gratuito: boolean;
+  valor: number | null;
+}
+
+/** Mensagens amigáveis para as restrições do banco. */
 function traduzErro(err: unknown) {
   const msg = (err as { message?: string })?.message ?? "";
+  if (msg.includes("planos_unico_gratuito")) {
+    return new Error("Já existe um plano gratuito. Só é permitido um.");
+  }
   if (msg.includes("planos_nome_unico") || msg.includes("duplicate key")) {
     return new Error("Já existe um plano com esse nome.");
   }
+  if (msg.includes("planos_valor_coerente")) {
+    return new Error("Informe um valor válido para planos pagos.");
+  }
   return err instanceof Error ? err : new Error(String(err));
+}
+
+const COLUNAS = "id, nome, ativo, gratuito, valor, created_at";
+
+function normaliza(input: PlanoInput) {
+  return {
+    nome: input.nome,
+    ativo: input.ativo,
+    gratuito: input.gratuito,
+    valor: input.gratuito ? null : input.valor,
+  };
 }
 
 export function usePlanos() {
@@ -27,10 +54,13 @@ export function usePlanos() {
     queryFn: async (): Promise<Plano[]> => {
       const { data, error } = await db
         .from("planos")
-        .select("id, nome, created_at")
+        .select(COLUNAS)
         .order("nome", { ascending: true });
       if (error) throw error;
-      return (data ?? []) as Plano[];
+      return (data ?? []).map((p) => ({
+        ...(p as Plano),
+        valor: p.valor === null || p.valor === undefined ? null : Number(p.valor),
+      }));
     },
   });
 }
@@ -38,8 +68,8 @@ export function usePlanos() {
 export function useCreatePlano() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (nome: string) => {
-      const { error } = await db.from("planos").insert({ nome });
+    mutationFn: async (input: PlanoInput) => {
+      const { error } = await db.from("planos").insert(normaliza(input));
       if (error) throw traduzErro(error);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["planos"] }),
@@ -49,10 +79,10 @@ export function useCreatePlano() {
 export function useUpdatePlano() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: { id: string; nome: string }) => {
+    mutationFn: async (input: PlanoInput & { id: string }) => {
       const { error } = await db
         .from("planos")
-        .update({ nome: input.nome })
+        .update(normaliza(input))
         .eq("id", input.id);
       if (error) throw traduzErro(error);
     },
