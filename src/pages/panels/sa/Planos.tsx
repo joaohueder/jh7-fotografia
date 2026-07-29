@@ -271,7 +271,7 @@ export default function PlanosList() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editando ? "Editar plano" : "Novo plano"}</DialogTitle>
-            <DialogDescription>Informe o nome do plano.</DialogDescription>
+            <DialogDescription>Defina nome, status, gratuidade e valor do plano.</DialogDescription>
           </DialogHeader>
 
           <form
