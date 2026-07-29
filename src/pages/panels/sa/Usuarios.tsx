@@ -58,16 +58,16 @@ const ROLE_STYLES: Record<UsuarioRole, { border: string; text: string; bg: strin
     gradient: "linear-gradient(135deg, var(--primary) 0%, var(--gold-soft) 100%)",
   },
   usuario: {
-    border: "hsl(var(--muted-foreground))",
-    text: "hsl(var(--muted-foreground))",
-    bg: "color-mix(in oklab, hsl(var(--muted-foreground)) 10%, transparent)",
-    gradient: "linear-gradient(135deg, hsl(var(--muted-foreground)) 0%, hsl(var(--border)) 100%)",
+    border: "var(--muted-foreground)",
+    text: "var(--muted-foreground)",
+    bg: "color-mix(in oklab, var(--muted-foreground) 10%, transparent)",
+    gradient: "linear-gradient(135deg, var(--muted-foreground) 0%, var(--border) 100%)",
   },
   sem_papel: {
-    border: "hsl(var(--muted-foreground))",
-    text: "hsl(var(--muted-foreground))",
-    bg: "color-mix(in oklab, hsl(var(--muted-foreground)) 10%, transparent)",
-    gradient: "linear-gradient(135deg, hsl(var(--muted-foreground)) 0%, hsl(var(--border)) 100%)",
+    border: "var(--muted-foreground)",
+    text: "var(--muted-foreground)",
+    bg: "color-mix(in oklab, var(--muted-foreground) 10%, transparent)",
+    gradient: "linear-gradient(135deg, var(--muted-foreground) 0%, var(--border) 100%)",
   },
 };
 
@@ -198,11 +198,11 @@ function UsuarioCard({
                 <span
                   className="w-2 h-2 rounded-full"
                   style={{
-                    background: logado ? "var(--brand-green)" : "hsl(var(--muted-foreground))",
+                    background: logado ? "var(--brand-green)" : "var(--muted-foreground)",
                     boxShadow: logado ? "0 0 8px var(--brand-green)" : undefined,
                   }}
                 />
-                <span style={{ color: logado ? "var(--brand-green)" : "hsl(var(--muted-foreground))" }}>
+                <span style={{ color: logado ? "var(--brand-green)" : "var(--muted-foreground)" }}>
                   {logado ? "Logado" : "Deslogado"}
                 </span>
                 {tempoLogado ? (
@@ -239,7 +239,7 @@ function UsuarioCard({
           <InfoRow
             label="Situação"
             value={u.ativo ? "Ativo" : "Inativo"}
-            valueColor={u.ativo ? "var(--brand-green)" : "hsl(var(--destructive))"}
+            valueColor={u.ativo ? "var(--brand-green)" : "var(--destructive)"}
           />
         </div>
 
@@ -257,8 +257,8 @@ function UsuarioCard({
             size="sm"
             className="h-9 text-xs font-bold"
             style={{
-              background: u.ativo ? "hsl(var(--destructive))" : "var(--primary)",
-              color: u.ativo ? "hsl(var(--destructive-foreground))" : "var(--primary-foreground, hsl(var(--primary-foreground)))",
+              background: u.ativo ? "var(--destructive)" : "var(--primary)",
+              color: u.ativo ? "var(--destructive-foreground)" : "var(--primary-foreground, var(--primary-foreground))",
             }}
             onClick={() => onToggle(u)}
           >
@@ -370,7 +370,7 @@ export default function UsuariosList() {
             { label: "Total", valor: resumo.total, cor: "var(--gold)", Icon: Users },
             { label: "Admin do SaaS", valor: resumo.sa, cor: "var(--gold)", Icon: ShieldCheck },
             { label: "Admin da empresa", valor: resumo.admin, cor: "var(--primary)", Icon: UserCog },
-            { label: "Usuários", valor: resumo.usuario, cor: "hsl(var(--foreground))", Icon: Users },
+            { label: "Usuários", valor: resumo.usuario, cor: "var(--foreground)", Icon: Users },
           ].map((c) => (
             <div
               key={c.label}
@@ -422,7 +422,7 @@ export default function UsuariosList() {
                   className="min-h-[var(--tap)] flex-1 whitespace-nowrap rounded-lg px-3 text-[0.8125rem] font-semibold transition-all duration-300"
                   style={{
                     background: ativo ? "color-mix(in oklab, var(--gold) 15%, transparent)" : undefined,
-                    color: ativo ? "var(--gold)" : "hsl(var(--muted-foreground))",
+                    color: ativo ? "var(--gold)" : "var(--muted-foreground)",
                     border: ativo ? "1px solid color-mix(in oklab, var(--gold) 30%, transparent)" : "1px solid transparent",
                   }}
                 >
