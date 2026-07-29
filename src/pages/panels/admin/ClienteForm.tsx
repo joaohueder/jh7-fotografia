@@ -715,8 +715,8 @@ export default function ClienteForm() {
   }
 
 
-  function avancar() {
-    if (!validarEtapa(step)) return;
+  async function avancar() {
+    if (!(await validarEtapa(step))) return;
     setStep((s) => Math.min(ultimo, s + 1));
   }
 
