@@ -217,7 +217,16 @@ function AuthPage() {
               </span>
             </div>
 
-            <div className="glass rounded-3xl p-[clamp(1.25rem,5vw,2.5rem)] animate-fade-up">
+            <div className="flex flex-col-reverse items-center gap-4 sm:flex-row sm:items-center">
+              <LoginOptions
+                orientation="vertical"
+                className="shrink-0"
+                onLoginSocial={({ provider }) => {
+                  // Integração social será implementada futuramente.
+                  console.log("onLoginSocial", provider);
+                }}
+              />
+              <div className="glass w-full min-w-0 flex-1 rounded-3xl p-[clamp(1.25rem,5vw,2.5rem)] animate-fade-up">
             <div className="space-y-2">
               <h2 className="text-[clamp(1.375rem,4vw,1.75rem)]">Bem-vindo de volta</h2>
               <p className="text-[0.9375rem] leading-relaxed text-muted-foreground">
