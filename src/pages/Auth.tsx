@@ -7,6 +7,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/selfhosted/client";
+import { setRememberMe as persistRememberMe } from "@/integrations/selfhosted/auth-storage";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,7 +71,11 @@ function AuthPage() {
 
     setIsSubmitting(true);
     setIsCheckingAccess(true);
+    // Define onde a sessão será gravada ANTES do login:
+    // marcado → localStorage por 30 dias; desmarcado → só enquanto a aba estiver aberta.
+    persistRememberMe(rememberMe);
     const { error } = await signIn(email, password);
+
 
     if (error) {
       setIsSubmitting(false);

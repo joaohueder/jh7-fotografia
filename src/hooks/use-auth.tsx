@@ -2,6 +2,11 @@ import { createContext, useContext, useEffect, useState, useCallback, type React
 import type { User, Session } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/selfhosted/client";
+import {
+  clearRememberState,
+  isRememberExpired,
+} from "@/integrations/selfhosted/auth-storage";
+
 
 interface AuthContextValue {
   user: User | null;
@@ -23,12 +28,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    supabase.auth.getSession().then(({ data, error: sessionError }) => {
-      if (!mounted) return;
-      if (sessionError) setError(sessionError);
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
-      setIsLoading(false);
+    // Encerra a sessão quando a janela de 30 dias do "ficar logado" expirou.
+    async function expirarSePreciso() {
+      if (!isRememberExpired()) return false;
+      clearRememberState();
+      await supabase.auth.signOut();
+      if (mounted) {
+        setSession(null);
+        setUser(null);
+      }
+      return true;
+    }
+
+    expirarSePreciso().then((expirou) => {
+      if (expirou) {
+        if (mounted) setIsLoading(false);
+        return;
+      }
+      supabase.auth.getSession().then(({ data, error: sessionError }) => {
+        if (!mounted) return;
+        if (sessionError) setError(sessionError);
+        setSession(data.session);
+        setUser(data.session?.user ?? null);
+        setIsLoading(false);
+      });
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
@@ -42,11 +65,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     });
 
+    // Revalida o prazo ao voltar para a aba (sessão pode ter vencido enquanto ausente).
+    function onVisibility() {
+      if (document.visibilityState === "visible") void expirarSePreciso();
+    }
+    document.addEventListener("visibilitychange", onVisibility);
+
     return () => {
       mounted = false;
       listener.subscription.unsubscribe();
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
+
 
   const signIn = useCallback(async (email: string, password: string) => {
     setError(null);
@@ -64,9 +95,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     setError(null);
     const { error: signOutError } = await supabase.auth.signOut();
+    clearRememberState();
     if (signOutError) setError(signOutError);
     return { error: signOutError };
   }, []);
+
 
   return (
     <AuthContext.Provider

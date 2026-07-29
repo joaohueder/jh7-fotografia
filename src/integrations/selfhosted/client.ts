@@ -1,5 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import { authStorage, AUTH_STORAGE_KEY } from "./auth-storage";
+
 
 // Supabase autohospedado (JH7 Gestão Fotográfica)
 export const SELF_HOSTED_SUPABASE_URL =
@@ -14,9 +16,10 @@ export const supabase = createClient<Database>(
   SELF_HOSTED_SUPABASE_ANON_KEY,
   {
     auth: {
-      storage: typeof window !== "undefined" ? window.localStorage : undefined,
-      storageKey: "jh7-auth-token",
+      storage: typeof window !== "undefined" ? authStorage : undefined,
+      storageKey: AUTH_STORAGE_KEY,
       persistSession: true,
+
       autoRefreshToken: true,
       detectSessionInUrl: true,
     },
