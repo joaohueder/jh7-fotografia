@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { Camera, KeyRound, LogOut, Menu, ShieldCheck, User, ChevronDown } from "lucide-react";
+import { Camera, KeyRound, LogOut, Menu, Settings, ShieldCheck, User, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -141,7 +141,18 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
                       {item.label}
                     </NavLink>
                   ))}
+                  <NavLink
+                    to="/configuracoes"
+                    end
+                    onClick={() => setMobileNavOpen(false)}
+                    className={({ isActive }) => cn(navItemClass({ isActive }), "gap-2")}
+                    style={navItemStyle}
+                  >
+                    <Settings className="h-4 w-4" />
+                    Configurações
+                  </NavLink>
                 </nav>
+
                 {user?.email ? (
                   <p className="mt-auto break-all text-sm text-muted-foreground">{user.email}</p>
                 ) : null}
@@ -239,8 +250,19 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
               {item.label}
             </NavLink>
           ))}
+          {/* Configurações fica sempre encostado à direita da barra */}
+          <NavLink
+            to="/configuracoes"
+            end
+            className={({ isActive }) => cn(navItemClass({ isActive }), "ml-auto gap-2")}
+            style={navItemStyle}
+          >
+            <Settings className="h-4 w-4" />
+            Configurações
+          </NavLink>
         </div>
       </nav>
+
 
       {/* Main — offset superior/inferior derivado dos tokens de chrome */}
       <main

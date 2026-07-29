@@ -1,0 +1,132 @@
+import { Maximize2, Monitor, RotateCcw } from "lucide-react";
+
+import { AccountShell } from "@/components/account-shell";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DEFAULT_MAX_WIDTH,
+  MAX_MAX_WIDTH,
+  MIN_MAX_WIDTH,
+  useAppLayout,
+} from "@/hooks/use-app-layout";
+
+/** Aba Layout — preferências visuais aplicadas em tempo real. */
+function LayoutTab() {
+  const { maxWidth, setMaxWidth, resetMaxWidth, isDefault } = useAppLayout();
+
+  return (
+    <div className="space-y-[clamp(1rem,3vw,1.5rem)]">
+      <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
+        <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
+          <span
+            className="inline-flex h-7 w-7 items-center justify-center rounded-lg"
+            style={{
+              background: "color-mix(in oklab, var(--panel-accent) 14%, transparent)",
+              color: "var(--panel-accent)",
+            }}
+          >
+            <Maximize2 className="h-4 w-4" />
+          </span>
+          Largura máxima do sistema
+        </h2>
+
+        <div className="space-y-5">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-sm text-muted-foreground">
+                Define até onde o conteúdo se estende em telas grandes. O padrão é{" "}
+                {DEFAULT_MAX_WIDTH}px.
+              </p>
+            </div>
+            <span
+              className="rounded-lg border border-border px-3 py-1.5 text-lg font-bold tabular-nums"
+              style={{ color: "var(--panel-accent)" }}
+            >
+              {maxWidth}px
+            </span>
+          </div>
+
+          <Slider
+            value={[maxWidth]}
+            min={MIN_MAX_WIDTH}
+            max={MAX_MAX_WIDTH}
+            step={10}
+            aria-label="Largura máxima do sistema em pixels"
+            onValueChange={(values) => setMaxWidth(values[0])}
+          />
+
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{MIN_MAX_WIDTH}px</span>
+            <span>{MAX_MAX_WIDTH}px</span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={resetMaxWidth}
+              disabled={isDefault}
+              className="tap-target gap-2"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Restaurar padrão ({DEFAULT_MAX_WIDTH}px)
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              A alteração é aplicada imediatamente e fica salva neste navegador.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
+        <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
+          <span
+            className="inline-flex h-7 w-7 items-center justify-center rounded-lg"
+            style={{
+              background: "color-mix(in oklab, var(--panel-accent) 14%, transparent)",
+              color: "var(--panel-accent)",
+            }}
+          >
+            <Monitor className="h-4 w-4" />
+          </span>
+          Pré-visualização
+        </h2>
+        <div className="rounded-lg border border-dashed border-border bg-surface p-4">
+          <div
+            className="mx-auto space-y-3 rounded-lg border border-border bg-card p-4 transition-[max-width] duration-150"
+            style={{ maxWidth: `${maxWidth / 2}px` }}
+          >
+            <div className="h-2.5 w-1/3 rounded-full" style={{ background: "var(--panel-accent)" }} />
+            <div className="h-2 w-full rounded-full bg-muted" />
+            <div className="h-2 w-4/5 rounded-full bg-muted" />
+          </div>
+          <p className="mt-3 text-center text-xs text-muted-foreground">
+            Proporção do conteúdo em relação à largura escolhida
+          </p>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+export default function ConfiguracoesPage() {
+  return (
+    <AccountShell
+      title="Configurações"
+      subtitle="Ajuste a aparência e o comportamento do sistema."
+    >
+      <Tabs defaultValue="layout" className="space-y-5">
+        <TabsList>
+          <TabsTrigger value="layout" className="gap-2">
+            <Monitor className="h-4 w-4" />
+            Layout
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="layout" className="mt-0">
+          <LayoutTab />
+        </TabsContent>
+      </Tabs>
+    </AccountShell>
+  );
+}

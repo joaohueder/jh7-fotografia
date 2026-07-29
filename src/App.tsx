@@ -17,7 +17,10 @@ import { RoleRedirect, RequireRole } from "@/components/role-routing";
 import MeuPerfil from "@/pages/conta/Perfil";
 import Seguranca from "@/pages/conta/Seguranca";
 import AlterarSenha from "@/pages/conta/AlterarSenha";
+import Configuracoes from "@/pages/conta/Configuracoes";
 import NotFoundPage from "@/pages/NotFound";
+import { AppLayoutProvider } from "@/hooks/use-app-layout";
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -75,9 +78,11 @@ function ScrollToTop() {
 export default function App() {
   return (
     <ThemeProvider>
+    <AppLayoutProvider>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
+
           <ScrollToTop />
           <AuthEvents />
           <Routes>
@@ -175,12 +180,23 @@ export default function App() {
                 </RequireAuth>
               }
             />
+            <Route
+              path="/configuracoes"
+              element={
+                <RequireAuth>
+                  <Configuracoes />
+                </RequireAuth>
+              }
+            />
             <Route path="*" element={<NotFoundPage />} />
+
           </Routes>
           <SystemMessageDialog />
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
+    </AppLayoutProvider>
     </ThemeProvider>
   );
+
 }

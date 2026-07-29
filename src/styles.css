@@ -348,7 +348,10 @@
     --app-nav-h: clamp(2.75rem, 8vw, 3rem);
     --app-footer-h: clamp(2.75rem, 8vw, 3rem);
     --tap: 2.75rem; /* 44px — alvo mínimo de toque */
+    /* Largura máxima do sistema — ajustável em Configurações › Layout */
+    --app-max-w: 1200px;
   }
+
 
   html {
     -webkit-font-smoothing: antialiased;
@@ -374,12 +377,13 @@
     line-height: 1.65;
   }
 
-  /* Largura máxima global do site: 1200px, centralizado */
+  /* Largura máxima global do site — controlada por Configurações › Layout */
   #root {
     width: 100%;
-    max-width: 75rem; /* 1200px em unidade relativa */
+    max-width: var(--app-max-w);
     margin-inline: auto;
   }
+
 
   /* Mídia é sempre fluida por padrão — evita estouro de container */
   img,
@@ -504,7 +508,7 @@
 /* Container fluido padrão do app: gutter escala com a viewport */
 @utility container-page {
   width: 100%;
-  max-width: 75rem;
+  max-width: var(--app-max-w);
   margin-inline: auto;
   padding-inline: var(--gutter);
 }
