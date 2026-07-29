@@ -197,21 +197,35 @@ function AssinaturaCard({
   );
 }
 
-/** Modal de seleção de plano. */
-function SelecionarPlanoDialog({
+/** Modal completo: seleciona o plano, define início e observação. */
+function ContratarPlanoDialog({
   open,
   onOpenChange,
   planos,
   loading,
-  selecionado,
-  onSelecionar,
+  temAtiva,
+  plano,
+  onPlano,
+  inicio,
+  onInicio,
+  observacao,
+  onObservacao,
+  salvando,
+  onConfirmar,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   planos: Plano[];
   loading: boolean;
-  selecionado: string | null;
-  onSelecionar: (plano: Plano) => void;
+  temAtiva: boolean;
+  plano: Plano | null;
+  onPlano: (p: Plano) => void;
+  inicio: string;
+  onInicio: (v: string) => void;
+  observacao: string;
+  onObservacao: (v: string) => void;
+  salvando: boolean;
+  onConfirmar: () => void;
 }) {
   const [busca, setBusca] = useState("");
 
@@ -226,66 +240,107 @@ function SelecionarPlanoDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Selecionar plano</DialogTitle>
+          <DialogTitle>{temAtiva ? "Trocar de plano" : "Novo plano"}</DialogTitle>
           <DialogDescription>
-            Escolha um dos planos ativos para vincular a esta empresa.
+            {temAtiva
+              ? "A assinatura ativa será encerrada ao confirmar o novo plano."
+              : "Escolha um dos planos ativos para vincular a esta empresa."}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar plano…"
-            className="h-11 pl-9 text-base"
-          />
-        </div>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label className="text-sm">
+              Plano<span className="ml-0.5 text-destructive">*</span>
+            </Label>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                placeholder="Buscar plano…"
+                className="h-11 pl-9 text-base"
+              />
+            </div>
 
-        {loading ? (
-          <div className="flex items-center gap-2 py-6 text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" /> Carregando planos…
+            {loading ? (
+              <div className="flex items-center gap-2 py-6 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Carregando planos…
+              </div>
+            ) : lista.length === 0 ? (
+              <p className="py-6 text-sm text-muted-foreground">
+                Nenhum plano ativo encontrado. Cadastre ou ative um plano no módulo Planos.
+              </p>
+            ) : (
+              <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(14rem,100%),1fr))]">
+                {lista.map((p) => {
+                  const active = plano?.id === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => onPlano(p)}
+                      className="flex flex-col gap-2 rounded-xl border p-4 text-left transition-colors"
+                      style={{
+                        borderColor: active ? "var(--panel-accent)" : "hsl(var(--border))",
+                        background: active
+                          ? "color-mix(in oklab, var(--panel-accent) 12%, transparent)"
+                          : "hsl(var(--card))",
+                      }}
+                    >
+                      <span className="break-words text-sm font-bold">{p.nome}</span>
+                      <span className="text-lg font-bold" style={{ color: "var(--panel-accent)" }}>
+                        {precoLabel(p.gratuito, p.valor)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        ) : lista.length === 0 ? (
-          <p className="py-6 text-sm text-muted-foreground">
-            Nenhum plano ativo encontrado. Cadastre ou ative um plano no módulo Planos.
-          </p>
-        ) : (
-          <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(14rem,100%),1fr))]">
-            {lista.map((p) => {
-              const active = selecionado === p.id;
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => onSelecionar(p)}
-                  className="flex flex-col gap-2 rounded-xl border p-4 text-left transition-colors"
-                  style={{
-                    borderColor: active ? "var(--panel-accent)" : "hsl(var(--border))",
-                    background: active
-                      ? "color-mix(in oklab, var(--panel-accent) 12%, transparent)"
-                      : "hsl(var(--card))",
-                  }}
-                >
-                  <span className="break-words text-sm font-bold">{p.nome}</span>
-                  <span className="text-lg font-bold" style={{ color: "var(--panel-accent)" }}>
-                    {precoLabel(p.gratuito, p.valor)}
-                  </span>
-                </button>
-              );
-            })}
+
+          <div className="space-y-2">
+            <Label className="text-sm">
+              Início<span className="ml-0.5 text-destructive">*</span>
+            </Label>
+            <Input
+              type="date"
+              value={inicio}
+              onChange={(e) => onInicio(e.target.value)}
+              className="h-11 text-base"
+            />
+            <p className="text-xs text-muted-foreground">
+              Vigência de 30 dias — vence em{" "}
+              <strong>{formatDate(vencimento({ inicio, fim: null })) ?? "—"}</strong>
+            </p>
           </div>
-        )}
+
+          <div className="space-y-2">
+            <Label className="text-sm">Observação</Label>
+            <Textarea
+              value={observacao}
+              onChange={(e) => onObservacao(e.target.value)}
+              rows={3}
+              placeholder="Condições negociadas, motivo da troca…"
+              className="text-base"
+            />
+          </div>
+        </div>
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Fechar
+            Cancelar
+          </Button>
+          <Button type="button" onClick={onConfirmar} disabled={!plano || salvando}>
+            {salvando ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {temAtiva ? "Trocar plano" : "Contratar plano"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+
 
 /** Aba de assinaturas da empresa: plano vigente + histórico completo. */
 export function EmpresaAssinaturas({ empresaId }: { empresaId: string }) {
