@@ -1,4 +1,4 @@
-import { Building2 } from "lucide-react";
+import { Building2, Gauge } from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
@@ -7,6 +7,7 @@ import { HelpTip } from "@/components/page-help";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DadosEmpresaTab } from "@/pages/panels/admin/DadosEmpresa";
+import { LimitesTab } from "@/pages/panels/admin/LimitesTab";
 
 export default function AdminConfiguracoes() {
   usePageMeta("Configurações — JH7 Gestão Fotográfica", "Dados cadastrais da empresa.");
@@ -17,7 +18,7 @@ export default function AdminConfiguracoes() {
         <header className="space-y-1">
           <div className="flex items-center gap-1.5">
             <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Configurações</h1>
-            <HelpTip text="Dados cadastrais da sua empresa. Digite o CEP para preencher o endereço automaticamente e clique em Salvar no fim da tela — nada é gravado antes disso." />
+            <HelpTip text="Dados cadastrais da sua empresa e os limites do plano contratado. Digite o CEP para preencher o endereço automaticamente e clique em Salvar no fim da tela — nada é gravado antes disso." />
           </div>
           <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
             Mantenha atualizados os dados cadastrais da sua empresa.
@@ -31,9 +32,16 @@ export default function AdminConfiguracoes() {
               <Building2 className="h-4 w-4" />
               Dados da empresa
             </TabsTrigger>
+            <TabsTrigger value="limites" className="gap-2">
+              <Gauge className="h-4 w-4" />
+              Limites
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="empresa" className="mt-0">
             <DadosEmpresaTab />
+          </TabsContent>
+          <TabsContent value="limites" className="mt-0">
+            <LimitesTab />
           </TabsContent>
         </Tabs>
       </div>
