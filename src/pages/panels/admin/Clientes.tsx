@@ -33,6 +33,7 @@ import {
 import { maskCpfCnpj } from "@/lib/br-masks";
 
 import { Button } from "@/components/ui/button";
+import { useLimitesEmpresa } from "@/hooks/use-limites";
 import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
@@ -85,6 +86,13 @@ export default function ClientesList() {
   const navigate = useNavigate();
   const { data: clientes, isLoading, error } = useClientes();
   const { data: evolucao, isLoading: carregandoEvolucao } = useClientesEvolucao();
+  const { data: limites } = useLimitesEmpresa();
+
+  // Regra de limite: o plano da empresa define quantos clientes podem existir.
+  const limiteClientes = limites?.limite_clientes ?? null;
+  const usadoClientes = limites?.usado_clientes ?? 0;
+  const limiteAtingido = limiteClientes !== null && usadoClientes >= limiteClientes;
+  const restantes = limiteClientes === null ? null : Math.max(limiteClientes - usadoClientes, 0);
   const setStatus = useSetClienteStatus();
   const remover = useDeleteCliente();
 
@@ -150,17 +158,43 @@ export default function ClientesList() {
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Clientes</h1>
-              <HelpTip text="Aqui ficam as pessoas e empresas que você atende. Clique em “Novo cliente” para cadastrar, use a busca para encontrar alguém e os botões de cada linha para editar, ativar/inativar ou excluir. Esta tela se atualiza sozinha: se alguém da sua equipe cadastrar ou alterar um cliente, a lista e o gráfico mudam automaticamente, sem precisar recarregar a página." />
+              <HelpTip text="Aqui ficam as pessoas e empresas que você atende. Clique em “Novo cliente” para cadastrar, use a busca para encontrar alguém e os botões de cada linha para editar, ativar/inativar ou excluir. O seu plano define quantos clientes podem ser cadastrados: quando o limite é atingido, o botão “Novo cliente” some e aparece um aviso — consulte o consumo em Configurações › Limites. Esta tela se atualiza sozinha: se alguém da sua equipe cadastrar ou alterar um cliente, a lista e o gráfico mudam automaticamente." />
             </div>
             <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
               Cadastro dos clientes atendidos pelo estúdio.
             </p>
           </div>
-          <Button className="tap-target gap-2" onClick={() => navigate("/admin/clientes/novo")}>
-            <Plus className="h-4 w-4" />
-            Novo cliente
-          </Button>
+          {limiteAtingido ? null : (
+            <div className="flex flex-col items-end gap-1">
+              <Button className="tap-target gap-2" onClick={() => navigate("/admin/clientes/novo")}>
+                <Plus className="h-4 w-4" />
+                Novo cliente
+              </Button>
+              {restantes !== null ? (
+                <span className="text-xs text-muted-foreground">
+                  {restantes} cadastro(s) disponíveis no seu plano
+                </span>
+              ) : null}
+            </div>
+          )}
         </header>
+
+        {limiteAtingido ? (
+          <div className="flex flex-wrap items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/10 p-4">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+            <div className="min-w-0 space-y-1">
+              <p className="text-sm font-semibold text-destructive">
+                Limite de clientes atingido ({usadoClientes} de {limiteClientes})
+              </p>
+              <p className="text-sm text-muted-foreground">
+                O plano contratado pela sua empresa não permite novos cadastros de clientes. Você
+                continua podendo consultar e editar os clientes existentes. Para cadastrar mais,
+                fale com o administrador para contratar um plano maior — o consumo completo está em
+                Configurações › Limites.
+              </p>
+            </div>
+          </div>
+        ) : null}
 
         <div className="grid gap-4 md:grid-cols-[minmax(13rem,1fr)_2fr]">
           <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
@@ -310,10 +344,16 @@ export default function ClientesList() {
                 endereços e histórico de atendimentos.
               </p>
             </div>
-            <Button className="tap-target gap-2" onClick={() => navigate("/admin/clientes/novo")}>
-              <Plus className="h-4 w-4" />
-              Cadastrar primeiro cliente
-            </Button>
+            {limiteAtingido ? (
+              <p className="text-sm font-semibold text-destructive">
+                Limite de clientes do plano atingido — não é possível cadastrar agora.
+              </p>
+            ) : (
+              <Button className="tap-target gap-2" onClick={() => navigate("/admin/clientes/novo")}>
+                <Plus className="h-4 w-4" />
+                Cadastrar primeiro cliente
+              </Button>
+            )}
           </div>
         ) : lista.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border p-10 text-center">
