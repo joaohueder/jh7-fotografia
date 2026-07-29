@@ -6,6 +6,7 @@ import { ArrowRight, Camera, Eye, EyeOff, Loader2 } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { useForcedTheme } from "@/hooks/use-theme";
+import { useForcedPalette } from "@/hooks/use-palette";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/selfhosted/client";
 import { setRememberMe as persistRememberMe } from "@/integrations/selfhosted/auth-storage";
@@ -31,6 +32,7 @@ function AuthPage() {
   const navigate = useNavigate();
   // A tela de login é sempre escura, independente da preferência do usuário.
   useForcedTheme("dark");
+  useForcedPalette();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
