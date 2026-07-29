@@ -21,6 +21,16 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
@@ -70,9 +80,11 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
   const queryClient = useQueryClient();
   const theme = ACCENTS[accent];
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
   const initials = (displayName ?? user?.email ?? "?").slice(0, 2);
 
   async function handleSignOut() {
+    setLogoutOpen(false);
     await queryClient.cancelQueries();
     queryClient.clear();
     await signOut();
@@ -245,7 +257,7 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onSelect={handleSignOut}
+                  onSelect={() => setLogoutOpen(true)}
                   className="cursor-pointer text-destructive focus:text-destructive"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
@@ -253,6 +265,22 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <AlertDialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Sair do sistema?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Você será desconectado e precisará fazer login novamente para acessar o JH7 Gestão
+                    Fotográfica.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => setLogoutOpen(false)}>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleSignOut}>Sair</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
 
         </div>
