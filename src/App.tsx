@@ -31,6 +31,7 @@ import NotFoundPage from "@/pages/NotFound";
 
 import { AppLayoutProvider } from "@/hooks/use-app-layout";
 import { PaletteProvider } from "@/hooks/use-palette";
+import { ImpersonacaoProvider } from "@/hooks/use-impersonacao";
 
 
 const queryClient = new QueryClient({
@@ -103,6 +104,7 @@ export default function App() {
         <AuthProvider>
         <AppLayoutProvider>
         <PaletteProvider>
+        <ImpersonacaoProvider>
 
           <ScrollToTop />
           <AuthEvents />
@@ -296,6 +298,7 @@ export default function App() {
 
           </Routes>
           <SystemMessageDialog />
+        </ImpersonacaoProvider>
         </PaletteProvider>
         </AppLayoutProvider>
         </AuthProvider>

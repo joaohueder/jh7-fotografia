@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Building2, Loader2, Pencil, Plus, Power, Trash2 } from "lucide-react";
+import { Building2, LogIn, Loader2, Pencil, Plus, Power, Trash2 } from "lucide-react";
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 import {
   Bar,
@@ -26,6 +26,7 @@ import {
   type Empresa,
 } from "@/hooks/use-empresas";
 import { useAssinaturasAtivas } from "@/hooks/use-assinaturas";
+import { useImpersonacao } from "@/hooks/use-impersonacao";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,6 +94,7 @@ export default function EmpresasList() {
   const remove = useDeleteEmpresa();
   const setStatus = useSetEmpresaStatus();
   const { data: assinaturas } = useAssinaturasAtivas();
+  const { iniciar } = useImpersonacao();
   const [busca, setBusca] = useState("");
   const [filtroAssinatura, setFiltroAssinatura] = useState<FiltroAssinatura>("TODAS");
 
@@ -157,6 +159,12 @@ export default function EmpresasList() {
     return list;
   }, [data, busca, filtroAssinatura, assinaturas]);
 
+
+  /** Abre o painel da empresa como se fosse o administrador dela. */
+  function acessarComoEmpresa(empresa: Empresa) {
+    iniciar({ id: empresa.id, nome: empresa.nome_fantasia });
+    navigate("/admin/dashboard");
+  }
 
   async function abrirExclusao(empresa: Empresa) {
     setAlvo(empresa);
@@ -535,6 +543,16 @@ export default function EmpresasList() {
                       variant="outline"
                       size="sm"
                       className="tap-target"
+                      label="Acessar painel da empresa"
+                      ariaLabel={`Acessar painel de ${e.nome_fantasia}`}
+                      onClick={() => acessarComoEmpresa(e)}
+                    >
+                      <LogIn className="h-4 w-4" />
+                    </IconAction>
+                    <IconAction
+                      variant="outline"
+                      size="sm"
+                      className="tap-target"
                       label={e.status === "ATIVO" ? "Desativar empresa" : "Ativar empresa"}
                       ariaLabel={`${e.status === "ATIVO" ? "Desativar" : "Ativar"} ${e.nome_fantasia}`}
                       onClick={() => abrirStatus(e)}
@@ -589,6 +607,13 @@ export default function EmpresasList() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-2">
+                          <IconAction
+                            label="Acessar painel da empresa"
+                            ariaLabel={`Acessar painel de ${e.nome_fantasia}`}
+                            onClick={() => acessarComoEmpresa(e)}
+                          >
+                            <LogIn className="h-4 w-4" />
+                          </IconAction>
                           <IconAction
                             label="Editar empresa"
                             ariaLabel={`Editar ${e.nome_fantasia}`}
