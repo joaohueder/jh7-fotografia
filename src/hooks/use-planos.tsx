@@ -109,7 +109,10 @@ export function useCreatePlano() {
       const { error } = await db.from("planos").insert(normaliza(input));
       if (error) throw traduzErro(error);
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["planos"] }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["planos"] });
+      void qc.invalidateQueries({ queryKey: ["plano-gratuito-ativo"] });
+    },
   });
 }
 
@@ -123,7 +126,10 @@ export function useUpdatePlano() {
         .eq("id", input.id);
       if (error) throw traduzErro(error);
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["planos"] }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["planos"] });
+      void qc.invalidateQueries({ queryKey: ["plano-gratuito-ativo"] });
+    },
   });
 }
 
@@ -134,7 +140,10 @@ export function useTogglePlanoStatus() {
       const { error } = await db.from("planos").update({ ativo }).eq("id", id);
       if (error) throw traduzErro(error);
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["planos"] }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["planos"] });
+      void qc.invalidateQueries({ queryKey: ["plano-gratuito-ativo"] });
+    },
   });
 }
 
@@ -145,7 +154,10 @@ export function useDeletePlano() {
       const { error } = await db.from("planos").delete().eq("id", id);
       if (error) throw traduzErro(error);
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["planos"] }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["planos"] });
+      void qc.invalidateQueries({ queryKey: ["plano-gratuito-ativo"] });
+    },
   });
 }
 
@@ -164,7 +176,10 @@ export function useReordenarPlanos() {
         }),
       );
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["planos"] }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["planos"] });
+      void qc.invalidateQueries({ queryKey: ["plano-gratuito-ativo"] });
+    },
   });
 }
 
