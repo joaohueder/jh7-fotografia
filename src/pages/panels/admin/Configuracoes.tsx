@@ -19,6 +19,19 @@ export default function AdminConfiguracoes() {
           </p>
         </header>
 
+        <PageHelp
+          title="Como usar as Configurações"
+          steps={[
+            "Preencha ou corrija os dados da sua empresa nos campos abaixo.",
+            "Digite o CEP e o endereço é preenchido automaticamente — confira e ajuste o número.",
+            "Clique em Salvar no fim da tela para guardar as alterações.",
+          ]}
+        >
+          Estes dados aparecem nos seus documentos e comunicações. Você pode voltar aqui e alterar
+          quando quiser; nada é enviado antes de você clicar em Salvar.
+        </PageHelp>
+
+
         <Tabs defaultValue="empresa" className="space-y-5">
           <TabsList>
             <TabsTrigger value="empresa" className="gap-2">
