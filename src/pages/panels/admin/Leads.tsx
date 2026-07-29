@@ -42,7 +42,9 @@ import {
 } from "@/hooks/use-leads";
 import { isValidPhone, maskPhone } from "@/lib/br-masks";
 import { salvarNotaInicial, useNotaInicial } from "@/hooks/use-cliente-notas";
+import { useLimitesEmpresa } from "@/hooks/use-limites";
 import { ClienteNotas } from "@/components/cliente-notas";
+
 import { dataHora, duracaoDesde, tempoDecorrido } from "@/lib/tempo";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
