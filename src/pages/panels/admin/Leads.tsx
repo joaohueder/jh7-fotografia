@@ -308,24 +308,22 @@ export default function LeadsList() {
               />
             </div>
 
-            {!editando ? (
-              <div className="space-y-1">
-                <label htmlFor="lead-interesse" className="text-xs font-semibold text-muted-foreground">
-                  Interesse do lead
-                </label>
-                <Textarea
-                  id="lead-interesse"
-                  value={interesse}
-                  onChange={(e) => setInteresse(e.target.value)}
-                  rows={3}
-                  placeholder="Ex.: quer ensaio de 15 anos em dezembro, pediu orçamento."
-                  className="text-base"
-                />
-                <p className="text-xs text-muted-foreground">
-                  O interesse é gravado como nota interna, com data, hora e autor.
-                </p>
-              </div>
-            ) : null}
+            <div className="space-y-1">
+              <label htmlFor="lead-interesse" className="text-xs font-semibold text-muted-foreground">
+                Interesse do lead {editando ? "(nova nota)" : ""}
+              </label>
+              <Textarea
+                id="lead-interesse"
+                value={interesse}
+                onChange={(e) => setInteresse(e.target.value)}
+                rows={3}
+                placeholder="Ex.: quer ensaio de 15 anos em dezembro, pediu orçamento."
+                className="text-base"
+              />
+              <p className="text-xs text-muted-foreground">
+                O interesse é gravado como nota interna, com data, hora e autor.
+              </p>
+            </div>
 
             {editando ? (
               <div className="border-t border-border pt-4">
