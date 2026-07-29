@@ -487,10 +487,13 @@ export default function LeadsList() {
                 Cadastre o primeiro contato interessado para não perder nenhuma oportunidade.
               </p>
             </div>
-            <Button className="tap-target gap-2" onClick={abrirNovo}>
-              <Plus className="h-4 w-4" />
-              Cadastrar primeiro lead
-            </Button>
+            {limiteAtingido ? null : (
+              <Button className="tap-target gap-2" onClick={abrirNovo}>
+                <Plus className="h-4 w-4" />
+                Cadastrar primeiro lead
+              </Button>
+            )}
+
           </div>
         ) : lista.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border p-10 text-center">
