@@ -298,7 +298,8 @@ export default function UsuariosList() {
         [u.nome, u.email ?? "", u.empresa_nome ?? ""].join(" ").toLowerCase().includes(term),
       );
     }
-    if (filtro !== "TODOS") list = list.filter((u) => u.role === filtro);
+    if (filtro === "LOGADOS") list = list.filter((u) => Boolean(u.logado));
+    else if (filtro !== "TODOS") list = list.filter((u) => u.role === filtro);
     return list;
   }, [data, busca, filtro]);
 
