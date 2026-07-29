@@ -179,7 +179,13 @@ function PlanoCard({ plano, uso, arrastavel, onEditar, onExcluir, onToggleStatus
           type="button"
           variant="ghost"
           size="sm"
-          className="tap-target h-8 gap-1.5 text-xs text-destructive hover:text-destructive"
+          disabled={bloqueiaExclusao}
+          title={
+            bloqueiaExclusao
+              ? "Plano com assinaturas vinculadas: apenas inativação é permitida."
+              : undefined
+          }
+          className="tap-target h-8 gap-1.5 text-xs text-destructive hover:text-destructive disabled:opacity-40"
           onClick={() => onExcluir(plano)}
         >
           <Trash2 className="h-3.5 w-3.5" />
