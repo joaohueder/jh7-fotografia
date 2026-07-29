@@ -484,6 +484,17 @@ export default function LeadsList() {
                         <Pencil className="h-4 w-4" />
                         Editar dados
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="tap-target gap-2"
+                        title="Ver e adicionar notas de acompanhamento deste lead."
+                        aria-label={`Abrir notas do lead ${l.nome}`}
+                        onClick={() => setLeadNotas(l)}
+                      >
+                        <StickyNote className="h-4 w-4" />
+                        Notas do lead
+                      </Button>
                       {l.situacao === "AGUARDANDO" ? (
                         <Button
                           variant="outline"
