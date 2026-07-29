@@ -20,6 +20,8 @@ import AdminDashboard from "@/pages/panels/AdminDashboard";
 import AdminConfiguracoes from "@/pages/panels/admin/Configuracoes";
 import ClientesList from "@/pages/panels/admin/Clientes";
 import ClienteForm from "@/pages/panels/admin/ClienteForm";
+import LeadsList from "@/pages/panels/admin/Leads";
+
 
 import UsuarioDashboard from "@/pages/panels/UsuarioDashboard";
 import { RoleRedirect, RequireRole } from "@/components/role-routing";
@@ -283,6 +285,17 @@ export default function App() {
                 </RequireAuth>
               }
             />
+            <Route
+              path="/admin/leads"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <LeadsList />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+
 
 
 

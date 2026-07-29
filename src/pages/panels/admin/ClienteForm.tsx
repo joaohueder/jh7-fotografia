@@ -62,6 +62,8 @@ const EMPTY: ClientePayload = {
   nome: "",
   nascimento: "",
   status: "ATIVO",
+  origem: "CLIENTE",
+
   documento: "",
   cep: "",
   endereco: "",
@@ -201,7 +203,10 @@ export default function ClienteForm() {
       nome: cliente.nome ?? "",
       nascimento: cliente.nascimento ?? "",
       status: cliente.status,
+      origem: cliente.origem ?? "CLIENTE",
       documento: maskCpfCnpj(cliente.documento ?? ""),
+
+
       cep: maskCep(cliente.cep ?? ""),
       endereco: cliente.endereco ?? "",
       complemento: cliente.complemento ?? "",

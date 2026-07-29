@@ -16,12 +16,15 @@ export interface ClienteContato {
   descricao: string | null;
 }
 
+export type ClienteOrigem = "CLIENTE" | "LEAD";
+
 export interface Cliente {
   id: string;
   empresa_id: string;
   nome: string;
   nascimento: string | null;
   status: ClienteStatus;
+  origem: ClienteOrigem;
   documento: string | null;
   cep: string | null;
   endereco: string | null;
@@ -37,6 +40,7 @@ export interface Cliente {
 }
 
 export type ClientePayload = Omit<Cliente, "id" | "empresa_id" | "created_at">;
+
 
 /** Empresa em contexto: a do usuário logado ou a personificada pelo SA. */
 export function useEmpresaAtual() {
@@ -67,7 +71,9 @@ export function useClientes() {
         .from("clientes")
         .select("*")
         .eq("empresa_id", empresaId!)
+        .eq("origem", "CLIENTE")
         .order("nome", { ascending: true });
+
       if (error) throw error;
       return (data ?? []) as Cliente[];
     },

@@ -59,7 +59,10 @@ export interface PanelMenuItem {
   to: string;
   /** Alinha o item à direita na barra de menu superior (desktop). */
   right?: boolean;
+  /** Itens do submenu (aparece como lista suspensa no desktop). */
+  children?: { label: string; to: string }[];
 }
+
 
 
 interface PanelLayoutProps {
@@ -151,18 +154,39 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
                   <SheetTitle className="text-base">{theme.label}</SheetTitle>
                 </SheetHeader>
                 <nav className="flex flex-col gap-1">
-                  {menu.map((item) => (
-                    <NavLink
-                      key={item.to}
-                      to={item.to}
-                      end
-                      onClick={() => setMobileNavOpen(false)}
-                      className={navItemClass}
-                      style={navItemStyle}
-                    >
-                      {item.label}
-                    </NavLink>
-                  ))}
+                  {menu.map((item) =>
+                    item.children?.length ? (
+                      <div key={item.to} className="space-y-1">
+                        <p className="px-3 pt-2 text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                          {item.label}
+                        </p>
+                        {item.children.map((sub) => (
+                          <NavLink
+                            key={sub.to}
+                            to={sub.to}
+                            end
+                            onClick={() => setMobileNavOpen(false)}
+                            className={({ isActive }) => cn(navItemClass({ isActive }), "pl-5")}
+                            style={navItemStyle}
+                          >
+                            {sub.label}
+                          </NavLink>
+                        ))}
+                      </div>
+                    ) : (
+                      <NavLink
+                        key={item.to}
+                        to={item.to}
+                        end
+                        onClick={() => setMobileNavOpen(false)}
+                        className={navItemClass}
+                        style={navItemStyle}
+                      >
+                        {item.label}
+                      </NavLink>
+                    ),
+                  )}
+
                 </nav>
 
 
@@ -320,17 +344,51 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
         style={{ "--panel-nav-h": "var(--app-nav-h)" } as React.CSSProperties}
       >
         <div className="container-page flex h-[var(--app-nav-h)] items-center gap-1 overflow-x-auto">
-          {menu.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end
-              className={({ isActive }) => cn(navItemClass({ isActive }), item.right && "ml-auto")}
-              style={navItemStyle}
-            >
-              {item.label}
-            </NavLink>
-          ))}
+          {menu.map((item) =>
+            item.children?.length ? (
+              <DropdownMenu key={item.to}>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className={cn(
+                      navItemClass({
+                        isActive: item.children.some((c) =>
+                          window.location.pathname.startsWith(c.to),
+                        ),
+                      }),
+                      "gap-1",
+                      item.right && "ml-auto",
+                    )}
+                  >
+                    {item.label}
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  {item.children.map((sub) => (
+                    <DropdownMenuItem
+                      key={sub.to}
+                      className="cursor-pointer"
+                      onSelect={() => navigate(sub.to)}
+                    >
+                      {sub.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end
+                className={({ isActive }) => cn(navItemClass({ isActive }), item.right && "ml-auto")}
+                style={navItemStyle}
+              >
+                {item.label}
+              </NavLink>
+            ),
+          )}
+
         </div>
 
       </nav>
