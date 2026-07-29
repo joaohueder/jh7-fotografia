@@ -453,68 +453,11 @@ export default function LeadsList() {
             {lista.map((l) => (
               <li
                 key={l.id}
-                className="group flex flex-wrap items-start gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-accent/30 sm:flex-nowrap"
+                className="group flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-accent/30"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
-                  <UserRound className="h-5 w-5 text-muted-foreground" />
-                </div>
-
-                <div className="min-w-0 flex-1 space-y-2">
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                    <span className="font-semibold text-foreground">{l.nome}</span>
-                    <SituacaoBadge situacao={l.situacao} />
-                    {l.contato_whatsapp ? (
-                      <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-                        <Phone className="h-3.5 w-3.5" />
-                        {maskPhone(l.contato_whatsapp)}
-                      </span>
-                    ) : null}
-                  </div>
-
-                  <div className="flex items-start gap-2 text-sm">
-                    <Heart className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-                    <span className="line-clamp-2 text-muted-foreground">
-                      <span className="mr-1 font-semibold text-foreground">Interesse do lead:</span>
-                      {l.interesse?.descricao ?? "Nenhum interesse registrado ainda."}
-                    </span>
-                  </div>
-
-                  <div className="flex items-start gap-2 text-sm">
-                    <StickyNote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                    <span className="min-w-0 text-muted-foreground">
-                      <span className="font-semibold text-foreground">Última nota:</span>{" "}
-                      {l.ultima_nota ? (
-                        <>
-                          <span className="text-xs text-muted-foreground">
-                            {dataHora(l.ultima_nota.created_at)} · {tempoDecorrido(l.ultima_nota.created_at)}
-                          </span>
-                          {" — "}
-                          <span className="line-clamp-2">{l.ultima_nota.descricao}</span>
-                        </>
-                      ) : (
-                        "Nenhuma movimentação registrada ainda."
-                      )}
-                    </span>
-                  </div>
-
-
-
-                </div>
-
-                <div className="flex shrink-0 flex-col items-end gap-1 text-right">
-                  <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 px-2 py-0.5 text-xs font-semibold text-foreground">
-                    <Clock className="h-3 w-3 text-primary" />
-                    {duracaoDesde(l.created_at)} de vida
-                  </span>
-                  <span className="text-[11px] text-muted-foreground">
-                    Criado em {dataHora(l.created_at)}
-                  </span>
-                </div>
-
-                <div className="flex w-full shrink-0 flex-wrap items-start gap-2 sm:w-auto">
+                {/* Linha de ações — sempre alinhada à direita */}
+                <div className="flex flex-wrap justify-end gap-2">
                   {l.situacao === "CLIENTE" ? (
-                    // Lead já virou cliente: o cadastro passa a ser gerenciado na tela de
-                    // Clientes, então aqui só oferecemos a visualização do cadastro completo.
                     <Button
                       variant="outline"
                       size="sm"
@@ -588,6 +531,59 @@ export default function LeadsList() {
                       </Button>
                     </>
                   )}
+                </div>
+
+                {/* Dados do lead — alinhados à esquerda abaixo dos botões */}
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
+                    <UserRound className="h-5 w-5 text-muted-foreground" />
+                  </div>
+
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <span className="font-semibold text-foreground">{l.nome}</span>
+                      <SituacaoBadge situacao={l.situacao} />
+                      {l.contato_whatsapp ? (
+                        <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                          <Phone className="h-3.5 w-3.5" />
+                          {maskPhone(l.contato_whatsapp)}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <div className="flex items-start gap-2 text-sm">
+                      <Heart className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                      <span className="line-clamp-2 text-muted-foreground">
+                        <span className="mr-1 font-semibold text-foreground">Interesse do lead:</span>
+                        {l.interesse?.descricao ?? "Nenhum interesse registrado ainda."}
+                      </span>
+                    </div>
+
+                    <div className="flex items-start gap-2 text-sm">
+                      <StickyNote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                      <span className="min-w-0 text-muted-foreground">
+                        <span className="font-semibold text-foreground">Última nota:</span>{" "}
+                        {l.ultima_nota ? (
+                          <>
+                            <span className="text-xs text-muted-foreground">
+                              {dataHora(l.ultima_nota.created_at)} · {tempoDecorrido(l.ultima_nota.created_at)}
+                            </span>
+                            {" — "}
+                            <span className="line-clamp-2">{l.ultima_nota.descricao}</span>
+                          </>
+                        ) : (
+                          "Nenhuma movimentação registrada ainda."
+                        )}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3 text-primary" />
+                      <span>{duracaoDesde(l.created_at)} de vida</span>
+                      <span>·</span>
+                      <span>Criado em {dataHora(l.created_at)}</span>
+                    </div>
+                  </div>
                 </div>
               </li>
             ))}
