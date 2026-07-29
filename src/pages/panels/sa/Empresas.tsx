@@ -119,8 +119,17 @@ export default function EmpresasList() {
       });
     }
     const novas6m = meses.reduce((acc, m) => acc + m.total, 0);
-    return { total: list.length, ativos, inativos: list.length - ativos, meses, novas6m };
-  }, [data]);
+    const comAssinatura = list.filter((e) => Boolean(assinaturas?.get(e.id))).length;
+    return {
+      total: list.length,
+      ativos,
+      inativos: list.length - ativos,
+      meses,
+      novas6m,
+      comAssinatura,
+      semAssinatura: list.length - comAssinatura,
+    };
+  }, [data, assinaturas]);
 
   /** Nenhuma empresa cadastrada (estado vazio real, não filtro de busca). */
   const vazio = !isLoading && !error && (data?.length ?? 0) === 0;
