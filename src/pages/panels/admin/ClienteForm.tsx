@@ -22,6 +22,7 @@ import { ADMIN_MENU } from "@/pages/panels/admin/menu";
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 import { lookupCep } from "@/hooks/use-empresas";
 import {
+  documentoDuplicado,
   isMenorDeIdade,
   useCliente,
   useEmpresaAtual,
@@ -278,6 +279,16 @@ export default function ClienteForm() {
       notifyValidation("Empresa não identificada para vincular o cliente.");
       return;
     }
+    try {
+      if (await documentoDuplicado(empresaId, form.documento!, id)) {
+        setError("documento", "Já existe um cliente com este CPF/CNPJ.");
+        notifyValidation("Já existe um cliente cadastrado com este CPF/CNPJ nesta empresa.");
+        return;
+      }
+    } catch {
+      /* a restrição do banco garante a unicidade */
+    }
+
 
     try {
       await salvar.mutateAsync({
@@ -349,16 +360,24 @@ export default function ClienteForm() {
                   <Input
                     value={form.documento ?? ""}
                     onChange={(e) => set("documento", maskCpfCnpj(e.target.value))}
-                    onBlur={() =>
-                      setError(
-                        "documento",
-                        !form.documento?.trim()
-                          ? "Informe o CPF/CNPJ"
-                          : isValidCpfCnpj(form.documento)
-                            ? null
-                            : "CPF/CNPJ inválido",
-                      )
-                    }
+                    onBlur={async () => {
+                      if (!form.documento?.trim()) {
+                        setError("documento", "Informe o CPF/CNPJ");
+                        return;
+                      }
+                      if (!isValidCpfCnpj(form.documento)) {
+                        setError("documento", "CPF/CNPJ inválido");
+                        return;
+                      }
+                      setError("documento", null);
+                      if (!empresaId) return;
+                      try {
+                        const dup = await documentoDuplicado(empresaId, form.documento, id);
+                        if (dup) setError("documento", "Já existe um cliente com este CPF/CNPJ.");
+                      } catch {
+                        /* validação no servidor cobre o caso */
+                      }
+                    }}
                     placeholder="000.000.000-00"
                     inputMode="numeric"
                     required
@@ -656,7 +675,7 @@ export default function ClienteForm() {
 
   const ultimo = secoes.length - 1;
 
-  function validarEtapa(indice: number) {
+  async function validarEtapa(indice: number) {
     if (indice === 0) {
       if (!form.nome.trim()) {
         notifyValidation("Informe o nome do cliente.");
@@ -672,6 +691,11 @@ export default function ClienteForm() {
       }
       if (!isValidCpfCnpj(form.documento)) {
         notifyValidation("CPF/CNPJ inválido.");
+        return false;
+      }
+      if (empresaId && (await documentoDuplicado(empresaId, form.documento, id))) {
+        setError("documento", "Já existe um cliente com este CPF/CNPJ.");
+        notifyValidation("Já existe um cliente cadastrado com este CPF/CNPJ nesta empresa.");
         return false;
       }
     }
@@ -701,8 +725,8 @@ export default function ClienteForm() {
   }
 
 
-  function avancar() {
-    if (!validarEtapa(step)) return;
+  async function avancar() {
+    if (!(await validarEtapa(step))) return;
     setStep((s) => Math.min(ultimo, s + 1));
   }
 

@@ -173,7 +173,29 @@ export function useDeleteCliente() {
   });
 }
 
+/** Verdadeiro quando já existe outro cliente da empresa com o mesmo CPF/CNPJ. */
+export async function documentoDuplicado(
+  empresaId: string,
+  documento: string,
+  ignoreId?: string,
+): Promise<boolean> {
+  const digits = (documento ?? "").replace(/\D/g, "");
+  if (!digits) return false;
+
+  const { data, error } = await db
+    .from("clientes")
+    .select("id, documento")
+    .eq("empresa_id", empresaId);
+  if (error) throw error;
+
+  return (data ?? []).some((c: { id: string; documento: string | null }) => {
+    if (ignoreId && c.id === ignoreId) return false;
+    return (c.documento ?? "").replace(/\D/g, "") === digits;
+  });
+}
+
 /** Verdadeiro quando a data de nascimento indica menos de 18 anos. */
+
 export function isMenorDeIdade(nascimento: string | null | undefined) {
   if (!nascimento) return false;
   const nasc = new Date(`${nascimento}T00:00:00`);
