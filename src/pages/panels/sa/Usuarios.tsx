@@ -170,7 +170,7 @@ function UsuarioCard({
       <div className="p-5 relative z-10">
         <div className="flex justify-between items-start mb-4">
           <div
-            className="h-12 w-12 rounded-xl flex items-center justify-center font-display text-white font-bold text-lg shadow-lg"
+            className="h-12 w-12 rounded-xl flex items-center justify-center font-display text-primary-foreground font-bold text-lg shadow-lg"
             style={{ background: styles.gradient }}
           >
             {iniciais(u.nome)}
