@@ -50,6 +50,19 @@ const ROLE_COR: Record<UsuarioRole, string> = {
   sem_papel: "hsl(var(--muted-foreground))",
 };
 
+function ConexaoBadge({ logado }: { logado: boolean }) {
+  const cor = logado ? "var(--brand-green)" : "hsl(var(--muted-foreground))";
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"
+      style={{ background: `color-mix(in oklab, ${cor} 15%, transparent)`, color: cor }}
+    >
+      <span className="h-2 w-2 rounded-full" style={{ background: cor }} />
+      {logado ? "Logado" : "Deslogado"}
+    </span>
+  );
+}
+
 function formataData(iso: string | null) {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("pt-BR");
@@ -267,9 +280,12 @@ export default function UsuariosList() {
                     </p>
                   </div>
                   <div className="mt-3 flex items-center justify-between gap-3">
-                    <Badge cor={u.ativo ? "var(--brand-green)" : "hsl(var(--destructive))"}>
-                      {u.ativo ? "Ativo" : "Inativo"}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge cor={u.ativo ? "var(--brand-green)" : "hsl(var(--destructive))"}>
+                        {u.ativo ? "Ativo" : "Inativo"}
+                      </Badge>
+                      <ConexaoBadge logado={Boolean(u.logado)} />
+                    </div>
                     <div className="flex items-center gap-2">
                       <Button variant="outline" size="sm" onClick={() => setAlvoLogoff(u)}>
                         <LogOut className="mr-1.5 h-4 w-4" />
@@ -295,6 +311,7 @@ export default function UsuariosList() {
                     <th className="px-4 py-3">Tipo</th>
                     <th className="px-4 py-3">Empresa</th>
                     <th className="px-4 py-3">Último acesso</th>
+                    <th className="px-4 py-3">Conexão</th>
                     <th className="px-4 py-3">Situação</th>
                     <th className="px-4 py-3 text-right">Ações</th>
                   </tr>
@@ -318,6 +335,9 @@ export default function UsuariosList() {
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {formataDataHora(u.ultimo_login)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <ConexaoBadge logado={Boolean(u.logado)} />
                       </td>
                       <td className="px-4 py-3">
                         <Badge cor={u.ativo ? "var(--brand-green)" : "hsl(var(--destructive))"}>
