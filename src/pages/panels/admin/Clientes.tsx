@@ -184,10 +184,47 @@ export default function ClientesList() {
           <p className="rounded-2xl border border-destructive/40 bg-destructive/10 p-6 text-sm">
             Não foi possível carregar os clientes: {(error as Error).message}
           </p>
+        ) : totais.total === 0 ? (
+          <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-border bg-card px-6 py-[clamp(2.5rem,8vw,4rem)] text-center">
+            <span
+              className="inline-flex h-16 w-16 items-center justify-center rounded-2xl"
+              style={{
+                background: "color-mix(in oklab, var(--panel-accent) 14%, transparent)",
+                color: "var(--panel-accent)",
+              }}
+            >
+              <UserPlus className="h-8 w-8" />
+            </span>
+            <div className="space-y-1">
+              <h2 className="text-[clamp(1.125rem,4vw,1.375rem)] font-bold tracking-tight">
+                Nenhum cliente cadastrado ainda
+              </h2>
+              <p className="mx-auto max-w-md text-sm text-muted-foreground">
+                Comece cadastrando o primeiro cliente do seu estúdio para organizar contatos,
+                endereços e histórico de atendimentos.
+              </p>
+            </div>
+            <Button className="tap-target gap-2" onClick={() => navigate("/admin/clientes/novo")}>
+              <Plus className="h-4 w-4" />
+              Cadastrar primeiro cliente
+            </Button>
+          </div>
         ) : lista.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border p-10 text-center">
             <Users className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Nenhum cliente encontrado.</p>
+            <p className="text-sm text-muted-foreground">
+              Nenhum cliente encontrado para esta busca ou filtro.
+            </p>
+            <Button
+              variant="ghost"
+              className="tap-target mt-3"
+              onClick={() => {
+                setBusca("");
+                setFiltro("todos");
+              }}
+            >
+              Limpar filtros
+            </Button>
           </div>
         ) : (
           <ul className="grid gap-3">
