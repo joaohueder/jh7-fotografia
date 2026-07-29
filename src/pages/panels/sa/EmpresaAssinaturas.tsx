@@ -56,6 +56,23 @@ function hoje() {
   return `${d.getFullYear()}-${mm}-${dd}`;
 }
 
+/** Vencimento da assinatura: início + vigência (30 dias por padrão). */
+function vencimento(item: { inicio: string; fim: string | null; vigencia_dias?: number }) {
+  if (item.fim) return item.fim.slice(0, 10);
+  const d = new Date(`${item.inicio.slice(0, 10)}T00:00:00`);
+  d.setDate(d.getDate() + (item.vigencia_dias || 30));
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
+/** Dias restantes até o vencimento (negativo quando já venceu). */
+function diasRestantes(fimIso: string) {
+  const fim = new Date(`${fimIso}T00:00:00`).getTime();
+  const agora = new Date(`${hoje()}T00:00:00`).getTime();
+  return Math.round((fim - agora) / 86400000);
+}
+
 function precoLabel(gratuito: boolean, valor: number | null) {
   if (gratuito) return "Gratuito";
   if (valor === null || valor === undefined) return "—";
@@ -73,6 +90,7 @@ function AssinaturaCard({
   encerrando: boolean;
 }) {
   const ativo = item.ativo;
+  const restantes = diasRestantes(vencimento(item));
   return (
     <article
       className="flex flex-col gap-4 rounded-2xl border bg-card p-[clamp(1rem,3vw,1.25rem)] transition-shadow hover:shadow-md"
@@ -125,10 +143,35 @@ function AssinaturaCard({
         </div>
         <div className="flex items-center gap-2">
           <CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground" />
-          <dt className="text-muted-foreground">Término:</dt>
-          <dd className="font-medium">{formatDate(item.fim) ?? "—"}</dd>
+          <dt className="text-muted-foreground">{ativo ? "Vence em:" : "Término:"}</dt>
+          <dd className="font-medium">{formatDate(vencimento(item)) ?? "—"}</dd>
+        </div>
+        <div className="flex items-center gap-2">
+          <CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <dt className="text-muted-foreground">Vigência:</dt>
+          <dd className="font-medium">{item.vigencia_dias || 30} dias</dd>
         </div>
       </dl>
+
+      {ativo ? (
+        <p
+          className="rounded-xl px-3 py-2 text-sm font-semibold"
+          style={
+            restantes < 0
+              ? { background: "hsl(var(--destructive) / 0.12)", color: "hsl(var(--destructive))" }
+              : {
+                  background: "color-mix(in oklab, var(--panel-accent) 12%, transparent)",
+                  color: "var(--panel-accent)",
+                }
+          }
+        >
+          {restantes < 0
+            ? `Vencida há ${Math.abs(restantes)} dia(s)`
+            : restantes === 0
+              ? "Vence hoje"
+              : `Faltam ${restantes} dia(s) para o vencimento`}
+        </p>
+      ) : null}
 
       {item.observacao ? (
         <p className="whitespace-pre-wrap break-words rounded-xl bg-muted/60 p-3 text-sm text-muted-foreground">
@@ -401,6 +444,10 @@ export function EmpresaAssinaturas({ empresaId }: { empresaId: string }) {
               onChange={(e) => setInicio(e.target.value)}
               className="h-11 text-base"
             />
+            <p className="text-xs text-muted-foreground">
+              Vigência de 30 dias — vence em{" "}
+              <strong>{formatDate(vencimento({ inicio, fim: null })) ?? "—"}</strong>
+            </p>
           </div>
 
           <div className="space-y-2 md:col-span-full">
