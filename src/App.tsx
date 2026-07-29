@@ -23,6 +23,7 @@ import ConfiguracoesRedirect from "@/pages/ConfiguracoesRedirect";
 import NotFoundPage from "@/pages/NotFound";
 
 import { AppLayoutProvider } from "@/hooks/use-app-layout";
+import { PaletteProvider } from "@/hooks/use-palette";
 
 
 const queryClient = new QueryClient({
@@ -85,6 +86,7 @@ export default function App() {
       <BrowserRouter>
         <AuthProvider>
         <AppLayoutProvider>
+        <PaletteProvider>
 
           <ScrollToTop />
           <AuthEvents />
@@ -217,6 +219,7 @@ export default function App() {
 
           </Routes>
           <SystemMessageDialog />
+        </PaletteProvider>
         </AppLayoutProvider>
         </AuthProvider>
       </BrowserRouter>
