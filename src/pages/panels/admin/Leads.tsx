@@ -222,6 +222,15 @@ export default function LeadsList() {
       return;
     }
     if (!empresaId) return;
+    // Revalida o limite no momento de gravar: outra pessoa da equipe pode ter
+    // ocupado a última vaga enquanto este formulário estava aberto.
+    if (!editando && limiteAtingido) {
+      notifyValidation(
+        `Limite de leads do plano atingido (${usadoLeads} de ${limiteLeads}). Fale com o administrador para contratar um plano maior.`,
+      );
+      return;
+    }
+
 
 
     try {
