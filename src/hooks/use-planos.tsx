@@ -117,3 +117,23 @@ export function useDeletePlano() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["planos"] }),
   });
 }
+
+/** Grava a nova ordem dos planos (drag and drop). */
+export function useReordenarPlanos() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      await Promise.all(
+        ids.map(async (id, index) => {
+          const { error } = await db
+            .from("planos")
+            .update({ ordem: index + 1 })
+            .eq("id", id);
+          if (error) throw traduzErro(error);
+        }),
+      );
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["planos"] }),
+  });
+}
+
