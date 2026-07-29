@@ -845,7 +845,13 @@ export default function ClienteForm() {
               </Button>
 
               {step === ultimo ? (
-                <Button type="submit" disabled={salvar.isPending} className="tap-target gap-2">
+                <Button
+                  type="button"
+                  disabled={salvar.isPending}
+                  onClick={() => void handleSubmit()}
+                  className="tap-target gap-2"
+                >
+
                   {salvar.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
