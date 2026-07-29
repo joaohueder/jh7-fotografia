@@ -29,13 +29,7 @@ export default function UsuarioDashboard() {
         title="Dashboard"
         subtitle="Suas sessões e tarefas do dia."
         stats={CARDS}
-        helpTitle="O que você encontra aqui"
-        helpText="Esta tela é o seu resumo do dia. Ela só mostra informações — você não corre risco de apagar nada por aqui."
-        helpSteps={[
-          "Confira os números do topo para saber o que precisa da sua atenção hoje.",
-          "Passe o mouse no ícone de interrogação para entender cada número.",
-          "Precisa de algo que não aparece aqui? Fale com o administrador da sua empresa.",
-        ]}
+        help="Seu resumo do dia. A tela só mostra informações, nada é apagado aqui. Passe o mouse nos ícones de interrogação para entender cada número; se precisar de algo que não aparece, fale com o administrador da empresa."
       />
     </PanelLayout>
   );

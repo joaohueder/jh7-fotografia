@@ -30,13 +30,7 @@ export default function AdminDashboard() {
         title="Dashboard"
         subtitle="Visão geral do seu estúdio fotográfico."
         stats={CARDS}
-        helpTitle="Bem-vindo! Veja por onde começar"
-        helpText="Esta é a tela inicial: aqui você acompanha, em poucos números, como está o seu estúdio hoje. Nada é alterado nesta tela — ela apenas mostra informações."
-        helpSteps={[
-          "Passe o mouse no ícone de interrogação de cada número para entender o que ele significa.",
-          "Use o menu no topo para ir até Clientes e cadastrar quem você atende.",
-          "Em Configurações você mantém os dados da sua empresa sempre atualizados.",
-        ]}
+        help="Tela inicial do seu estúdio: mostra apenas informações, nada é alterado aqui. Passe o mouse nos ícones de interrogação para entender cada número e use o menu do topo para ir a Clientes e Configurações."
       />
     </PanelLayout>
   );
