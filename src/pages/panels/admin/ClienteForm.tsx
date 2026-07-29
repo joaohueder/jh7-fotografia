@@ -665,7 +665,7 @@ export default function ClienteForm() {
 
   const ultimo = secoes.length - 1;
 
-  function validarEtapa(indice: number) {
+  async function validarEtapa(indice: number) {
     if (indice === 0) {
       if (!form.nome.trim()) {
         notifyValidation("Informe o nome do cliente.");
@@ -681,6 +681,11 @@ export default function ClienteForm() {
       }
       if (!isValidCpfCnpj(form.documento)) {
         notifyValidation("CPF/CNPJ inválido.");
+        return false;
+      }
+      if (empresaId && (await documentoDuplicado(empresaId, form.documento, id))) {
+        setError("documento", "Já existe um cliente com este CPF/CNPJ.");
+        notifyValidation("Já existe um cliente cadastrado com este CPF/CNPJ nesta empresa.");
         return false;
       }
     }
