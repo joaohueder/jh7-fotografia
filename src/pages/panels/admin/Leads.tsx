@@ -78,7 +78,7 @@ export default function LeadsList() {
       notifyValidation("Informe o nome do lead.");
       return;
     }
-    if (!whatsapp.trim() || isValidPhone(whatsapp)) {
+    if (!isValidPhone(whatsapp)) {
       notifyValidation("Informe um WhatsApp válido com DDD.");
       return;
     }
