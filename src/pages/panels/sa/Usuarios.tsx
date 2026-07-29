@@ -402,7 +402,7 @@ export default function UsuariosList() {
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Buscar por nome, e-mail ou empresa"
-              className="h-12 pl-10 text-base bg-white/5 border-white/10 focus-visible:ring-[var(--gold)]/50"
+              className="h-12 pl-10 text-base bg-muted/40 border-border text-foreground focus-visible:ring-[var(--gold)]/50"
               aria-label="Buscar usuários"
             />
           </div>
