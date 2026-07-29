@@ -58,6 +58,7 @@ export default function LeadsList() {
   const salvar = useSalvarLead();
   const remover = useDeleteLead();
 
+
   const [busca, setBusca] = useState("");
   const [aberto, setAberto] = useState(false);
   const [editando, setEditando] = useState<Lead | null>(null);
