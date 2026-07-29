@@ -4,7 +4,7 @@ import {
   ArrowLeft,
   Building2,
   ClipboardCopy,
-  Eye,
+  CreditCard,
   EyeOff,
   KeyRound,
   Loader2,
