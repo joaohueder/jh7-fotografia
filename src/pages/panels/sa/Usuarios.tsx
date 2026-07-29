@@ -364,7 +364,7 @@ export default function UsuariosList() {
                           <div className="flex flex-col gap-1 leading-tight">
                             <ConexaoBadge logado={Boolean(u.logado)} desde={u.sessao_desde} agora={agora} />
                             <span className="text-xs text-muted-foreground">
-                              {u.logado ? "Total logado" : "Último acesso"}: {formataDataHora(u.ultimo_login)}
+                              Último acesso: {formataDataHora(u.ultimo_login)}
                               {u.ultimo_login ? (
                                 <span className="ml-1 opacity-80">
                                   ({tempoDecorrido(u.ultimo_login, agora) ?? "—"})
