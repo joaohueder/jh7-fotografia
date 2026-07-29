@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
+import { useLimitesEmpresa } from "@/hooks/use-limites";
 import { PanelLayout } from "@/components/panel-layout";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
 import { ClienteNotas } from "@/components/cliente-notas";
@@ -206,6 +207,13 @@ export default function ClienteForm() {
   );
 
   const { data: empresaId } = useEmpresaAtual();
+  const { data: limites } = useLimitesEmpresa();
+
+  // Regra de limite: novos cadastros (inclusive conversão de lead) consomem a
+  // cota de clientes do plano. Edição de cliente existente nunca é bloqueada.
+  const limiteClientes = limites?.limite_clientes ?? null;
+  const usadoClientes = limites?.usado_clientes ?? 0;
+  const limiteAtingido = !editando && limiteClientes !== null && usadoClientes >= limiteClientes;
   const { data, isLoading } = useCliente(registroId);
   const salvar = useSalvarCliente();
 
@@ -372,6 +380,12 @@ export default function ClienteForm() {
     }
     if (!empresaId) {
       notifyValidation("Empresa não identificada para vincular o cliente.");
+      return;
+    }
+    if (limiteAtingido && !mesclarId) {
+      notifyValidation(
+        `Limite de clientes do plano atingido (${usadoClientes} de ${limiteClientes}). Contrate um plano maior para cadastrar novos clientes.`,
+      );
       return;
     }
     try {
@@ -884,6 +898,33 @@ export default function ClienteForm() {
     );
   }
 
+  if (limiteAtingido) {
+    return (
+      <PanelLayout accent="admin" menu={ADMIN_MENU}>
+        <div className="mx-auto w-full max-w-[var(--app-max-w)] space-y-4">
+          <Button
+            type="button"
+            variant="ghost"
+            className="tap-target -ml-2 gap-2"
+            onClick={() => navigate("/admin/clientes")}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar para clientes
+          </Button>
+          <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-6">
+            <h1 className="text-lg font-bold text-destructive">Limite de clientes atingido</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              O plano contratado pela sua empresa permite {limiteClientes} cliente(s) e você já tem{" "}
+              {usadoClientes} cadastrado(s). Não é possível criar novos cadastros
+              {leadId ? " nem converter leads em clientes" : ""} até contratar um plano maior. Veja o
+              consumo detalhado em Configurações › Limites.
+            </p>
+          </div>
+        </div>
+      </PanelLayout>
+    );
+  }
+
   return (
     <PanelLayout accent="admin" menu={ADMIN_MENU}>
       <div className="mx-auto w-full max-w-[var(--app-max-w)] space-y-[clamp(1.5rem,4vw,2rem)]">
@@ -906,7 +947,7 @@ export default function ClienteForm() {
                 text={
                   editando
                     ? "Use as abas para trocar de seção. Campos com asterisco (*) são obrigatórios. Clique em Salvar para confirmar as alterações."
-                    : "Preencha cada etapa e clique em Avançar. Campos com asterisco (*) são obrigatórios. Na última etapa você revisa tudo e só então clica em “Salvar cliente”."
+                    : "Preencha cada etapa e clique em Avançar. Campos com asterisco (*) são obrigatórios. Na última etapa você revisa tudo e só então clica em “Salvar cliente”. O cadastro consome a cota de clientes do plano da empresa."
                 }
               />
             </div>

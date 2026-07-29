@@ -70,6 +70,7 @@ export function useClientes() {
   useEffect(() => {
     const invalidar = () => {
       qc.invalidateQueries({ queryKey: ["clientes"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["limites-empresa"] });
       qc.invalidateQueries({ queryKey: ["clientes-evolucao"], refetchType: "active" });
     };
     const channel = supabase
