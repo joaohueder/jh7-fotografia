@@ -95,8 +95,21 @@
   --brand-green: oklch(0.72 0.19 148);
   --brand-green-soft: oklch(0.82 0.15 150);
 
+  /*
+   * Semântica de ação (padrão do sistema):
+   *  - Verde  → ações principais/positivas (salvar, criar, confirmar)
+   *  - Laranja→ atenção, pendências, período de teste
+   *  - Vermelho → exclusão, bloqueio, inadimplência
+   * Cada painel pode reescrever --action via --panel-accent.
+   */
+  --action: var(--brand-green);
+  --action-foreground: oklch(0.16 0.01 148);
+  --warning: var(--gold);
+  --warning-foreground: oklch(0.16 0.01 45);
+
   --primary: oklch(0.705 0.192 45);
   --primary-foreground: oklch(0.16 0.01 45);
+
 
   --secondary: oklch(0.225 0.006 60);
   --secondary-foreground: oklch(0.975 0.002 90);
