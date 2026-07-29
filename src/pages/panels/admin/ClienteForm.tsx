@@ -245,8 +245,9 @@ export default function ClienteForm() {
     }));
   }
 
-  async function handleSubmit(ev: React.FormEvent) {
-    ev.preventDefault();
+  async function handleSubmit(ev?: React.FormEvent) {
+    ev?.preventDefault();
+
 
     if (!form.nome.trim()) {
       notifyValidation("Informe o nome do cliente.");
