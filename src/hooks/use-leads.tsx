@@ -157,3 +157,67 @@ export function useConverterLead() {
     },
   });
 }
+
+export interface LeadMes {
+  /** Rótulo curto do mês, ex.: "jan/25". */
+  mes: string;
+  /** Quantidade de leads captados naquele mês. */
+  total: number;
+}
+
+/**
+ * Evolução mensal dos leads nos últimos 6 meses.
+ * Considera todo contato que nasceu como lead — inclusive os que já viraram
+ * clientes — para que o histórico não diminua após uma conversão.
+ */
+export function useLeadsEvolucao() {
+  const { data: empresaId } = useEmpresaAtual();
+
+  return useQuery({
+    queryKey: ["leads-evolucao", empresaId],
+    enabled: Boolean(empresaId),
+    staleTime: 60 * 1000,
+    queryFn: async (): Promise<LeadMes[]> => {
+      const inicio = new Date();
+      inicio.setDate(1);
+      inicio.setHours(0, 0, 0, 0);
+      inicio.setMonth(inicio.getMonth() - 5);
+
+      const { data, error } = await db
+        .from("clientes")
+        .select("id, created_at, origem, cliente_notas(tipo)")
+        .eq("empresa_id", empresaId!)
+        .gte("created_at", inicio.toISOString());
+      if (error) throw error;
+
+      const registros = ((data ?? []) as any[]).filter((c) => {
+        if (c.origem === "LEAD") return true;
+        // Cliente convertido a partir de um lead: possui a nota de interesse inicial.
+        const notas = Array.isArray(c.cliente_notas) ? c.cliente_notas : [];
+        return notas.some((n: any) => n?.tipo === "INTERESSE");
+      });
+
+      const meses: LeadMes[] = [];
+      const chaves: string[] = [];
+      for (let i = 0; i < 6; i += 1) {
+        const d = new Date(inicio);
+        d.setMonth(inicio.getMonth() + i);
+        chaves.push(`${d.getFullYear()}-${d.getMonth()}`);
+        meses.push({
+          mes: d
+            .toLocaleDateString("pt-BR", { month: "short", year: "2-digit" })
+            .replace(".", ""),
+          total: 0,
+        });
+      }
+
+      for (const r of registros) {
+        const d = new Date(r.created_at);
+        const idx = chaves.indexOf(`${d.getFullYear()}-${d.getMonth()}`);
+        if (idx >= 0) meses[idx].total += 1;
+      }
+
+      return meses;
+    },
+  });
+}
