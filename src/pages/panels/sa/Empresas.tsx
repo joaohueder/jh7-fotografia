@@ -161,7 +161,6 @@ export default function EmpresasList() {
     }
   }
 
-
   return (
     <PanelLayout accent="sa" menu={SA_MENU}>
       <div className="space-y-[clamp(1.25rem,4vw,2rem)]">
@@ -590,11 +589,9 @@ export default function EmpresasList() {
                 void confirmarStatus();
               }}
               disabled={
-                setStatus.isPending ||
-                (alvoStatus?.status === "ATIVO" && nota.trim().length < 5)
+                setStatus.isPending || (alvoStatus?.status === "ATIVO" && nota.trim().length < 5)
               }
             >
-
               {setStatus.isPending
                 ? "Salvando…"
                 : alvoStatus?.status === "ATIVO"
