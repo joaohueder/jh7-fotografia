@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -35,6 +36,16 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+/** Converte "149,90" ou "149.90" em número; retorna null se inválido. */
+function parseValor(input: string): number | null {
+  const limpo = input.replace(/\s|R\$/g, "").replace(/\./g, "").replace(",", ".");
+  if (!limpo) return null;
+  const n = Number(limpo);
+  return Number.isFinite(n) ? n : null;
+}
+
+const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+
 export default function PlanosList() {
   usePageMeta("Planos — JH7 Gestão Fotográfica", "Planos comerciais do SaaS.");
 
@@ -47,6 +58,9 @@ export default function PlanosList() {
   const [aberto, setAberto] = useState(false);
   const [editando, setEditando] = useState<Plano | null>(null);
   const [nome, setNome] = useState("");
+  const [ativo, setAtivo] = useState(true);
+  const [gratuito, setGratuito] = useState(false);
+  const [valor, setValor] = useState("");
   const [alvo, setAlvo] = useState<Plano | null>(null);
 
   const salvando = criar.isPending || atualizar.isPending;
@@ -63,36 +77,59 @@ export default function PlanosList() {
   function abrirNovo() {
     setEditando(null);
     setNome("");
+    setAtivo(true);
+    setGratuito(false);
+    setValor("");
     setAberto(true);
   }
 
   function abrirEdicao(plano: Plano) {
     setEditando(plano);
     setNome(plano.nome);
+    setAtivo(plano.ativo);
+    setGratuito(plano.gratuito);
+    setValor(plano.valor === null ? "" : plano.valor.toFixed(2).replace(".", ","));
     setAberto(true);
   }
 
   async function salvar() {
-    const valor = nome.trim();
-    if (valor.length < 2) {
+    const nomeLimpo = nome.trim();
+    if (nomeLimpo.length < 2) {
       notifyValidation("Informe um nome com pelo menos 2 caracteres.");
       return;
     }
-    if (valor.length > 60) {
+    if (nomeLimpo.length > 60) {
       notifyValidation("O nome do plano deve ter no máximo 60 caracteres.");
       return;
     }
+
+    let valorNumero: number | null = null;
+    if (!gratuito) {
+      valorNumero = parseValor(valor);
+      if (valorNumero === null) {
+        notifyValidation("Informe o valor do plano (ex.: 149,90).");
+        return;
+      }
+      if (valorNumero < 0 || valorNumero > 999999.99) {
+        notifyValidation("O valor do plano deve estar entre 0 e 999.999,99.");
+        return;
+      }
+    }
+
+    const payload = { nome: nomeLimpo, ativo, gratuito, valor: valorNumero };
+
     try {
       if (editando) {
-        await atualizar.mutateAsync({ id: editando.id, nome: valor });
+        await atualizar.mutateAsync({ id: editando.id, ...payload });
         notifySuccess("Plano atualizado.");
       } else {
-        await criar.mutateAsync(valor);
+        await criar.mutateAsync(payload);
         notifySuccess("Plano criado.");
       }
       setAberto(false);
       setEditando(null);
       setNome("");
+      setValor("");
     } catch (err) {
       notifyError(err);
     }
@@ -181,7 +218,25 @@ export default function PlanosList() {
                   </span>
                   <div className="min-w-0">
                     <h2 className="truncate font-semibold leading-tight">{plano.nome}</h2>
-                    <p className="text-xs text-muted-foreground">Plano</p>
+                    <p className="mt-0.5 text-sm text-muted-foreground">
+                      {plano.gratuito ? "Gratuito" : plano.valor !== null ? BRL.format(plano.valor) : "—"}
+                    </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.7rem] font-medium ${
+                          plano.ativo
+                            ? "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {plano.ativo ? "Ativo" : "Inativo"}
+                      </span>
+                      {plano.gratuito && (
+                        <span className="inline-flex items-center rounded-full bg-[color-mix(in_oklab,var(--panel-accent)_14%,transparent)] px-2 py-0.5 text-[0.7rem] font-medium text-[var(--panel-accent)]">
+                          Plano gratuito
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -220,21 +275,57 @@ export default function PlanosList() {
           </DialogHeader>
 
           <form
-            className="space-y-2"
+            className="space-y-4"
             onSubmit={(e) => {
               e.preventDefault();
               void salvar();
             }}
           >
-            <Label htmlFor="plano-nome">Nome do plano</Label>
-            <Input
-              id="plano-nome"
-              value={nome}
-              maxLength={60}
-              autoFocus
-              onChange={(e) => setNome(e.target.value)}
-              placeholder="Ex.: Essencial"
-            />
+            <div className="space-y-2">
+              <Label htmlFor="plano-nome">Nome do plano</Label>
+              <Input
+                id="plano-nome"
+                value={nome}
+                maxLength={60}
+                autoFocus
+                onChange={(e) => setNome(e.target.value)}
+                placeholder="Ex.: Essencial"
+              />
+            </div>
+
+            <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-3">
+              <div>
+                <Label htmlFor="plano-ativo">Status</Label>
+                <p className="text-xs text-muted-foreground">
+                  {ativo ? "Plano ativo e disponível." : "Plano inativo."}
+                </p>
+              </div>
+              <Switch id="plano-ativo" checked={ativo} onCheckedChange={setAtivo} />
+            </div>
+
+            <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-3">
+              <div>
+                <Label htmlFor="plano-gratuito">Plano gratuito</Label>
+                <p className="text-xs text-muted-foreground">
+                  {gratuito ? "Sim — sem cobrança." : "Não — informe o valor."}
+                </p>
+              </div>
+              <Switch id="plano-gratuito" checked={gratuito} onCheckedChange={setGratuito} />
+            </div>
+
+            {!gratuito && (
+              <div className="space-y-2">
+                <Label htmlFor="plano-valor">Valor do plano (R$)</Label>
+                <Input
+                  id="plano-valor"
+                  inputMode="decimal"
+                  value={valor}
+                  maxLength={12}
+                  onChange={(e) => setValor(e.target.value)}
+                  placeholder="Ex.: 149,90"
+                />
+              </div>
+            )}
           </form>
 
           <DialogFooter>
