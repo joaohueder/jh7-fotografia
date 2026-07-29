@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GripVertical, Layers, Loader2, Pencil, Plus, Power, Trash2 } from "lucide-react";
+import { Building2, GripVertical, Layers, Loader2, Pencil, Plus, Power, Trash2 } from "lucide-react";
 import {
   DndContext,
   KeyboardSensor,
@@ -27,10 +27,12 @@ import { SA_MENU } from "@/pages/panels/sa/menu";
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 import {
   usePlanos,
+  usePlanosUso,
   useDeletePlano,
   useReordenarPlanos,
   useTogglePlanoStatus,
   type Plano,
+  type PlanoUso,
 } from "@/hooks/use-planos";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,17 +51,20 @@ const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" 
 
 interface CardProps {
   plano: Plano;
+  uso: PlanoUso;
   arrastavel: boolean;
   onEditar: (p: Plano) => void;
   onExcluir: (p: Plano) => void;
   onToggleStatus: (p: Plano) => void;
 }
 
-function PlanoCard({ plano, arrastavel, onEditar, onExcluir, onToggleStatus }: CardProps) {
+function PlanoCard({ plano, uso, arrastavel, onEditar, onExcluir, onToggleStatus }: CardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: plano.id,
     disabled: !arrastavel,
   });
+
+  const bloqueiaExclusao = uso.total > 0;
 
   const valorTexto = plano.gratuito
     ? "Gratuito"
@@ -133,8 +138,17 @@ function PlanoCard({ plano, arrastavel, onEditar, onExcluir, onToggleStatus }: C
               Plano gratuito
             </span>
           )}
+
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground"
+            title="Empresas com assinatura ativa neste plano"
+          >
+            <Building2 className="h-3.5 w-3.5" />
+            {uso.ativas === 1 ? "1 empresa ativa" : `${uso.ativas} empresas ativas`}
+          </span>
         </div>
       </div>
+
 
       <div className="flex items-center justify-center gap-2 border-t border-border bg-muted/30 px-4 py-3">
         <Button
@@ -165,7 +179,13 @@ function PlanoCard({ plano, arrastavel, onEditar, onExcluir, onToggleStatus }: C
           type="button"
           variant="ghost"
           size="sm"
-          className="tap-target h-8 gap-1.5 text-xs text-destructive hover:text-destructive"
+          disabled={bloqueiaExclusao}
+          title={
+            bloqueiaExclusao
+              ? "Plano com assinaturas vinculadas: apenas inativação é permitida."
+              : undefined
+          }
+          className="tap-target h-8 gap-1.5 text-xs text-destructive hover:text-destructive disabled:opacity-40"
           onClick={() => onExcluir(plano)}
         >
           <Trash2 className="h-3.5 w-3.5" />
@@ -181,11 +201,13 @@ export default function PlanosList() {
 
   const navigate = useNavigate();
   const { data, isLoading, error } = usePlanos();
+  const { data: usoMapa } = usePlanosUso();
   const remover = useDeletePlano();
   const reordenar = useReordenarPlanos();
   const toggleStatus = useTogglePlanoStatus();
 
   const [busca, setBusca] = useState("");
+  const [filtroStatus, setFiltroStatus] = useState<"todos" | "ativos" | "inativos">("todos");
   const [alvo, setAlvo] = useState<Plano | null>(null);
   const [toggleAlvo, setToggleAlvo] = useState<Plano | null>(null);
   const [ordem, setOrdem] = useState<Plano[]>([]);
@@ -194,13 +216,19 @@ export default function PlanosList() {
     setOrdem(data ?? []);
   }, [data]);
 
+  const usoDe = (id: string): PlanoUso => usoMapa?.get(id) ?? { ativas: 0, total: 0 };
+
   const termo = busca.trim().toLowerCase();
-  const arrastavel = termo.length === 0;
+  const arrastavel = termo.length === 0 && filtroStatus === "todos";
 
   const planos = useMemo(() => {
-    if (!termo) return ordem;
-    return ordem.filter((p) => p.nome.toLowerCase().includes(termo));
-  }, [ordem, termo]);
+    return ordem.filter((p) => {
+      if (termo && !p.nome.toLowerCase().includes(termo)) return false;
+      if (filtroStatus === "ativos" && !p.ativo) return false;
+      if (filtroStatus === "inativos" && p.ativo) return false;
+      return true;
+    });
+  }, [ordem, termo, filtroStatus]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -244,6 +272,19 @@ export default function PlanosList() {
     } catch (err) {
       notifyError(err);
     }
+  }
+
+  function abrirExclusao(plano: Plano) {
+    const uso = usoDe(plano.id);
+    if (uso.total > 0) {
+      notifyValidation(
+        uso.ativas > 0
+          ? `O plano ${plano.nome} possui ${uso.ativas} empresa(s) com assinatura ativa e não pode ser excluído. Inative o plano para deixar de oferecê-lo.`
+          : `O plano ${plano.nome} possui histórico de assinaturas e não pode ser excluído. Inative o plano para deixar de oferecê-lo.`,
+      );
+      return;
+    }
+    setAlvo(plano);
   }
 
   async function confirmarExclusao() {
@@ -295,21 +336,44 @@ export default function PlanosList() {
         </header>
 
         {!vazio && (
-          <div className="space-y-2">
-            <Input
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              placeholder="Buscar plano..."
-              aria-label="Buscar plano pelo nome"
-              className="max-w-sm"
-            />
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <Input
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                placeholder="Buscar plano..."
+                aria-label="Buscar plano pelo nome"
+                className="max-w-sm"
+              />
+              <div className="inline-flex rounded-lg border border-border p-1">
+                {([
+                  ["todos", "Todos"],
+                  ["ativos", "Ativos"],
+                  ["inativos", "Inativos"],
+                ] as const).map(([valor, rotulo]) => (
+                  <button
+                    key={valor}
+                    type="button"
+                    onClick={() => setFiltroStatus(valor)}
+                    className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                      filtroStatus === valor
+                        ? "bg-[var(--panel-accent)] text-white"
+                        : "text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {rotulo}
+                  </button>
+                ))}
+              </div>
+            </div>
             <p className="text-xs text-muted-foreground">
               {arrastavel
                 ? "Arraste os cards pela alça para definir a ordem de exibição dos planos."
-                : "Limpe a busca para reordenar os planos."}
+                : "Limpe a busca e o filtro para reordenar os planos."}
             </p>
           </div>
         )}
+
 
         {isLoading && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -351,9 +415,10 @@ export default function PlanosList() {
                   <PlanoCard
                     key={plano.id}
                     plano={plano}
+                    uso={usoDe(plano.id)}
                     arrastavel={arrastavel}
                     onEditar={abrirEdicao}
-                    onExcluir={setAlvo}
+                    onExcluir={abrirExclusao}
                     onToggleStatus={abrirConfirmacaoToggle}
                   />
                 ))}
