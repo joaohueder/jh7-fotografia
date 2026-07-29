@@ -632,19 +632,27 @@ export default function ClienteForm() {
                 </div>
               </Section>
     ) },
-    { value: "notas", label: "Notas", node: (
-              <Section title="Notas internas" icon={StickyNote}>
-                <div className="col-span-full">
-                  <ClienteNotas
-                    clienteId={registroId}
-                    modulo="CLIENTES"
-                    titulo="Histórico de notas"
-                    placeholder="Ex.: prefere atendimento aos sábados; indicou uma amiga."
-                  />
-                </div>
-              </Section>
-    ) },
   ];
+
+  // Notas só existem quando o registro já está no banco (edição ou conversão de lead)
+  if (registroId) {
+    secoes.push({
+      value: "notas",
+      label: "Notas",
+      node: (
+        <Section title="Notas internas" icon={StickyNote}>
+          <div className="col-span-full">
+            <ClienteNotas
+              clienteId={registroId}
+              modulo="CLIENTES"
+              titulo="Histórico de notas"
+              placeholder="Ex.: prefere atendimento aos sábados; indicou uma amiga."
+            />
+          </div>
+        </Section>
+      ),
+    });
+  }
 
   if (!editando) {
     secoes.push({
