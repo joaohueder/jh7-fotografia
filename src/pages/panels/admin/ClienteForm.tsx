@@ -1024,7 +1024,51 @@ export default function ClienteForm() {
             </div>
           )}
         </form>
+
+        {mesclarId ? (
+          <div className="rounded-xl border border-border bg-muted/40 p-4 text-sm">
+            <p className="font-semibold text-foreground">
+              Este cadastro será unificado com um cliente já existente.
+            </p>
+            <p className="mt-1 text-muted-foreground">
+              Ao salvar, os dados acima atualizam o cliente que já usa este CPF/CNPJ e todas as
+              notas deste lead são transferidas para ele. Se você cancelar, nada é alterado: o lead
+              continua como lead e as notas ficam onde estão.
+            </p>
+          </div>
+        ) : null}
       </div>
+
+      <AlertDialog open={Boolean(duplicado)} onOpenChange={(o) => !o && setDuplicado(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cliente já cadastrado com este CPF/CNPJ</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-left">
+                <p>
+                  Encontramos <strong>{duplicado?.cliente.nome}</strong> nesta empresa usando o
+                  mesmo CPF/CNPJ.
+                </p>
+                <p>
+                  Deseja puxar os dados desse cliente para este cadastro? Ao salvar, as notas deste
+                  lead também serão transferidas para o cliente e o lead deixa de existir
+                  separadamente.
+                </p>
+                <p className="text-xs">
+                  Se você cancelar, nada é importado: o lead continua como lead e as notas ficam
+                  como estão.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Não, manter separado</AlertDialogCancel>
+            <AlertDialogAction onClick={puxarDadosDuplicado}>
+              Sim, puxar dados do cliente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PanelLayout>
   );
 }
