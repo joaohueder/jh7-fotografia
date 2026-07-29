@@ -125,17 +125,29 @@ export default function EmpresasList() {
   /** Nenhuma empresa cadastrada (estado vazio real, não filtro de busca). */
   const vazio = !isLoading && !error && (data?.length ?? 0) === 0;
 
+  /** Nome do plano vigente da empresa, ou null quando não há assinatura ativa. */
+  const planoDe = (id: string) => assinaturas?.get(id)?.plano_nome ?? null;
+
   const empresas = useMemo(() => {
     const term = busca.trim().toLowerCase();
-    const list = data ?? [];
-    if (!term) return list;
-    return list.filter((e) =>
-      [e.razao_social, e.nome_fantasia, e.cnpj, e.cidade ?? ""]
-        .join(" ")
-        .toLowerCase()
-        .includes(term),
-    );
-  }, [data, busca]);
+    let list = data ?? [];
+    if (term) {
+      list = list.filter((e) =>
+        [e.razao_social, e.nome_fantasia, e.cnpj, e.cidade ?? ""]
+          .join(" ")
+          .toLowerCase()
+          .includes(term),
+      );
+    }
+    if (filtroAssinatura !== "TODAS") {
+      list = list.filter((e) => {
+        const tem = Boolean(assinaturas?.get(e.id));
+        return filtroAssinatura === "COM" ? tem : !tem;
+      });
+    }
+    return list;
+  }, [data, busca, filtroAssinatura, assinaturas]);
+
 
   async function abrirExclusao(empresa: Empresa) {
     setAlvo(empresa);
