@@ -223,20 +223,30 @@ export default function ClienteForm() {
 
   /**
    * Confere se o CPF/CNPJ já pertence a outro cliente da empresa.
-   * Ao converter um lead, oferece puxar os dados do cadastro encontrado.
+   * Só oferece puxar os dados quando o cadastro veio da conversão de um lead;
+   * em um cadastro normal apenas avisa que o cliente já existe.
    */
   async function conferirDocumento(): Promise<boolean> {
     if (!empresaId || !form.documento?.trim() || !isValidCpfCnpj(form.documento)) return true;
     try {
       const achado = await buscarClientePorDocumento(empresaId, form.documento, registroId);
       if (!achado || achado.cliente.id === mesclarId) return true;
-      setDuplicado(achado);
-      setError("documento", "Já existe um cliente com este CPF/CNPJ.");
+      if (leadId) {
+        setDuplicado(achado);
+        setError("documento", "Já existe um cliente com este CPF/CNPJ.");
+      } else {
+        setDuplicado(null);
+        setError(
+          "documento",
+          `Já existe o cliente "${achado.cliente.nome}" com este CPF/CNPJ nesta empresa.`,
+        );
+      }
       return false;
     } catch {
       return true; // a restrição do banco garante a unicidade
     }
   }
+
 
   /** Preenche o formulário com os dados do cliente já cadastrado. */
   function puxarDadosDuplicado() {
@@ -413,7 +423,12 @@ export default function ClienteForm() {
                   label="CPF / CNPJ"
                   required
                   error={errors.documento}
-                  hint="Comece por aqui: se o CPF/CNPJ já estiver cadastrado, o sistema oferece puxar os dados do cliente."
+                  hint={
+                    leadId
+                      ? "Comece por aqui: se o CPF/CNPJ já estiver cadastrado, o sistema oferece puxar os dados do cliente."
+                      : "Comece por aqui: se o CPF/CNPJ já estiver cadastrado nesta empresa, o sistema avisa e não permite duplicar."
+                  }
+
                 >
                   <Input
                     value={form.documento ?? ""}
@@ -820,10 +835,13 @@ export default function ClienteForm() {
 
       if (!(await conferirDocumento())) {
         notifyValidation(
-          "Já existe um cliente com este CPF/CNPJ nesta empresa. Escolha se quer puxar os dados dele.",
+          leadId
+            ? "Já existe um cliente com este CPF/CNPJ nesta empresa. Escolha se quer puxar os dados dele."
+            : "Já existe um cliente com este CPF/CNPJ nesta empresa. Use outro documento ou abra o cadastro existente.",
         );
         return false;
       }
+
     }
     if (indice === 1 && form.cep?.trim() && !isValidCep(form.cep)) {
       notifyValidation("CEP inválido.");
