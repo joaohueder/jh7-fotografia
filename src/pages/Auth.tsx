@@ -3,7 +3,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ArrowRight, Camera, Eye, EyeOff, Loader2 } from "lucide-react";
 
-import type { SupabaseClient } from "@supabase/supabase-js";
+
+
 
 import { useForcedTheme } from "@/hooks/use-theme";
 import { useForcedPalette } from "@/hooks/use-palette";
