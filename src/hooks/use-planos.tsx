@@ -13,6 +13,10 @@ export interface Plano {
   gratuito: boolean;
   valor: number | null;
   ordem: number | null;
+  /** Máximo de leads por empresa. null = ilimitado. */
+  limite_leads: number | null;
+  /** Máximo de clientes por empresa. null = ilimitado. */
+  limite_clientes: number | null;
   created_at: string;
 }
 
@@ -22,6 +26,8 @@ export interface PlanoInput {
   ativo: boolean;
   gratuito: boolean;
   valor: number | null;
+  limite_leads: number | null;
+  limite_clientes: number | null;
 }
 
 /** Mensagens amigáveis para as restrições do banco. */
@@ -37,6 +43,14 @@ function traduzErro(err: unknown) {
   }
   if (msg.includes("planos_valor_coerente")) {
     return new Error("Informe um valor válido para planos pagos.");
+  }
+  if (msg.includes("planos_limite_leads_positivo") || msg.includes("planos_limite_clientes_positivo")) {
+    return new Error("Os limites de leads e clientes devem ser números iguais ou maiores que zero.");
+  }
+  if (msg.includes("limite_leads") || msg.includes("limite_clientes")) {
+    return new Error(
+      "Os campos de limite ainda não existem no banco. Rode o script sql/34_planos_limites.sql no seu Supabase.",
+    );
   }
   if (
     msg.includes("empresa_assinaturas_plano_id_fkey") ||
@@ -107,7 +121,8 @@ export function usePlanoGratuitoAtivo(ignorarId?: string) {
 }
 
 
-const COLUNAS = "id, nome, ativo, gratuito, valor, ordem, created_at";
+const COLUNAS =
+  "id, nome, ativo, gratuito, valor, ordem, limite_leads, limite_clientes, created_at";
 
 function normaliza(input: PlanoInput) {
   return {
@@ -115,6 +130,8 @@ function normaliza(input: PlanoInput) {
     ativo: input.ativo,
     gratuito: input.gratuito,
     valor: input.gratuito ? null : input.valor,
+    limite_leads: input.limite_leads,
+    limite_clientes: input.limite_clientes,
   };
 }
 
@@ -131,6 +148,8 @@ export function usePlanos() {
       return (data ?? []).map((p) => ({
         ...(p as Plano),
         valor: p.valor === null || p.valor === undefined ? null : Number(p.valor),
+        limite_leads: p.limite_leads ?? null,
+        limite_clientes: p.limite_clientes ?? null,
       }));
     },
   });
@@ -149,7 +168,12 @@ export function usePlano(id: string | undefined) {
       const { data, error } = await db.from("planos").select(COLUNAS).eq("id", id!).single();
       if (error) throw error;
       const p = data as Plano;
-      return { ...p, valor: p.valor === null || p.valor === undefined ? null : Number(p.valor) };
+      return {
+        ...p,
+        valor: p.valor === null || p.valor === undefined ? null : Number(p.valor),
+        limite_leads: p.limite_leads ?? null,
+        limite_clientes: p.limite_clientes ?? null,
+      };
     },
   });
 }
