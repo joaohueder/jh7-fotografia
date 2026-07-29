@@ -465,19 +465,16 @@ export default function EmpresasList() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label={`Editar ${e.nome_fantasia}`}
+                          <IconAction
+                            label="Editar empresa"
+                            ariaLabel={`Editar ${e.nome_fantasia}`}
                             onClick={() => navigate(`/sa/empresas/${e.id}`)}
                           >
                             <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title={e.status === "ATIVO" ? "Inativar empresa" : "Ativar empresa"}
-                            aria-label={`${e.status === "ATIVO" ? "Inativar" : "Ativar"} ${e.nome_fantasia}`}
+                          </IconAction>
+                          <IconAction
+                            label={e.status === "ATIVO" ? "Desativar empresa" : "Ativar empresa"}
+                            ariaLabel={`${e.status === "ATIVO" ? "Desativar" : "Ativar"} ${e.nome_fantasia}`}
                             onClick={() => abrirStatus(e)}
                           >
                             <Power
@@ -486,20 +483,21 @@ export default function EmpresasList() {
                                 color:
                                   e.status === "ATIVO"
                                     ? "var(--panel-accent)"
-                                    : "hsl(var(--muted-foreground))",
+                                    : "var(--muted-foreground)",
                               }}
                             />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label={`Excluir ${e.nome_fantasia}`}
+                          </IconAction>
+                          <IconAction
+                            label="Excluir empresa"
+                            ariaLabel={`Excluir ${e.nome_fantasia}`}
+                            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                             onClick={() => abrirExclusao(e)}
                           >
                             <Trash2 className="h-4 w-4" />
-                          </Button>
+                          </IconAction>
                         </div>
                       </td>
+
                     </tr>
                   ))}
                 </tbody>
