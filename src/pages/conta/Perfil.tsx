@@ -17,6 +17,72 @@ import { notifyError, notifySuccess } from "@/lib/system-message";
 
 const db = supabase as unknown as SupabaseClient;
 
+/** Preferência individual de largura máxima da tela. */
+function LarguraMaximaCard() {
+  const { maxWidth, systemDefault, setMaxWidth, resetMaxWidth, isDefault, isSaving } = useAppLayout();
+
+  return (
+    <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
+      <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
+        <span
+          className="inline-flex h-7 w-7 items-center justify-center rounded-lg"
+          style={{
+            background: "color-mix(in oklab, var(--panel-accent) 14%, transparent)",
+            color: "var(--panel-accent)",
+          }}
+        >
+          <Maximize2 className="h-4 w-4" />
+        </span>
+        Largura máxima da tela
+      </h2>
+
+      <div className="space-y-5">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            Define até onde o conteúdo se estende em telas grandes. O padrão do sistema é {systemDefault}px.
+          </p>
+          <span
+            className="rounded-lg border border-border px-3 py-1.5 text-lg font-bold tabular-nums"
+            style={{ color: "var(--panel-accent)" }}
+          >
+            {maxWidth}px
+          </span>
+        </div>
+
+        <Slider
+          value={[maxWidth]}
+          min={MIN_MAX_WIDTH}
+          max={MAX_MAX_WIDTH}
+          step={10}
+          aria-label="Largura máxima da tela em pixels"
+          onValueChange={(values) => setMaxWidth(values[0])}
+        />
+
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>{MIN_MAX_WIDTH}px</span>
+          <span>{MAX_MAX_WIDTH}px</span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={resetMaxWidth}
+            disabled={isDefault}
+            className="tap-target gap-2"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Restaurar padrão ({systemDefault}px)
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            {isSaving ? "Salvando..." : "A alteração é aplicada imediatamente e salva na sua conta."}
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function MeuPerfil() {
   usePageMeta("Meu perfil — JH7 Gestão Fotográfica", "Dados da sua conta.");
   const { user } = useAuth();
