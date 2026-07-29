@@ -22,6 +22,7 @@ import { ADMIN_MENU } from "@/pages/panels/admin/menu";
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 import { lookupCep } from "@/hooks/use-empresas";
 import {
+  documentoDuplicado,
   isMenorDeIdade,
   useCliente,
   useEmpresaAtual,
