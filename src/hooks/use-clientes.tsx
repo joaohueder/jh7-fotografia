@@ -223,6 +223,76 @@ export async function documentoDuplicado(
   });
 }
 
+/**
+ * Busca o cliente da empresa que já usa este CPF/CNPJ (ou null).
+ * Traz também os contatos adicionais, para permitir "puxar os dados".
+ */
+export async function buscarClientePorDocumento(
+  empresaId: string,
+  documento: string,
+  ignoreId?: string,
+): Promise<{ cliente: Cliente; contatos: ClienteContato[] } | null> {
+  const digits = (documento ?? "").replace(/\D/g, "");
+  if (!digits) return null;
+
+  const { data, error } = await db.from("clientes").select("*").eq("empresa_id", empresaId);
+  if (error) throw error;
+
+  const achado = ((data ?? []) as Cliente[]).find((c) => {
+    if (ignoreId && c.id === ignoreId) return false;
+    return (c.documento ?? "").replace(/\D/g, "") === digits;
+  });
+  if (!achado) return null;
+
+  const contatosRes = await db
+    .from("cliente_contatos")
+    .select("*")
+    .eq("cliente_id", achado.id)
+    .order("created_at");
+  if (contatosRes.error) throw contatosRes.error;
+
+  return {
+    cliente: achado,
+    contatos: (contatosRes.data ?? []) as ClienteContato[],
+  };
+}
+
+/**
+ * Move as notas do lead para o cliente já existente e remove o registro do lead.
+ * Usado quando o CPF/CNPJ digitado na conversão já pertence a outro cadastro.
+ */
+export async function mesclarLeadEmCliente(leadId: string, clienteId: string) {
+  if (!leadId || leadId === clienteId) return;
+
+  // Se o cliente de destino já tem um "interesse inicial", as notas vindas do
+  // lead entram como movimentação comum para não duplicar o interesse.
+  const { data: jaTemInteresse } = await db
+    .from("cliente_notas")
+    .select("id")
+    .eq("cliente_id", clienteId)
+    .eq("tipo", "INTERESSE")
+    .limit(1);
+
+  const destinoTemInteresse = (jaTemInteresse ?? []).length > 0;
+
+  if (destinoTemInteresse) {
+    const { error } = await db
+      .from("cliente_notas")
+      .update({ cliente_id: clienteId, tipo: "NOTA" })
+      .eq("cliente_id", leadId);
+    if (error) throw error;
+  } else {
+    const { error } = await db
+      .from("cliente_notas")
+      .update({ cliente_id: clienteId })
+      .eq("cliente_id", leadId);
+    if (error) throw error;
+  }
+
+  const del = await db.from("clientes").delete().eq("id", leadId);
+  if (del.error) throw del.error;
+}
+
 /** Verdadeiro quando a data de nascimento indica menos de 18 anos. */
 
 export function isMenorDeIdade(nascimento: string | null | undefined) {
