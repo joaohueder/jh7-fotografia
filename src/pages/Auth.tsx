@@ -71,7 +71,7 @@ function AuthPage() {
     setIsCheckingAccess(true);
     // Define onde a sessão será gravada ANTES do login:
     // marcado → localStorage por 30 dias; desmarcado → só enquanto a aba estiver aberta.
-    setRememberMe(rememberMe);
+    persistRememberMe(rememberMe);
     const { error } = await signIn(email, password);
 
 
