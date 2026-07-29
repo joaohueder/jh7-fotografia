@@ -181,7 +181,12 @@ export default function LeadsList() {
       notifyValidation("Informe um WhatsApp válido com DDD.");
       return;
     }
+    if (!interesse.trim()) {
+      notifyValidation("Descreva o interesse do lead para registrar o motivo do primeiro contato.");
+      return;
+    }
     if (!empresaId) return;
+
 
     try {
       const leadId = await salvar.mutateAsync({ id: editando?.id, empresaId, nome, whatsapp });
