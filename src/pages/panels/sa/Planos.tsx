@@ -29,6 +29,7 @@ import {
   usePlanos,
   useDeletePlano,
   useReordenarPlanos,
+  useTogglePlanoStatus,
   type Plano,
 } from "@/hooks/use-planos";
 import { Button } from "@/components/ui/button";
