@@ -30,6 +30,7 @@ export function useLeads() {
   return useQuery({
     queryKey: ["leads", empresaId],
     enabled: Boolean(empresaId),
+    staleTime: 0,
     queryFn: async (): Promise<Lead[]> => {
       const { data, error } = await db
         .from("clientes")
@@ -88,7 +89,7 @@ export function useSalvarLead() {
       if (error) throw error;
       return (data as { id: string }).id;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["leads"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["leads"], refetchType: "active" }),
   });
 }
 
