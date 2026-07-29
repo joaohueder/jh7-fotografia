@@ -61,7 +61,6 @@ function PlanoCard({ plano, arrastavel, onEditar, onExcluir, onToggleStatus }: C
     disabled: !arrastavel,
   });
 
-
   const valorTexto = plano.gratuito
     ? "Gratuito"
     : plano.valor !== null
