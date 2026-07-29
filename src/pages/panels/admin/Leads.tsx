@@ -54,7 +54,7 @@ export default function LeadsList() {
 
   const navigate = useNavigate();
   const { data: empresaId } = useEmpresaAtual();
-  const { data: leads, isLoading, error } = useLeads();
+  const { data: leads, isLoading, error, refetch: recarregarLeads } = useLeads();
   const salvar = useSalvarLead();
   const remover = useDeleteLead();
 
@@ -116,6 +116,8 @@ export default function LeadsList() {
         await salvarNotaInicial(leadId, interesse, "LEADS", editando ? notaInicial.data?.id : null);
         await notaInicial.refetch();
       }
+      // Recarrega a lista direto do banco para exibir nome, WhatsApp e nota atualizados.
+      await recarregarLeads();
       notifySuccess(editando ? "Lead atualizado." : "Lead cadastrado com sucesso.");
       setAberto(false);
     } catch (err) {
