@@ -141,7 +141,18 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
                       {item.label}
                     </NavLink>
                   ))}
+                  <NavLink
+                    to="/configuracoes"
+                    end
+                    onClick={() => setMobileNavOpen(false)}
+                    className={({ isActive }) => cn(navItemClass({ isActive }), "gap-2")}
+                    style={navItemStyle}
+                  >
+                    <Settings className="h-4 w-4" />
+                    Configurações
+                  </NavLink>
                 </nav>
+
                 {user?.email ? (
                   <p className="mt-auto break-all text-sm text-muted-foreground">{user.email}</p>
                 ) : null}
