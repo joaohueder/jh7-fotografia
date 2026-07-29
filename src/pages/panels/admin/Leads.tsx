@@ -320,56 +320,36 @@ export default function LeadsList() {
               />
             </div>
 
-            {editando ? (
-              <div className="space-y-1">
-                <span className="text-xs font-semibold text-muted-foreground">
-                  Interesse inicial do lead
-                </span>
-                <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm">
-                  {notaInicial.isLoading ? (
-                    <span className="text-muted-foreground">Carregando…</span>
-                  ) : notaInicial.data ? (
-                    <>
-                      <p className="whitespace-pre-wrap text-foreground">
-                        {notaInicial.data.descricao}
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Registrado em{" "}
-                        {new Date(notaInicial.data.created_at).toLocaleString("pt-BR")}
-                        {notaInicial.data.criado_por_nome
-                          ? ` por ${notaInicial.data.criado_por_nome}`
-                          : ""}
-                      </p>
-                    </>
-                  ) : (
-                    <span className="text-muted-foreground">
-                      Nenhum interesse inicial foi registrado no primeiro contato.
-                    </span>
-                  )}
-                </div>
+            <div className="space-y-1">
+              <label htmlFor="lead-interesse" className="text-xs font-semibold text-muted-foreground">
+                Interesse inicial do lead
+              </label>
+              <Textarea
+                id="lead-interesse"
+                value={interesse}
+                onChange={(e) => setInteresse(e.target.value)}
+                rows={3}
+                placeholder={
+                  notaInicial.isLoading && editando
+                    ? "Carregando…"
+                    : "Ex.: quer ensaio de 15 anos em dezembro, pediu orçamento."
+                }
+                className="text-base"
+              />
+              {editando && notaInicial.data ? (
                 <p className="text-xs text-muted-foreground">
-                  Este é o motivo pelo qual o lead entrou em contato pela primeira vez. Ele não muda —
-                  novas conversas devem ser registradas no histórico abaixo.
+                  Registrado em {new Date(notaInicial.data.created_at).toLocaleString("pt-BR")}
+                  {notaInicial.data.criado_por_nome ? ` por ${notaInicial.data.criado_por_nome}` : ""}.
+                  Você pode corrigir este texto se o motivo do primeiro contato foi anotado errado.
                 </p>
-              </div>
-            ) : (
-              <div className="space-y-1">
-                <label htmlFor="lead-interesse" className="text-xs font-semibold text-muted-foreground">
-                  Interesse do lead
-                </label>
-                <Textarea
-                  id="lead-interesse"
-                  value={interesse}
-                  onChange={(e) => setInteresse(e.target.value)}
-                  rows={3}
-                  placeholder="Ex.: quer ensaio de 15 anos em dezembro, pediu orçamento."
-                  className="text-base"
-                />
+              ) : (
                 <p className="text-xs text-muted-foreground">
-                  O interesse inicial é gravado como a primeira nota, com data, hora e autor.
+                  É o motivo pelo qual o lead entrou em contato pela primeira vez. Fica salvo com data,
+                  hora e autor. Novas conversas devem ir para o histórico.
                 </p>
-              </div>
-            )}
+              )}
+            </div>
+
 
             {editando ? (
               <div className="border-t border-border pt-4">
