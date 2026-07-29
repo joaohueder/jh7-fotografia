@@ -25,11 +25,14 @@ import { HelpTip } from "@/components/page-help";
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 import { lookupCep } from "@/hooks/use-empresas";
 import {
+  buscarClientePorDocumento,
   documentoDuplicado,
   isMenorDeIdade,
+  mesclarLeadEmCliente,
   useCliente,
   useEmpresaAtual,
   useSalvarCliente,
+  type Cliente,
   type ClienteContato,
   type ClientePayload,
   type ClienteStatus,
@@ -58,6 +61,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const EMPTY: ClientePayload = {
   nome: "",
@@ -200,6 +213,66 @@ export default function ClienteForm() {
   const [contatos, setContatos] = useState<ClienteContato[]>([]);
   const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [step, setStep] = useState(0);
+  /** Cliente já cadastrado com o mesmo CPF/CNPJ, aguardando confirmação. */
+  const [duplicado, setDuplicado] = useState<{
+    cliente: Cliente;
+    contatos: ClienteContato[];
+  } | null>(null);
+  /** Quando preenchido, o cadastro será unificado neste cliente já existente. */
+  const [mesclarId, setMesclarId] = useState<string | null>(null);
+
+  /**
+   * Confere se o CPF/CNPJ já pertence a outro cliente da empresa.
+   * Ao converter um lead, oferece puxar os dados do cadastro encontrado.
+   */
+  async function conferirDocumento(): Promise<boolean> {
+    if (!empresaId || !form.documento?.trim() || !isValidCpfCnpj(form.documento)) return true;
+    try {
+      const achado = await buscarClientePorDocumento(empresaId, form.documento, registroId);
+      if (!achado || achado.cliente.id === mesclarId) return true;
+      setDuplicado(achado);
+      setError("documento", "Já existe um cliente com este CPF/CNPJ.");
+      return false;
+    } catch {
+      return true; // a restrição do banco garante a unicidade
+    }
+  }
+
+  /** Preenche o formulário com os dados do cliente já cadastrado. */
+  function puxarDadosDuplicado() {
+    if (!duplicado) return;
+    const { cliente, contatos: lista } = duplicado;
+    setForm({
+      nome: cliente.nome ?? "",
+      nascimento: cliente.nascimento ?? "",
+      status: cliente.status,
+      origem: cliente.origem ?? "CLIENTE",
+      documento: maskCpfCnpj(cliente.documento ?? ""),
+      cep: maskCep(cliente.cep ?? ""),
+      endereco: cliente.endereco ?? "",
+      complemento: cliente.complemento ?? "",
+      numero: cliente.numero ?? "",
+      bairro: cliente.bairro ?? "",
+      cidade: cliente.cidade ?? "",
+      uf: cliente.uf ?? "",
+      contato_whatsapp: maskPhone(cliente.contato_whatsapp ?? ""),
+      contato_email: cliente.contato_email ?? "",
+      observacoes: cliente.observacoes ?? "",
+    });
+    setContatos(
+      (lista ?? []).map((c) => ({
+        tipo: CONTATO_TIPOS.includes(c.tipo as never) ? c.tipo : "Telefone",
+        valor: maskContato(c.tipo, c.valor),
+        descricao: c.descricao ?? "",
+      })),
+    );
+    setMesclarId(cliente.id);
+    setError("documento", null);
+    setDuplicado(null);
+    notifySuccess(
+      "Dados do cliente existente carregados. As notas do lead serão transferidas quando você salvar.",
+    );
+  }
 
   useEffect(() => {
     if (!data) return;
@@ -292,7 +365,7 @@ export default function ClienteForm() {
       return;
     }
     try {
-      if (await documentoDuplicado(empresaId, form.documento!, registroId)) {
+      if (await documentoDuplicado(empresaId, form.documento!, mesclarId ?? registroId)) {
         setError("documento", "Já existe um cliente com este CPF/CNPJ.");
         notifyValidation("Já existe um cliente cadastrado com este CPF/CNPJ nesta empresa.");
         return;
@@ -303,8 +376,9 @@ export default function ClienteForm() {
 
 
     try {
+      const destinoId = mesclarId ?? registroId;
       await salvar.mutateAsync({
-        id: registroId,
+        id: destinoId,
         empresaId,
         cliente: {
           ...form,
@@ -312,12 +386,20 @@ export default function ClienteForm() {
         },
         contatos,
       });
+
+      // Unificação: leva as notas do lead para o cliente existente e remove o lead.
+      if (mesclarId && leadId && mesclarId !== leadId) {
+        await mesclarLeadEmCliente(leadId, mesclarId);
+      }
+
       notifySuccess(
         editando
           ? "Cliente atualizado com sucesso."
-          : leadId
-            ? "Lead convertido em cliente com sucesso."
-            : "Cliente cadastrado com sucesso.",
+          : mesclarId
+            ? "Lead unificado ao cliente já cadastrado. As notas foram transferidas."
+            : leadId
+              ? "Lead convertido em cliente com sucesso."
+              : "Cliente cadastrado com sucesso.",
       );
       navigate("/admin/clientes");
     } catch (err) {
@@ -377,7 +459,11 @@ export default function ClienteForm() {
                 <Field label="CPF / CNPJ" required error={errors.documento}>
                   <Input
                     value={form.documento ?? ""}
-                    onChange={(e) => set("documento", maskCpfCnpj(e.target.value))}
+                    onChange={(e) => {
+                      set("documento", maskCpfCnpj(e.target.value));
+                      // Trocou o documento: desfaz a unificação escolhida antes.
+                      if (mesclarId) setMesclarId(null);
+                    }}
                     onBlur={async () => {
                       if (!form.documento?.trim()) {
                         setError("documento", "Informe o CPF/CNPJ");
@@ -388,13 +474,7 @@ export default function ClienteForm() {
                         return;
                       }
                       setError("documento", null);
-                      if (!empresaId) return;
-                      try {
-                        const dup = await documentoDuplicado(empresaId, form.documento, registroId);
-                        if (dup) setError("documento", "Já existe um cliente com este CPF/CNPJ.");
-                      } catch {
-                        /* validação no servidor cobre o caso */
-                      }
+                      await conferirDocumento();
                     }}
                     placeholder="000.000.000-00"
                     inputMode="numeric"
@@ -731,9 +811,10 @@ export default function ClienteForm() {
         notifyValidation("CPF/CNPJ inválido.");
         return false;
       }
-      if (empresaId && (await documentoDuplicado(empresaId, form.documento, registroId))) {
-        setError("documento", "Já existe um cliente com este CPF/CNPJ.");
-        notifyValidation("Já existe um cliente cadastrado com este CPF/CNPJ nesta empresa.");
+      if (!(await conferirDocumento())) {
+        notifyValidation(
+          "Já existe um cliente com este CPF/CNPJ nesta empresa. Escolha se quer puxar os dados dele.",
+        );
         return false;
       }
     }
@@ -943,7 +1024,51 @@ export default function ClienteForm() {
             </div>
           )}
         </form>
+
+        {mesclarId ? (
+          <div className="rounded-xl border border-border bg-muted/40 p-4 text-sm">
+            <p className="font-semibold text-foreground">
+              Este cadastro será unificado com um cliente já existente.
+            </p>
+            <p className="mt-1 text-muted-foreground">
+              Ao salvar, os dados acima atualizam o cliente que já usa este CPF/CNPJ e todas as
+              notas deste lead são transferidas para ele. Se você cancelar, nada é alterado: o lead
+              continua como lead e as notas ficam onde estão.
+            </p>
+          </div>
+        ) : null}
       </div>
+
+      <AlertDialog open={Boolean(duplicado)} onOpenChange={(o) => !o && setDuplicado(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cliente já cadastrado com este CPF/CNPJ</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-left">
+                <p>
+                  Encontramos <strong>{duplicado?.cliente.nome}</strong> nesta empresa usando o
+                  mesmo CPF/CNPJ.
+                </p>
+                <p>
+                  Deseja puxar os dados desse cliente para este cadastro? Ao salvar, as notas deste
+                  lead também serão transferidas para o cliente e o lead deixa de existir
+                  separadamente.
+                </p>
+                <p className="text-xs">
+                  Se você cancelar, nada é importado: o lead continua como lead e as notas ficam
+                  como estão.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Não, manter separado</AlertDialogCancel>
+            <AlertDialogAction onClick={puxarDadosDuplicado}>
+              Sim, puxar dados do cliente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PanelLayout>
   );
 }
