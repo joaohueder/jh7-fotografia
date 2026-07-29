@@ -245,8 +245,9 @@ export default function ClienteForm() {
     }));
   }
 
-  async function handleSubmit(ev: React.FormEvent) {
-    ev.preventDefault();
+  async function handleSubmit(ev?: React.FormEvent) {
+    ev?.preventDefault();
+
 
     if (!form.nome.trim()) {
       notifyValidation("Informe o nome do cliente.");
@@ -787,8 +788,9 @@ export default function ClienteForm() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (editando || step === ultimo) void handleSubmit(e);
+            if (editando) void handleSubmit(e);
           }}
+
           className="space-y-[clamp(1rem,3vw,1.5rem)]"
         >
           {editando ? (
@@ -843,7 +845,13 @@ export default function ClienteForm() {
               </Button>
 
               {step === ultimo ? (
-                <Button type="submit" disabled={salvar.isPending} className="tap-target gap-2">
+                <Button
+                  type="button"
+                  disabled={salvar.isPending}
+                  onClick={() => void handleSubmit()}
+                  className="tap-target gap-2"
+                >
+
                   {salvar.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
