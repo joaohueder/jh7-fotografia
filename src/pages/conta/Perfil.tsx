@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { useQueryClient } from "@tanstack/react-query";
 import { Maximize2, Monitor, RotateCcw, UserRound } from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
@@ -88,6 +89,7 @@ export default function MeuPerfil() {
   usePageMeta("Meu perfil — JH7 Gestão Fotográfica", "Dados da sua conta.");
   const { user } = useAuth();
   const { role } = usePrimaryRole();
+  const queryClient = useQueryClient();
 
   const [fullName, setFullName] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -127,6 +129,7 @@ export default function MeuPerfil() {
       notifyError(error, { title: "Não foi possível salvar o perfil" });
       return;
     }
+    queryClient.invalidateQueries({ queryKey: ["profile"] });
     notifySuccess("Seus dados de perfil foram atualizados.", "Perfil atualizado");
   }
 

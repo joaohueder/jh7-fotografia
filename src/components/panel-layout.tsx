@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { useAuth } from "@/hooks/use-auth";
+import { useProfile } from "@/hooks/use-profile";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -64,11 +65,12 @@ interface PanelLayoutProps {
  */
 export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
   const { user, signOut } = useAuth();
+  const { fullName, displayName } = useProfile();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const theme = ACCENTS[accent];
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const initials = (user?.email ?? "?").slice(0, 2);
+  const initials = (displayName ?? user?.email ?? "?").slice(0, 2);
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -154,7 +156,10 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
                 </nav>
 
                 {user?.email ? (
-                  <p className="mt-auto break-all text-sm text-muted-foreground">{user.email}</p>
+                  <div className="mt-auto space-y-0.5">
+                    <p className="truncate text-sm font-semibold">{fullName ?? displayName ?? "—"}</p>
+                    <p className="break-all text-xs text-muted-foreground">{user.email}</p>
+                  </div>
                 ) : null}
               </SheetContent>
             </Sheet>
@@ -199,7 +204,7 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
                     {initials}
                   </span>
                   <span className="hidden max-w-[11rem] truncate text-sm text-muted-foreground lg:inline">
-                    {user?.email}
+                    {displayName ?? "—"}
                   </span>
                   <ChevronDown className="hidden h-4 w-4 text-muted-foreground sm:inline" />
                 </Button>
@@ -209,7 +214,12 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
                   <span className="block text-xs font-normal text-muted-foreground">
                     Conectado como
                   </span>
-                  <span className="block break-all text-sm">{user?.email ?? "—"}</span>
+                  <span className="block truncate text-sm font-semibold">
+                    {fullName ?? displayName ?? "—"}
+                  </span>
+                  <span className="block break-all text-xs font-normal text-muted-foreground">
+                    {user?.email ?? "—"}
+                  </span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => navigate("/conta/perfil")}>
