@@ -69,6 +69,11 @@ export default function LeadsList() {
 
   const notaInicial = useNotaInicial(editando?.id);
 
+  // Ao abrir a edição, preenche o campo com o interesse inicial já registrado.
+  useEffect(() => {
+    if (editando && notaInicial.data) setInteresse(notaInicial.data.descricao);
+  }, [editando, notaInicial.data]);
+
   const lista = useMemo(() => {
     const termo = busca.trim().toLowerCase();
     if (!termo) return leads ?? [];
