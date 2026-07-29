@@ -107,6 +107,17 @@ export function useUpdatePlano() {
   });
 }
 
+export function useTogglePlanoStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ativo }: { id: string; ativo: boolean }) => {
+      const { error } = await db.from("planos").update({ ativo }).eq("id", id);
+      if (error) throw traduzErro(error);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["planos"] }),
+  });
+}
+
 export function useDeletePlano() {
   const qc = useQueryClient();
   return useMutation({
