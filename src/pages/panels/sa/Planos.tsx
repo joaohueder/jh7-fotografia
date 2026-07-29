@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GripVertical, Layers, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { GripVertical, Layers, Loader2, Pencil, Plus, Power, Trash2 } from "lucide-react";
 import {
   DndContext,
   KeyboardSensor,
@@ -29,6 +29,7 @@ import {
   usePlanos,
   useDeletePlano,
   useReordenarPlanos,
+  useTogglePlanoStatus,
   type Plano,
 } from "@/hooks/use-planos";
 import { Button } from "@/components/ui/button";
@@ -51,9 +52,10 @@ interface CardProps {
   arrastavel: boolean;
   onEditar: (p: Plano) => void;
   onExcluir: (p: Plano) => void;
+  onToggleStatus: (p: Plano) => void;
 }
 
-function PlanoCard({ plano, arrastavel, onEditar, onExcluir }: CardProps) {
+function PlanoCard({ plano, arrastavel, onEditar, onExcluir, onToggleStatus }: CardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: plano.id,
     disabled: !arrastavel,
@@ -139,6 +141,20 @@ function PlanoCard({ plano, arrastavel, onEditar, onExcluir }: CardProps) {
           type="button"
           variant="ghost"
           size="sm"
+          className={`tap-target h-8 gap-1.5 text-xs ${
+            plano.ativo
+              ? "text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
+              : "text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+          }`}
+          onClick={() => onToggleStatus(plano)}
+        >
+          <Power className="h-3.5 w-3.5" />
+          {plano.ativo ? "Inativar" : "Ativar"}
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
           className="tap-target h-8 gap-1.5 text-xs"
           onClick={() => onEditar(plano)}
         >
@@ -167,6 +183,7 @@ export default function PlanosList() {
   const { data, isLoading, error } = usePlanos();
   const remover = useDeletePlano();
   const reordenar = useReordenarPlanos();
+  const toggleStatus = useTogglePlanoStatus();
 
   const [busca, setBusca] = useState("");
   const [alvo, setAlvo] = useState<Plano | null>(null);
@@ -198,6 +215,15 @@ export default function PlanosList() {
 
   function abrirEdicao(plano: Plano) {
     navigate(`/sa/planos/${plano.id}`);
+  }
+
+  async function alternarStatus(plano: Plano) {
+    try {
+      await toggleStatus.mutateAsync({ id: plano.id, ativo: !plano.ativo });
+      notifySuccess(`Plano ${plano.ativo ? "inativado" : "ativado"} com sucesso.`);
+    } catch (err) {
+      notifyError(err);
+    }
   }
 
   async function confirmarExclusao() {
@@ -308,6 +334,7 @@ export default function PlanosList() {
                     arrastavel={arrastavel}
                     onEditar={abrirEdicao}
                     onExcluir={setAlvo}
+                    onToggleStatus={alternarStatus}
                   />
                 ))}
               </div>
