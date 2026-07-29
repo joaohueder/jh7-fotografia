@@ -23,7 +23,6 @@ import { Area, Bar, CartesianGrid, ComposedChart, ResponsiveContainer, Tooltip, 
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
-import { IconAction } from "@/components/icon-action";
 import { HelpTip } from "@/components/page-help";
 
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
@@ -117,6 +116,8 @@ export default function LeadsList() {
   const [whatsapp, setWhatsapp] = useState("");
   const [interesse, setInteresse] = useState("");
   const [alvoExclusao, setAlvoExclusao] = useState<Lead | null>(null);
+  // Lead aguardando confirmação de desistência (abre o modal de confirmação).
+  const [alvoDesistencia, setAlvoDesistencia] = useState<Lead | null>(null);
 
   const notaInicial = useNotaInicial(editando?.id);
 
@@ -214,6 +215,13 @@ export default function LeadsList() {
     } catch (err) {
       notifyError(err, { title: "Não foi possível salvar o lead" });
     }
+  }
+
+  async function confirmarDesistencia() {
+    if (!alvoDesistencia) return;
+    const lead = alvoDesistencia;
+    setAlvoDesistencia(null);
+    await alterarSituacao(lead, "DESISTIU");
   }
 
   async function confirmarExclusao() {
@@ -503,57 +511,81 @@ export default function LeadsList() {
                   </span>
                 </div>
 
-                <div className="flex shrink-0 items-start gap-1">
+                <div className="flex w-full shrink-0 flex-wrap items-start gap-2 sm:w-auto">
                   {l.situacao === "CLIENTE" ? (
                     // Lead já virou cliente: o cadastro passa a ser gerenciado na tela de
                     // Clientes, então aqui só oferecemos a visualização do cadastro completo.
-                    <IconAction
-                      label="Este lead já virou cliente. Abrir o cadastro completo em Clientes"
-                      ariaLabel={`Abrir cadastro do cliente ${l.nome}`}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="tap-target gap-2"
+                      title="Este lead já virou cliente. O cadastro é editado na tela de Clientes."
+                      aria-label={`Abrir cadastro do cliente ${l.nome}`}
                       onClick={() => navigate(`/admin/clientes/${l.id}`)}
                     >
                       <Eye className="h-4 w-4" />
-                    </IconAction>
+                      Ver cadastro do cliente
+                    </Button>
                   ) : (
                     <>
-                      <IconAction
-                        label="Editar lead"
-                        ariaLabel={`Editar ${l.nome}`}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="tap-target gap-2"
+                        title="Alterar nome, WhatsApp e interesse inicial deste lead."
+                        aria-label={`Editar dados de ${l.nome}`}
                         onClick={() => abrirEdicao(l)}
                       >
                         <Pencil className="h-4 w-4" />
-                      </IconAction>
+                        Editar dados
+                      </Button>
                       {l.situacao === "AGUARDANDO" ? (
-                        <IconAction
-                          label="Marcar como desistiu"
-                          ariaLabel={`Marcar ${l.nome} como desistiu`}
-                          onClick={() => void alterarSituacao(l, "DESISTIU")}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="tap-target gap-2"
+                          title="Registrar que este contato não tem mais interesse no momento."
+                          aria-label={`Marcar ${l.nome} como desistiu`}
+                          onClick={() => setAlvoDesistencia(l)}
                         >
                           <UserX className="h-4 w-4" />
-                        </IconAction>
+                          Marcar desistência
+                        </Button>
                       ) : (
-                        <IconAction
-                          label="Voltar para aguardando"
-                          ariaLabel={`Voltar ${l.nome} para aguardando`}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="tap-target gap-2"
+                          title="Voltar este contato para a lista de leads em negociação."
+                          aria-label={`Retomar negociação com ${l.nome}`}
                           onClick={() => void alterarSituacao(l, "AGUARDANDO")}
                         >
                           <RotateCcw className="h-4 w-4" />
-                        </IconAction>
+                          Retomar negociação
+                        </Button>
                       )}
-                      <IconAction
-                        label="Transformar em cliente (abre o cadastro completo)"
-                        ariaLabel={`Converter ${l.nome} em cliente`}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="tap-target gap-2"
+                        title="Abre o cadastro completo de cliente já preenchido com os dados do lead."
+                        aria-label={`Transformar ${l.nome} em cliente`}
                         onClick={() => navigate(`/admin/clientes/novo?lead=${l.id}`)}
                       >
                         <UserCheck className="h-4 w-4" />
-                      </IconAction>
-                      <IconAction
-                        label="Excluir lead"
-                        ariaLabel={`Excluir ${l.nome}`}
+                        Transformar em cliente
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="tap-target gap-2 text-destructive hover:text-destructive"
+                        title="Remove o lead definitivamente da lista."
+                        aria-label={`Excluir o lead ${l.nome}`}
                         onClick={() => setAlvoExclusao(l)}
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </IconAction>
+                        <Trash2 className="h-4 w-4" />
+                        Excluir lead
+                      </Button>
                     </>
                   )}
                 </div>
@@ -691,6 +723,25 @@ export default function LeadsList() {
           ) : null}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!alvoDesistencia} onOpenChange={(o) => !o && setAlvoDesistencia(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Marcar desistência do lead</AlertDialogTitle>
+            <AlertDialogDescription>
+              O lead <strong>{alvoDesistencia?.nome}</strong> passará para a situação
+              &ldquo;Desistiu&rdquo; e sairá da lista de contatos aguardando retorno. Nada é
+              apagado: o histórico continua salvo e você pode retomar a negociação depois.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmarDesistencia}>
+              Confirmar desistência
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={!!alvoExclusao} onOpenChange={(o) => !o && setAlvoExclusao(null)}>
         <AlertDialogContent>
