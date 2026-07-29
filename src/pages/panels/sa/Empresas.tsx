@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Building2, Loader2, Pencil, Plus, Power, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
@@ -118,10 +118,10 @@ export default function EmpresasList() {
     if (!alvo) return;
     try {
       await remove.mutateAsync(alvo.id);
-      toast.success("Empresa excluída.");
+      notifySuccess("Empresa excluída.");
       setAlvo(null);
     } catch (err) {
-      toast.error((err as Error).message);
+      notifyError(err);
     }
   }
 
@@ -133,17 +133,17 @@ export default function EmpresasList() {
   async function confirmarStatus() {
     if (!alvoStatus) return;
     if (nota.trim().length < 5) {
-      toast.error("Informe uma nota com pelo menos 5 caracteres.");
+      notifyValidation("Informe uma nota com pelo menos 5 caracteres.");
       return;
     }
     const novo = alvoStatus.status === "ATIVO" ? "INATIVO" : "ATIVO";
     try {
       await setStatus.mutateAsync({ id: alvoStatus.id, status: novo, nota: nota.trim() });
-      toast.success(novo === "ATIVO" ? "Empresa ativada." : "Empresa inativada.");
+      notifySuccess(novo === "ATIVO" ? "Empresa ativada." : "Empresa inativada.");
       setAlvoStatus(null);
       setNota("");
     } catch (err) {
-      toast.error((err as Error).message);
+      notifyError(err);
     }
   }
 

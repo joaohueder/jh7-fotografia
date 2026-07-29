@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
@@ -314,7 +314,7 @@ export default function EmpresaForm() {
     setShowSenha(true);
     setError("senha", null);
     setError("confirmar", null);
-    toast.success("Senha gerada. Copie-a antes de salvar.");
+    notifySuccess("Senha gerada. Copie-a antes de salvar.");
   }
 
   const senhaOk = senha.length >= 8;
@@ -327,12 +327,12 @@ export default function EmpresaForm() {
   async function avancar() {
     if (step === 0) {
       if (!form.razao_social.trim() || !form.nome_fantasia.trim() || !form.cnpj.trim()) {
-        toast.error("Razão social, nome fantasia e CPF/CNPJ são obrigatórios.");
+        notifyValidation("Razão social, nome fantasia e CPF/CNPJ são obrigatórios.");
         return;
       }
       if (!isValidCpfCnpj(form.cnpj)) {
         setError("cnpj", "CPF/CNPJ inválido");
-        toast.error("CPF/CNPJ inválido.");
+        notifyValidation("CPF/CNPJ inválido.");
         return;
       }
       if (!cnpjChecked) {
@@ -342,56 +342,56 @@ export default function EmpresaForm() {
     }
     if (step === 1) {
       if (!form.resp_nome.trim()) {
-        toast.error("Informe o nome do responsável.");
+        notifyValidation("Informe o nome do responsável.");
         return;
       }
       if (!form.resp_nascimento?.trim()) {
-        toast.error("Informe a data de nascimento do responsável.");
+        notifyValidation("Informe a data de nascimento do responsável.");
         return;
       }
       if (!form.resp_cpf?.trim()) {
-        toast.error("Informe o CPF do responsável.");
+        notifyValidation("Informe o CPF do responsável.");
         return;
       }
       if (!isValidCpf(form.resp_cpf)) {
-        toast.error("CPF do responsável inválido.");
+        notifyValidation("CPF do responsável inválido.");
         return;
       }
       if (!form.resp_whatsapp?.trim()) {
-        toast.error("Informe o WhatsApp do responsável.");
+        notifyValidation("Informe o WhatsApp do responsável.");
         return;
       }
       if (!isValidPhone(form.resp_whatsapp)) {
-        toast.error("WhatsApp do responsável inválido.");
+        notifyValidation("WhatsApp do responsável inválido.");
         return;
       }
     }
     if (step === 2) {
       if (!form.contato_whatsapp?.trim()) {
-        toast.error("Informe o WhatsApp de contato da empresa.");
+        notifyValidation("Informe o WhatsApp de contato da empresa.");
         return;
       }
       if (!isValidPhone(form.contato_whatsapp)) {
-        toast.error("WhatsApp de contato da empresa inválido.");
+        notifyValidation("WhatsApp de contato da empresa inválido.");
         return;
       }
       if (contatos.some((c) => validateContato(c.tipo, c.valor))) {
-        toast.error("Verifique os contatos adicionais.");
+        notifyValidation("Verifique os contatos adicionais.");
         return;
       }
     }
     if (step === 3) {
       if (!emailChecked) await validarEmailAcesso();
       if (!email.trim() || !isValidEmail(email)) {
-        toast.error("Informe um e-mail de acesso válido.");
+        notifyValidation("Informe um e-mail de acesso válido.");
         return;
       }
       if (!senhaOk) {
-        toast.error("A senha deve ter pelo menos 8 caracteres.");
+        notifyValidation("A senha deve ter pelo menos 8 caracteres.");
         return;
       }
       if (!confirmarOk) {
-        toast.error("As senhas não conferem.");
+        notifyValidation("As senhas não conferem.");
         return;
       }
     }
@@ -405,12 +405,12 @@ export default function EmpresaForm() {
 
 
     if (!form.razao_social.trim() || !form.nome_fantasia.trim() || !form.cnpj.trim()) {
-      toast.error("Razão social, nome fantasia e CPF/CNPJ são obrigatórios.");
+      notifyValidation("Razão social, nome fantasia e CPF/CNPJ são obrigatórios.");
       return;
     }
     if (!isValidCpfCnpj(form.cnpj)) {
       setError("cnpj", "CPF/CNPJ inválido");
-      toast.error("CPF/CNPJ inválido.");
+      notifyValidation("CPF/CNPJ inválido.");
       return;
     }
     if (!cnpjChecked) {
@@ -419,53 +419,53 @@ export default function EmpresaForm() {
     }
 
     if (!form.resp_nome.trim()) {
-      toast.error("Informe o nome do responsável.");
+      notifyValidation("Informe o nome do responsável.");
       return;
     }
     if (!form.resp_nascimento?.trim()) {
-      toast.error("Informe a data de nascimento do responsável.");
+      notifyValidation("Informe a data de nascimento do responsável.");
       return;
     }
     if (!form.resp_cpf?.trim()) {
-      toast.error("Informe o CPF do responsável.");
+      notifyValidation("Informe o CPF do responsável.");
       return;
     }
     if (!isValidCpf(form.resp_cpf)) {
-      toast.error("CPF do responsável inválido.");
+      notifyValidation("CPF do responsável inválido.");
       return;
     }
     if (!form.resp_whatsapp?.trim()) {
-      toast.error("Informe o WhatsApp do responsável.");
+      notifyValidation("Informe o WhatsApp do responsável.");
       return;
     }
     if (!isValidPhone(form.resp_whatsapp)) {
-      toast.error("WhatsApp do responsável inválido.");
+      notifyValidation("WhatsApp do responsável inválido.");
       return;
     }
     if (!form.contato_whatsapp?.trim()) {
-      toast.error("Informe o WhatsApp de contato da empresa.");
+      notifyValidation("Informe o WhatsApp de contato da empresa.");
       return;
     }
     if (!isValidPhone(form.contato_whatsapp)) {
-      toast.error("WhatsApp de contato da empresa inválido.");
+      notifyValidation("WhatsApp de contato da empresa inválido.");
       return;
     }
     const contatoInvalido = contatos.find((c) => validateContato(c.tipo, c.valor));
     if (contatoInvalido) {
-      toast.error("Verifique os contatos adicionais.");
+      notifyValidation("Verifique os contatos adicionais.");
       return;
     }
     if (!editing && !acessoOk) {
-      toast.error("Preencha e valide e-mail, senha e confirmação de senha.");
+      notifyValidation("Preencha e valide e-mail, senha e confirmação de senha.");
       return;
     }
     if (editing && (senha || confirmar)) {
       if (!senhaOk) {
-        toast.error("A senha deve ter pelo menos 8 caracteres.");
+        notifyValidation("A senha deve ter pelo menos 8 caracteres.");
         return;
       }
       if (!confirmarOk) {
-        toast.error("As senhas não conferem.");
+        notifyValidation("As senhas não conferem.");
         return;
       }
     }
@@ -488,7 +488,7 @@ export default function EmpresaForm() {
           contatos: lista,
           password: trocarSenha ? senha : undefined,
         });
-        toast.success(trocarSenha ? "Empresa e senha atualizadas." : "Empresa atualizada.");
+        notifySuccess(trocarSenha ? "Empresa e senha atualizadas." : "Empresa atualizada.");
       } else {
         await create.mutateAsync({
           empresa: payload,
@@ -496,11 +496,11 @@ export default function EmpresaForm() {
           email: email.trim(),
           password: senha,
         });
-        toast.success("Empresa criada e usuário administrador cadastrado.");
+        notifySuccess("Empresa criada e usuário administrador cadastrado.");
       }
       navigate("/sa/empresas");
     } catch (err) {
-      toast.error((err as Error).message);
+      notifyError(err);
     }
   }
 
