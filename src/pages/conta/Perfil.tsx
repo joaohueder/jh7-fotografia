@@ -105,6 +105,8 @@ export default function MeuPerfil() {
           {saving ? "Salvando..." : "Salvar alterações"}
         </Button>
       </form>
+
+      <LarguraMaximaCard />
     </AccountShell>
   );
 }
