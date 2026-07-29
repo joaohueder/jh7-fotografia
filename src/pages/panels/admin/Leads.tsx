@@ -233,7 +233,7 @@ export default function LeadsList() {
             {lista.map((l) => (
               <li
                 key={l.id}
-                className="group flex items-start gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-accent/30"
+                className="group flex flex-wrap items-start gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-accent/30 sm:flex-nowrap"
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
                   <UserRound className="h-5 w-5 text-muted-foreground" />
