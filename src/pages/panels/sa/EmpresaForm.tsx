@@ -638,7 +638,40 @@ export default function EmpresaForm() {
           </div>
         )}
 
+        {editing && !isLoading && (
+          <div
+            className="-mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1"
+            role="tablist"
+            aria-label="Seções da empresa"
+          >
+            {TABS.map(({ id: tabId, label, icon: Icon }) => {
+              const active = tab === tabId;
+              return (
+                <button
+                  key={tabId}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setTab(tabId)}
+                  className="tap-target inline-flex shrink-0 snap-start items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-colors"
+                  style={{
+                    borderColor: active ? "var(--panel-accent)" : "hsl(var(--border))",
+                    color: active ? "var(--panel-accent)" : "hsl(var(--muted-foreground))",
+                    background: active
+                      ? "color-mix(in oklab, var(--panel-accent) 12%, transparent)"
+                      : "hsl(var(--card))",
+                  }}
+                >
+                  <Icon className="h-4 w-4" />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {editing && isLoading ? (
+
           <div className="flex items-center gap-2 text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" /> Carregando…
           </div>
