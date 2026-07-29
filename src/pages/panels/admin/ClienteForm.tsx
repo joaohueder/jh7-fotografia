@@ -765,6 +765,25 @@ export default function ClienteForm() {
           </div>
         </header>
 
+        <PageHelp
+          title={editando ? "Como editar este cliente" : "Como cadastrar um cliente"}
+          steps={
+            editando
+              ? [
+                  "Use as abas acima para trocar entre dados básicos, endereço, contatos e observações.",
+                  "Altere o que precisar — os campos com asterisco (*) são obrigatórios.",
+                  "Clique em Salvar para confirmar. Se desistir, use “Voltar para clientes”.",
+                ]
+              : [
+                  "Preencha os campos da etapa atual e clique em Avançar. Pode voltar quando quiser.",
+                  "Campos com asterisco (*) são obrigatórios: nome, data de nascimento, CPF/CNPJ e WhatsApp.",
+                  "Na última etapa você revê tudo e só então clica em “Salvar cliente”. Nada é gravado antes disso.",
+                ]
+          }
+        />
+
+
+
         {!editando && (
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
