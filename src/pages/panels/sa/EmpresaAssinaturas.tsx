@@ -393,6 +393,7 @@ export function EmpresaAssinaturas({ empresaId }: { empresaId: string }) {
       setPlano(null);
       setObservacao("");
       setInicio(hoje());
+      setModalOpen(false);
     } catch (err) {
       notifyError(err);
     } finally {
@@ -441,7 +442,7 @@ export function EmpresaAssinaturas({ empresaId }: { empresaId: string }) {
           />
         ) : (
           <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-            Esta empresa não possui assinatura ativa. Selecione um plano abaixo.
+            Esta empresa não possui assinatura ativa. Clique em "Novo plano" para contratar.
           </p>
         )}
       </section>
