@@ -350,16 +350,24 @@ export default function ClienteForm() {
                   <Input
                     value={form.documento ?? ""}
                     onChange={(e) => set("documento", maskCpfCnpj(e.target.value))}
-                    onBlur={() =>
-                      setError(
-                        "documento",
-                        !form.documento?.trim()
-                          ? "Informe o CPF/CNPJ"
-                          : isValidCpfCnpj(form.documento)
-                            ? null
-                            : "CPF/CNPJ inválido",
-                      )
-                    }
+                    onBlur={async () => {
+                      if (!form.documento?.trim()) {
+                        setError("documento", "Informe o CPF/CNPJ");
+                        return;
+                      }
+                      if (!isValidCpfCnpj(form.documento)) {
+                        setError("documento", "CPF/CNPJ inválido");
+                        return;
+                      }
+                      setError("documento", null);
+                      if (!empresaId) return;
+                      try {
+                        const dup = await documentoDuplicado(empresaId, form.documento, id);
+                        if (dup) setError("documento", "Já existe um cliente com este CPF/CNPJ.");
+                      } catch {
+                        /* validação no servidor cobre o caso */
+                      }
+                    }}
                     placeholder="000.000.000-00"
                     inputMode="numeric"
                     required
