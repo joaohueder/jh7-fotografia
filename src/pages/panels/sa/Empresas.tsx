@@ -486,6 +486,10 @@ export default function EmpresasList() {
                     </div>
                     <StatusBadge status={e.status} />
                   </div>
+                  <div className="mt-3">
+                    <AssinaturaBadge plano={planoDe(e.id)} />
+                  </div>
+
                   <div className="mt-3 flex gap-2">
                     <Button
                       variant="outline"
