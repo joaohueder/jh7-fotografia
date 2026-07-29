@@ -54,7 +54,7 @@ export default function LeadsList() {
 
   const navigate = useNavigate();
   const { data: empresaId } = useEmpresaAtual();
-  const { data: leads, isLoading, error } = useLeads();
+  const { data: leads, isLoading, error, refetch: recarregarLeads } = useLeads();
   const salvar = useSalvarLead();
   const remover = useDeleteLead();
 
