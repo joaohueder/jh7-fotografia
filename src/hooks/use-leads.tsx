@@ -21,6 +21,12 @@ export interface Lead {
     criado_por_nome: string | null;
     created_at: string;
   } | null;
+  /** Motivo pelo qual o lead entrou em contato (primeira anotação). */
+  interesse?: {
+    descricao: string;
+    criado_por_nome: string | null;
+    created_at: string;
+  } | null;
 }
 
 /** Leads são clientes com origem = LEAD (nome + WhatsApp). */
@@ -35,23 +41,27 @@ export function useLeads() {
       const { data, error } = await db
         .from("clientes")
         .select(
-          "id, empresa_id, nome, contato_whatsapp, status, origem, created_at, cliente_notas(descricao, modulo, criado_por_nome, created_at)",
+          "id, empresa_id, nome, contato_whatsapp, status, origem, created_at, cliente_notas(descricao, modulo, criado_por_nome, created_at), interesse:cliente_notas(descricao, criado_por_nome, created_at, tipo)",
         )
         .eq("empresa_id", empresaId!)
         .eq("origem", "LEAD")
         // Somente leads ainda não convertidos (sem cadastro completo)
         .is("documento", null)
+        .eq("interesse.tipo", "INTERESSE")
         .order("created_at", { ascending: false, foreignTable: "cliente_notas" })
         .limit(1, { foreignTable: "cliente_notas" })
+        .limit(1, { foreignTable: "interesse" })
         .order("created_at", { ascending: false });
       if (error) throw error;
 
       return ((data ?? []) as any[]).map((l) => {
         const notas = Array.isArray(l.cliente_notas) ? (l.cliente_notas as Lead["ultima_nota"][]) : [];
-        const { cliente_notas: _, ...rest } = l;
+        const interesses = Array.isArray(l.interesse) ? (l.interesse as Lead["interesse"][]) : [];
+        const { cliente_notas: _n, interesse: _i, ...rest } = l;
         return {
           ...rest,
           ultima_nota: notas[0] ?? null,
+          interesse: interesses[0] ?? null,
         } as Lead;
       });
     },
