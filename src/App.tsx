@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { ThemeProvider } from "@/hooks/use-theme";
 import { supabase } from "@/integrations/selfhosted/client";
 import { SystemMessageDialog } from "@/components/system-message-dialog";
 import LandingPage from "@/pages/Landing";
@@ -60,6 +61,7 @@ function AuthEvents() {
 
 export default function App() {
   return (
+    <ThemeProvider>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
@@ -141,5 +143,6 @@ export default function App() {
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
+    </ThemeProvider>
   );
 }

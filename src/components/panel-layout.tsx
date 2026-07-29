@@ -12,6 +12,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
 export type PanelAccent = "sa" | "admin" | "usuario";
@@ -163,6 +164,7 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
             <span className="hidden max-w-[11rem] truncate text-sm text-muted-foreground lg:block">
               {user?.email}
             </span>
+            <ThemeToggle />
             {/* Ícone puro no mobile (44px), rótulo textual a partir de sm */}
             <Button
               variant="ghost"

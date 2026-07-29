@@ -170,10 +170,165 @@
     0 2px 0 0 oklch(1 0 0 / 0.04) inset;
   --shadow-gold: 0 12px 40px -14px color-mix(in oklab, var(--gold) 45%, transparent);
   --ease-silk: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Superfícies translúcidas (utility .glass) */
+  --glass-bg: color-mix(in oklab, var(--surface) 55%, transparent);
+  --glass-border: oklch(1 0 0 / 0.08);
 }
 
 .dark {
   color-scheme: dark;
+}
+
+/*
+ * TEMA CLARO
+ * Aplicado em <html class="theme-light">. Mantém a identidade da marca
+ * (laranja + verde) com tons rebaixados para garantir contraste AA sobre
+ * fundos claros. Especificidade igual a :root — vence por ordem.
+ */
+.theme-light {
+  color-scheme: light;
+
+  --background: oklch(0.985 0.003 90);
+  --foreground: oklch(0.205 0.008 60);
+
+  --surface: oklch(1 0 0);
+  --surface-elevated: oklch(0.965 0.004 80);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.205 0.008 60);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.205 0.008 60);
+
+  --gold: oklch(0.6 0.19 43);
+  --gold-soft: oklch(0.68 0.17 55);
+  --brand-green: oklch(0.55 0.15 150);
+  --brand-green-soft: oklch(0.62 0.15 150);
+
+  --action: var(--brand-green);
+  --action-foreground: oklch(0.99 0.002 150);
+  --warning: var(--gold);
+  --warning-foreground: oklch(0.99 0.002 45);
+
+  --primary: oklch(0.6 0.19 43);
+  --primary-foreground: oklch(0.99 0.002 45);
+
+  --secondary: oklch(0.945 0.005 80);
+  --secondary-foreground: oklch(0.245 0.008 60);
+
+  --muted: oklch(0.945 0.005 80);
+  --muted-foreground: oklch(0.46 0.012 65);
+
+  --accent: oklch(0.93 0.008 70);
+  --accent-foreground: oklch(0.225 0.008 60);
+
+  --destructive: oklch(0.53 0.21 27);
+  --destructive-foreground: oklch(0.99 0.003 90);
+
+  --border: oklch(0.2 0.01 60 / 12%);
+  --input: oklch(0.2 0.01 60 / 16%);
+  --ring: oklch(0.6 0.19 43 / 45%);
+
+  --chart-1: oklch(0.6 0.19 43);
+  --chart-2: oklch(0.55 0.15 150);
+  --chart-3: oklch(0.68 0.17 55);
+  --chart-4: oklch(0.62 0.15 150);
+  --chart-5: oklch(0.6 0.02 60);
+
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.205 0.008 60);
+  --sidebar-primary: oklch(0.6 0.19 43);
+  --sidebar-primary-foreground: oklch(0.99 0.002 45);
+  --sidebar-accent: oklch(0.945 0.005 80);
+  --sidebar-accent-foreground: oklch(0.245 0.008 60);
+  --sidebar-border: oklch(0.2 0.01 60 / 12%);
+  --sidebar-ring: oklch(0.6 0.19 43 / 45%);
+
+  --shadow-soft: 0 1px 2px oklch(0.2 0.01 60 / 0.08),
+    0 8px 24px -12px oklch(0.2 0.01 60 / 0.18);
+  --shadow-elegant: 0 24px 60px -28px oklch(0.2 0.01 60 / 0.28),
+    0 1px 0 0 oklch(1 0 0 / 0.6) inset;
+
+  --glass-bg: color-mix(in oklab, var(--surface) 88%, transparent);
+  --glass-border: oklch(0.2 0.01 60 / 0.1);
+}
+
+/*
+ * TEMA ESCURO explícito.
+ * Declarado DEPOIS de .theme-light para poder ser aninhado dentro de uma
+ * página clara (ex.: a tela de login, que é sempre escura).
+ */
+.theme-dark {
+  color-scheme: dark;
+
+  --background: oklch(0.135 0.004 60);
+  --foreground: oklch(0.975 0.002 90);
+
+  --surface: oklch(0.175 0.005 60);
+  --surface-elevated: oklch(0.215 0.006 60);
+
+  --card: oklch(0.175 0.005 60);
+  --card-foreground: oklch(0.975 0.002 90);
+  --popover: oklch(0.175 0.005 60);
+  --popover-foreground: oklch(0.975 0.002 90);
+
+  --gold: oklch(0.705 0.192 45);
+  --gold-soft: oklch(0.8 0.15 62);
+  --brand-green: oklch(0.72 0.19 148);
+  --brand-green-soft: oklch(0.82 0.15 150);
+
+  --action: var(--brand-green);
+  --action-foreground: oklch(0.16 0.01 148);
+  --warning: var(--gold);
+  --warning-foreground: oklch(0.16 0.01 45);
+
+  --primary: oklch(0.705 0.192 45);
+  --primary-foreground: oklch(0.16 0.01 45);
+
+  --secondary: oklch(0.225 0.006 60);
+  --secondary-foreground: oklch(0.975 0.002 90);
+
+  --muted: oklch(0.225 0.006 60);
+  --muted-foreground: oklch(0.705 0.008 70);
+
+  --accent: oklch(0.26 0.008 60);
+  --accent-foreground: oklch(0.975 0.002 90);
+
+  --destructive: oklch(0.6 0.21 27);
+  --destructive-foreground: oklch(0.98 0.003 90);
+
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 8%);
+  --ring: oklch(0.705 0.192 45 / 55%);
+
+  --chart-1: oklch(0.705 0.192 45);
+  --chart-2: oklch(0.72 0.19 148);
+  --chart-3: oklch(0.8 0.15 62);
+  --chart-4: oklch(0.82 0.15 150);
+  --chart-5: oklch(0.62 0.03 60);
+
+  --sidebar: oklch(0.155 0.004 60);
+  --sidebar-foreground: oklch(0.975 0.002 90);
+  --sidebar-primary: oklch(0.705 0.192 45);
+  --sidebar-primary-foreground: oklch(0.16 0.01 45);
+  --sidebar-accent: oklch(0.225 0.006 60);
+  --sidebar-accent-foreground: oklch(0.975 0.002 90);
+  --sidebar-border: oklch(1 0 0 / 9%);
+  --sidebar-ring: oklch(0.705 0.192 45 / 55%);
+
+  --shadow-soft: 0 1px 2px oklch(0 0 0 / 0.4), 0 8px 24px -12px oklch(0 0 0 / 0.55);
+  --shadow-elegant: 0 24px 60px -24px oklch(0 0 0 / 0.75),
+    0 2px 0 0 oklch(1 0 0 / 0.04) inset;
+
+  --glass-bg: color-mix(in oklab, var(--surface) 55%, transparent);
+  --glass-border: oklch(1 0 0 / 0.08);
+}
+
+/* Blocos aninhados também precisam pintar o próprio fundo/texto */
+.theme-dark,
+.theme-light {
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 @layer base {
@@ -319,9 +474,9 @@
 }
 
 @utility glass {
-  background: color-mix(in oklab, var(--surface) 55%, transparent);
+  background: var(--glass-bg);
   backdrop-filter: blur(28px) saturate(140%);
-  border: 1px solid oklch(1 0 0 / 0.08);
+  border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-elegant);
 }
 
