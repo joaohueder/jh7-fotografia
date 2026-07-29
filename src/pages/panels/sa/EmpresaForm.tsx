@@ -248,6 +248,29 @@ export default function EmpresaForm() {
     }));
   }
 
+  /** Replica o endereço da empresa nos campos de endereço do responsável. */
+  function copiarEnderecoEmpresa() {
+    const temEndereco = [form.cep, form.endereco, form.numero, form.bairro, form.cidade, form.uf]
+      .map((v) => (v ?? "").trim())
+      .some(Boolean);
+    if (!temEndereco) {
+      notifyValidation("Preencha o endereço da empresa antes de copiar para o responsável.");
+      return;
+    }
+    setForm((prev) => ({
+      ...prev,
+      resp_cep: prev.cep ?? "",
+      resp_endereco: prev.endereco ?? "",
+      resp_numero: prev.numero ?? "",
+      resp_complemento: prev.complemento ?? "",
+      resp_bairro: prev.bairro ?? "",
+      resp_cidade: prev.cidade ?? "",
+      resp_uf: prev.uf ?? "",
+    }));
+    setError("resp_cep", null);
+  }
+
+
   async function validarEmailAcesso() {
     const value = email.trim();
     setEmailChecked(false);
