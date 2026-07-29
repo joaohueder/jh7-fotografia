@@ -1,15 +1,21 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
+  Building2,
   ClipboardCopy,
   Eye,
   EyeOff,
+  KeyRound,
   Loader2,
+  PhoneCall,
   Plus,
   RefreshCw,
+  StickyNote,
   Trash2,
+  UserRound,
 } from "lucide-react";
+
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
@@ -83,10 +89,29 @@ const EMPTY: EmpresaPayload = {
 };
 
 /** Seção de formulário: título + grade fluida de campos. */
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({
+  title,
+  icon: Icon,
+  children,
+}: {
+  title: string;
+  icon?: ComponentType<{ className?: string }>;
+  children: ReactNode;
+}) {
   return (
     <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
-      <h2 className="mb-4 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
+      <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
+        {Icon ? (
+          <span
+            className="inline-flex h-7 w-7 items-center justify-center rounded-lg"
+            style={{
+              background: "color-mix(in oklab, var(--panel-accent) 14%, transparent)",
+              color: "var(--panel-accent)",
+            }}
+          >
+            <Icon className="h-4 w-4" />
+          </span>
+        ) : null}
         {title}
       </h2>
       <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(16rem,100%),1fr))]">
@@ -95,6 +120,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
     </section>
   );
 }
+
 
 function Field({
   label,
@@ -162,6 +188,17 @@ const STEPS = [
 ] as const;
 const RESUMO = STEPS.length - 1;
 
+/** Abas usadas no modo de edição. */
+const TABS = [
+  { id: "empresa", label: "Dados da empresa", icon: Building2 },
+  { id: "responsavel", label: "Dados do responsável", icon: UserRound },
+  { id: "acesso", label: "Acesso ao sistema", icon: KeyRound },
+  { id: "observacoes", label: "Observações", icon: StickyNote },
+] as const;
+
+type TabId = (typeof TABS)[number]["id"];
+
+
 type Errors = Record<string, string | null>;
 
 export default function EmpresaForm() {
@@ -189,9 +226,11 @@ export default function EmpresaForm() {
   const [checkingCnpj, setCheckingCnpj] = useState(false);
   const [cnpjChecked, setCnpjChecked] = useState(false);
   const [step, setStep] = useState(0);
+  const [tab, setTab] = useState<TabId>("empresa");
 
-  /** Na edição todas as seções aparecem; na criação, uma por etapa. */
-  const showStep = (index: number) => editing || step === index;
+  /** Na edição as seções são agrupadas em abas; na criação, uma por etapa. */
+  const showStep = (index: number, tabId: TabId) => (editing ? tab === tabId : step === index);
+
 
   useEffect(() => {
     if (!data) return;
@@ -599,7 +638,40 @@ export default function EmpresaForm() {
           </div>
         )}
 
+        {editing && !isLoading && (
+          <div
+            className="-mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1"
+            role="tablist"
+            aria-label="Seções da empresa"
+          >
+            {TABS.map(({ id: tabId, label, icon: Icon }) => {
+              const active = tab === tabId;
+              return (
+                <button
+                  key={tabId}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setTab(tabId)}
+                  className="tap-target inline-flex shrink-0 snap-start items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-colors"
+                  style={{
+                    borderColor: active ? "var(--panel-accent)" : "hsl(var(--border))",
+                    color: active ? "var(--panel-accent)" : "hsl(var(--muted-foreground))",
+                    background: active
+                      ? "color-mix(in oklab, var(--panel-accent) 12%, transparent)"
+                      : "hsl(var(--card))",
+                  }}
+                >
+                  <Icon className="h-4 w-4" />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {editing && isLoading ? (
+
           <div className="flex items-center gap-2 text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" /> Carregando…
           </div>
@@ -615,8 +687,8 @@ export default function EmpresaForm() {
             }}
             className="space-y-4"
           >
-            {showStep(0) && (
-              <Section title="Dados da empresa">
+            {showStep(0, "empresa") && (
+              <Section title="Dados da empresa" icon={Building2}>
                 <Field label="Razão social" required>
                   <Input
                     value={form.razao_social}
@@ -721,8 +793,8 @@ export default function EmpresaForm() {
               </Section>
             )}
 
-            {showStep(1) && (
-              <Section title="Dados do responsável">
+            {showStep(1, "responsavel") && (
+              <Section title="Dados do responsável" icon={UserRound}>
                 <Field label="Nome" required>
                   <Input
                     value={form.resp_nome}
@@ -866,8 +938,8 @@ export default function EmpresaForm() {
               </Section>
             )}
 
-            {showStep(2) && (
-              <Section title="Contato da empresa">
+            {showStep(2, "empresa") && (
+              <Section title="Contato da empresa" icon={PhoneCall}>
                 <Field label="WhatsApp" required error={errors.contato_whatsapp}>
                   <Input
                     value={form.contato_whatsapp ?? ""}
@@ -1022,8 +1094,8 @@ export default function EmpresaForm() {
               </Section>
             )}
 
-            {showStep(3) && (
-              <Section title="Acesso ao sistema (usuário administrador)">
+            {showStep(3, "acesso") && (
+              <Section title="Acesso ao sistema (usuário administrador)" icon={KeyRound}>
                 <Field
                   label="E-mail"
                   required={!editing}
@@ -1107,8 +1179,8 @@ export default function EmpresaForm() {
               </Section>
             )}
 
-            {showStep(4) && (
-              <Section title="Observações">
+            {showStep(4, "observacoes") && (
+              <Section title="Observações" icon={StickyNote}>
                 <Field label="Observações" span>
                   <Textarea
                     value={form.observacoes ?? ""}
