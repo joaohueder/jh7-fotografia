@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -32,11 +33,30 @@ export interface Lead {
 /** Leads são clientes com origem = LEAD (nome + WhatsApp). */
 export function useLeads() {
   const { data: empresaId } = useEmpresaAtual();
+  const qc = useQueryClient();
+
+  // Tempo real: recarrega a lista assim que leads ou notas mudarem no banco,
+  // mesmo que a alteração tenha vindo de outro usuário/aba.
+  useEffect(() => {
+    const invalidar = () => qc.invalidateQueries({ queryKey: ["leads"], refetchType: "active" });
+    const channel = supabase
+      .channel("leads-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "clientes" }, invalidar)
+      .on("postgres_changes", { event: "*", schema: "public", table: "cliente_notas" }, invalidar)
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [qc]);
 
   return useQuery({
     queryKey: ["leads", empresaId],
     enabled: Boolean(empresaId),
     staleTime: 0,
+    refetchInterval: 20 * 1000,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
     queryFn: async (): Promise<Lead[]> => {
       const { data, error } = await db
         .from("clientes")

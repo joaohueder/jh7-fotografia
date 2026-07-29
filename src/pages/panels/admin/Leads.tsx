@@ -147,7 +147,7 @@ export default function LeadsList() {
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Leads</h1>
-              <HelpTip text="Leads são pessoas interessadas que ainda não viraram clientes. Aqui você guarda apenas o nome e o WhatsApp para retornar o contato depois." />
+              <HelpTip text="Leads são pessoas interessadas que ainda não viraram clientes. Aqui você guarda apenas o nome e o WhatsApp para retornar o contato depois. Esta tela se atualiza sozinha: se alguém da sua equipe cadastrar ou alterar um lead, a lista muda automaticamente, sem precisar recarregar a página." />
             </div>
             <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
               Contatos captados por formulários ou cadastrados manualmente.
