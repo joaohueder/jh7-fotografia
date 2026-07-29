@@ -481,8 +481,13 @@ export default function EmpresasList() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate font-semibold">{e.nome_fantasia}</p>
-                      <p className="truncate text-sm text-muted-foreground">{e.razao_social}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">{e.cnpj}</p>
+                      <p className="mt-1 truncate text-sm text-muted-foreground">
+                        <span className="font-medium text-foreground">Resp.:</span> {e.resp_nome}
+                      </p>
+                      <p className="mt-1 truncate text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground">WhatsApp:</span>{" "}
+                        {e.contato_whatsapp || "—"}
+                      </p>
                     </div>
                     <StatusBadge status={e.status} />
                   </div>
@@ -530,22 +535,22 @@ export default function EmpresasList() {
                 <thead className="bg-surface/60 text-left text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3 font-semibold">Nome fantasia</th>
-                    <th className="px-4 py-3 font-semibold">Razão social</th>
-                    <th className="px-4 py-3 font-semibold">CPF/CNPJ</th>
+                    <th className="px-4 py-3 font-semibold">WhatsApp</th>
+                    <th className="px-4 py-3 font-semibold">Responsável</th>
                     <th className="px-4 py-3 font-semibold">Cidade/UF</th>
                     <th className="px-4 py-3 font-semibold">Status</th>
                     <th className="px-4 py-3 font-semibold">Assinatura</th>
                     <th className="px-4 py-3 text-right font-semibold">Ações</th>
-
-
                   </tr>
                 </thead>
                 <tbody>
                   {empresas.map((e) => (
                     <tr key={e.id} className="border-t border-border">
                       <td className="px-4 py-3 font-medium">{e.nome_fantasia}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{e.razao_social}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{e.cnpj}</td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {e.contato_whatsapp || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{e.resp_nome}</td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {[e.cidade, e.uf].filter(Boolean).join("/") || "—"}
                       </td>
@@ -555,7 +560,6 @@ export default function EmpresasList() {
                       <td className="px-4 py-3">
                         <AssinaturaBadge plano={planoDe(e.id)} />
                       </td>
-
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-2">
                           <IconAction
@@ -590,7 +594,6 @@ export default function EmpresasList() {
                           </IconAction>
                         </div>
                       </td>
-
                     </tr>
                   ))}
                 </tbody>
