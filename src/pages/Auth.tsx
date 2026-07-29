@@ -8,6 +8,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/selfhosted/client";
 import { setRememberMe as persistRememberMe } from "@/integrations/selfhosted/auth-storage";
+import { notifyError, notifyValidation } from "@/lib/system-message";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,6 +59,7 @@ function AuthPage() {
 
     if (!email || !password) {
       setFormError("Preencha e-mail e senha.");
+      notifyValidation("Preencha o e-mail e a senha para acessar o sistema.");
       return;
     }
 
@@ -73,6 +75,11 @@ function AuthPage() {
       setIsSubmitting(false);
       setIsCheckingAccess(false);
       setFormError("E-mail ou senha inválidos.");
+      notifyError(error, {
+        title: "Não foi possível entrar",
+        description:
+          "E-mail ou senha inválidos. Confira os dados digitados e tente novamente. Se esqueceu a senha, fale com o administrador.",
+      });
       return;
     }
 
