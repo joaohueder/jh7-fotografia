@@ -8,7 +8,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { useForcedTheme } from "@/hooks/use-theme";
 import { useForcedPalette } from "@/hooks/use-palette";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/selfhosted/client";
+import { buscarAcesso } from "@/hooks/use-acesso";
 import { setRememberMe as persistRememberMe } from "@/integrations/selfhosted/auth-storage";
 import { notifyError, notifyValidation } from "@/lib/system-message";
 
