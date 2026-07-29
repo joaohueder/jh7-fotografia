@@ -93,6 +93,10 @@ export function usePlano(id: string | undefined) {
   return useQuery({
     queryKey: ["plano", id],
     enabled: Boolean(id),
+    // Sempre busca o registro atual ao abrir a edição.
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: "always",
     queryFn: async (): Promise<Plano> => {
       const { data, error } = await db.from("planos").select(COLUNAS).eq("id", id!).single();
       if (error) throw error;
