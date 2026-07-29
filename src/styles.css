@@ -508,7 +508,7 @@
 /* Container fluido padrão do app: gutter escala com a viewport */
 @utility container-page {
   width: 100%;
-  max-width: 75rem;
+  max-width: var(--app-max-w);
   margin-inline: auto;
   padding-inline: var(--gutter);
 }
