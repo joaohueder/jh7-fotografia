@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { Maximize2, RotateCcw } from "lucide-react";
+import { Maximize2, Monitor, RotateCcw, UserRound } from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useAuth } from "@/hooks/use-auth";
