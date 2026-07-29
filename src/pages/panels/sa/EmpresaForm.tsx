@@ -1182,6 +1182,11 @@ export default function EmpresaForm() {
               </Section>
             )}
 
+            {editing && tab === "assinaturas" && id ? (
+              <EmpresaAssinaturas empresaId={id} />
+            ) : null}
+
+
             {showStep(4, "observacoes") && (
               <Section title="Observações" icon={StickyNote}>
                 <Field label="Observações" span>
