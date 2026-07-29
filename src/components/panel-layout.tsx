@@ -56,7 +56,10 @@ const ACCENTS: Record<PanelAccent, { accent: string; accentSoft: string; label: 
 export interface PanelMenuItem {
   label: string;
   to: string;
+  /** Alinha o item à direita na barra de menu superior (desktop). */
+  right?: boolean;
 }
+
 
 interface PanelLayoutProps {
   accent: PanelAccent;
@@ -285,11 +288,18 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
       >
         <div className="container-page flex h-[var(--app-nav-h)] items-center gap-1 overflow-x-auto">
           {menu.map((item) => (
-            <NavLink key={item.to} to={item.to} end className={navItemClass} style={navItemStyle}>
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end
+              className={({ isActive }) => cn(navItemClass({ isActive }), item.right && "ml-auto")}
+              style={navItemStyle}
+            >
               {item.label}
             </NavLink>
           ))}
         </div>
+
       </nav>
 
 
