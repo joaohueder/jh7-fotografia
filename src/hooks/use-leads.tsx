@@ -63,6 +63,7 @@ export function useLeads() {
   useEffect(() => {
     const invalidar = () => {
       qc.invalidateQueries({ queryKey: ["leads"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["limites-empresa"] });
       // O gráfico de evolução também precisa acompanhar as mudanças em tempo real.
       qc.invalidateQueries({ queryKey: ["leads-evolucao"], refetchType: "active" });
     };
@@ -162,6 +163,7 @@ export function useSalvarLead() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["leads"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["limites-empresa"] });
       qc.invalidateQueries({ queryKey: ["leads-evolucao"], refetchType: "active" });
     },
   });
@@ -177,6 +179,7 @@ export function useSituacaoLead() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["leads"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["limites-empresa"] });
       qc.invalidateQueries({ queryKey: ["leads-evolucao"], refetchType: "active" });
     },
   });
