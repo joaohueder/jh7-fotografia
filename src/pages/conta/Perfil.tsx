@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { useQueryClient } from "@tanstack/react-query";
 import { Maximize2, Monitor, RotateCcw, UserRound } from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
