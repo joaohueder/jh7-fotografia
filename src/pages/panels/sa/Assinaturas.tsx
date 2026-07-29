@@ -1,12 +1,28 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { CalendarClock, FileSignature, Loader2 } from "lucide-react";
+import { CalendarClock, FileSignature, Loader2, PowerOff } from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { SA_MENU } from "@/pages/panels/sa/menu";
-import { useTodasAssinaturas, type AssinaturaComEmpresa } from "@/hooks/use-assinaturas";
+import {
+  useEncerrarAssinatura,
+  useTodasAssinaturas,
+  type AssinaturaComEmpresa,
+} from "@/hooks/use-assinaturas";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { notifyError, notifySuccess } from "@/lib/system-message";
 
 const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -70,8 +86,26 @@ export default function AssinaturasList() {
   usePageMeta("Assinaturas — JH7 Gestão Fotográfica", "Assinaturas das empresas do SaaS.");
 
   const { data, isLoading, error } = useTodasAssinaturas();
+  const expirar = useEncerrarAssinatura();
   const [busca, setBusca] = useState("");
   const [filtro, setFiltro] = useState<Filtro>("TODAS");
+  const [assinaturaAlvo, setAssinaturaAlvo] = useState<AssinaturaComEmpresa | null>(null);
+
+  async function confirmarExpiracao() {
+    if (!assinaturaAlvo) return;
+
+    try {
+      await expirar.mutateAsync({
+        id: assinaturaAlvo.id,
+        empresaId: assinaturaAlvo.empresa_id,
+        observacao: "Assinatura expirada manualmente pelo painel SA.",
+      });
+      notifySuccess(`Assinatura de ${assinaturaAlvo.empresa_nome} expirada com sucesso.`);
+      setAssinaturaAlvo(null);
+    } catch (err) {
+      notifyError(err, { description: "Não foi possível expirar a assinatura." });
+    }
+  }
 
   const lista = useMemo(() => {
     let list = data ?? [];
@@ -228,6 +262,18 @@ export default function AssinaturasList() {
                       <VencimentoTexto a={a} />
                     </p>
                   </div>
+                  {a.ativo ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="mt-3 w-full border-destructive/35 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      onClick={() => setAssinaturaAlvo(a)}
+                    >
+                      <PowerOff className="mr-2 h-4 w-4" />
+                      Expirar assinatura
+                    </Button>
+                  ) : null}
                 </li>
               ))}
             </ul>
@@ -244,6 +290,7 @@ export default function AssinaturasList() {
                     <th className="px-4 py-3">Fim</th>
                     <th className="px-4 py-3">Vencimento</th>
                     <th className="px-4 py-3">Situação</th>
+                    <th className="px-4 py-3 text-right">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -275,6 +322,22 @@ export default function AssinaturasList() {
                       <td className="px-4 py-3">
                         <SituacaoBadge a={a} />
                       </td>
+                      <td className="px-4 py-3 text-right">
+                        {a.ativo ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="border-destructive/35 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            onClick={() => setAssinaturaAlvo(a)}
+                          >
+                            <PowerOff className="mr-2 h-4 w-4" />
+                            Expirar
+                          </Button>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -282,6 +345,31 @@ export default function AssinaturasList() {
             </div>
           </>
         )}
+
+        <AlertDialog
+          open={Boolean(assinaturaAlvo)}
+          onOpenChange={(open) => !open && !expirar.isPending && setAssinaturaAlvo(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Expirar assinatura?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta ação encerra imediatamente a assinatura de {assinaturaAlvo?.empresa_nome ?? "esta empresa"}. A empresa ficará sem plano ativo até contratar ou receber uma nova assinatura.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={expirar.isPending}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => void confirmarExpiracao()}
+                disabled={expirar.isPending}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {expirar.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Expirar assinatura
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </PanelLayout>
   );
