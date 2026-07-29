@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { Maximize2, RotateCcw } from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useAuth } from "@/hooks/use-auth";
@@ -10,6 +11,8 @@ import { supabase } from "@/integrations/selfhosted/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { MAX_MAX_WIDTH, MIN_MAX_WIDTH, useAppLayout } from "@/hooks/use-app-layout";
 import { notifyError, notifySuccess } from "@/lib/system-message";
 
 const db = supabase as unknown as SupabaseClient;
