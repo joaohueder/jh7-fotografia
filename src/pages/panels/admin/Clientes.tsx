@@ -294,6 +294,7 @@ export default function ClientesList() {
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-semibold leading-tight">{c.nome}</span>
                       <StatusBadge status={c.status} />
+                      <OrigemBadge origem={c.origem} />
                       {menor ? (
                         <span className="inline-flex animate-pulse items-center gap-1 rounded-full border border-destructive px-2 py-0.5 text-[11px] font-bold uppercase text-destructive">
                           <AlertTriangle className="h-3 w-3" />
