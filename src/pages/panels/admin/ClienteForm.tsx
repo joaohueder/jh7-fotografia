@@ -279,6 +279,16 @@ export default function ClienteForm() {
       notifyValidation("Empresa não identificada para vincular o cliente.");
       return;
     }
+    try {
+      if (await documentoDuplicado(empresaId, form.documento!, id)) {
+        setError("documento", "Já existe um cliente com este CPF/CNPJ.");
+        notifyValidation("Já existe um cliente cadastrado com este CPF/CNPJ nesta empresa.");
+        return;
+      }
+    } catch {
+      /* a restrição do banco garante a unicidade */
+    }
+
 
     try {
       await salvar.mutateAsync({
