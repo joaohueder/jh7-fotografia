@@ -52,12 +52,30 @@ function AuthPage() {
 
     setIsSubmitting(true);
     const { error } = await signIn(email, password);
-    setIsSubmitting(false);
 
     if (error) {
+      setIsSubmitting(false);
       setFormError("E-mail ou senha inválidos.");
       return;
     }
+
+    // Bloqueia acesso de usuário ou empresa inativos
+    const { data: acesso } = await (supabase as unknown as SupabaseClient).rpc(
+      "meu_acesso",
+    );
+    const liberado = (acesso as { ativo?: boolean } | null)?.ativo ?? true;
+    if (!liberado) {
+      await signOut();
+      setIsSubmitting(false);
+      setFormError(
+        (acesso as { motivo?: string } | null)?.motivo ??
+          "Acesso bloqueado. Fale com o administrador.",
+      );
+      return;
+    }
+
+    setIsSubmitting(false);
+
 
     if (rememberMe) {
       localStorage.setItem("auth_email", email);
