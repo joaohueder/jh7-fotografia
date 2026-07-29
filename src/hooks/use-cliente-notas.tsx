@@ -40,6 +40,26 @@ export function useClienteNotas(clienteId: string | undefined) {
   });
 }
 
+/** Primeira nota registrada (interesse inicial do lead). */
+export function useNotaInicial(clienteId: string | undefined) {
+  return useQuery({
+    queryKey: ["cliente-nota-inicial", clienteId],
+    enabled: Boolean(clienteId),
+    staleTime: 0,
+    queryFn: async (): Promise<ClienteNota | null> => {
+      const { data, error } = await db
+        .from("cliente_notas")
+        .select("*")
+        .eq("cliente_id", clienteId!)
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return (data ?? null) as ClienteNota | null;
+    },
+  });
+}
+
 /** Nome amigável do usuário logado para assinar a nota. */
 async function autorAtual(): Promise<{ id: string | null; nome: string | null }> {
   const { data } = await db.auth.getUser();
