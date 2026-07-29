@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  AlertTriangle,
   Loader2,
   Pencil,
   Phone,
@@ -18,6 +19,7 @@ import {
   RotateCcw,
   UserX,
 } from "lucide-react";
+
 
 import { Area, Bar, CartesianGrid, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
@@ -40,7 +42,9 @@ import {
 } from "@/hooks/use-leads";
 import { isValidPhone, maskPhone } from "@/lib/br-masks";
 import { salvarNotaInicial, useNotaInicial } from "@/hooks/use-cliente-notas";
+import { useLimitesEmpresa } from "@/hooks/use-limites";
 import { ClienteNotas } from "@/components/cliente-notas";
+
 import { dataHora, duracaoDesde, tempoDecorrido } from "@/lib/tempo";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -106,6 +110,15 @@ export default function LeadsList() {
   const salvar = useSalvarLead();
   const remover = useDeleteLead();
   const situacaoLead = useSituacaoLead();
+  const { data: limites } = useLimitesEmpresa();
+
+  // Regra de limite: o plano da empresa define quantos leads podem existir.
+  const limiteLeads = limites?.limite_leads ?? null;
+  const usadoLeads = limites?.usado_leads ?? 0;
+  const limiteAtingido = limiteLeads !== null && usadoLeads >= limiteLeads;
+  const restantes = limiteLeads === null ? null : Math.max(limiteLeads - usadoLeads, 0);
+
+
 
 
   const [busca, setBusca] = useState("");
@@ -165,12 +178,20 @@ export default function LeadsList() {
   }
 
   function abrirNovo() {
+    // Nenhum cadastro novo quando a cota de leads do plano já foi usada por completo.
+    if (limiteAtingido) {
+      notifyValidation(
+        `Limite de leads do plano atingido (${usadoLeads} de ${limiteLeads}). Fale com o administrador para contratar um plano maior.`,
+      );
+      return;
+    }
     setEditando(null);
     setNome("");
     setWhatsapp("");
     setInteresse("");
     setAberto(true);
   }
+
 
   function abrirEdicao(lead: Lead) {
     // Leads que já viraram clientes são editados apenas na tela de Clientes.
@@ -201,6 +222,15 @@ export default function LeadsList() {
       return;
     }
     if (!empresaId) return;
+    // Revalida o limite no momento de gravar: outra pessoa da equipe pode ter
+    // ocupado a última vaga enquanto este formulário estava aberto.
+    if (!editando && limiteAtingido) {
+      notifyValidation(
+        `Limite de leads do plano atingido (${usadoLeads} de ${limiteLeads}). Fale com o administrador para contratar um plano maior.`,
+      );
+      return;
+    }
+
 
 
     try {
@@ -254,17 +284,44 @@ export default function LeadsList() {
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Leads</h1>
-              <HelpTip text="Leads são pessoas interessadas que ainda não viraram clientes. Aqui você guarda apenas o nome e o WhatsApp para retornar o contato depois. Esta tela se atualiza sozinha: se alguém da sua equipe cadastrar ou alterar um lead, a lista muda automaticamente, sem precisar recarregar a página. Use os filtros para separar quem está aguardando retorno, quem desistiu e quem já virou cliente." />
+              <HelpTip text="Leads são pessoas interessadas que ainda não viraram clientes. Aqui você guarda o nome, o WhatsApp e o interesse para retornar o contato depois. Esta tela se atualiza sozinha: se alguém da sua equipe cadastrar ou alterar um lead, a lista muda automaticamente, sem precisar recarregar a página. Use os filtros para separar quem está aguardando retorno, quem desistiu e quem já virou cliente. O seu plano define quantos leads podem ser cadastrados: quando o limite é atingido, o botão “Novo lead” some e aparece um aviso — o consumo completo fica em Configurações › Limites." />
             </div>
             <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
               Contatos captados por formulários ou cadastrados manualmente.
             </p>
           </div>
-          <Button className="tap-target gap-2" onClick={abrirNovo}>
-            <Plus className="h-4 w-4" />
-            Novo lead
-          </Button>
+          {limiteAtingido ? null : (
+            <div className="flex flex-col items-end gap-1">
+              <Button className="tap-target gap-2" onClick={abrirNovo}>
+                <Plus className="h-4 w-4" />
+                Novo lead
+              </Button>
+              {restantes !== null ? (
+                <span className="text-xs text-muted-foreground">
+                  {restantes} cadastro(s) de lead disponíveis no seu plano
+                </span>
+              ) : null}
+            </div>
+          )}
         </header>
+
+        {limiteAtingido ? (
+          <div className="flex flex-wrap items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/10 p-4">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+            <div className="min-w-0 space-y-1">
+              <p className="text-sm font-semibold text-destructive">
+                Limite de leads atingido ({usadoLeads} de {limiteLeads})
+              </p>
+              <p className="text-sm text-muted-foreground">
+                O plano contratado pela sua empresa não permite cadastrar novos leads. Você continua
+                podendo consultar, editar, registrar notas e converter os leads existentes. Para
+                cadastrar mais, fale com o administrador para contratar um plano maior — o consumo
+                completo está em Configurações › Limites.
+              </p>
+            </div>
+          </div>
+        ) : null}
+
 
         <div className="grid gap-4 md:grid-cols-[minmax(13rem,1fr)_2fr]">
           <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
@@ -430,10 +487,13 @@ export default function LeadsList() {
                 Cadastre o primeiro contato interessado para não perder nenhuma oportunidade.
               </p>
             </div>
-            <Button className="tap-target gap-2" onClick={abrirNovo}>
-              <Plus className="h-4 w-4" />
-              Cadastrar primeiro lead
-            </Button>
+            {limiteAtingido ? null : (
+              <Button className="tap-target gap-2" onClick={abrirNovo}>
+                <Plus className="h-4 w-4" />
+                Cadastrar primeiro lead
+              </Button>
+            )}
+
           </div>
         ) : lista.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border p-10 text-center">
