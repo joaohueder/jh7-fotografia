@@ -56,6 +56,33 @@ function StatusBadge({ status }: { status: Empresa["status"] }) {
   );
 }
 
+/** Sinaliza se a empresa possui uma assinatura vigente. */
+function AssinaturaBadge({ plano }: { plano: string | null }) {
+  const tem = plano !== null;
+  return (
+    <span
+      className="inline-flex max-w-[12rem] items-center gap-1.5 truncate rounded-full border px-2.5 py-0.5 text-xs font-semibold"
+      style={{
+        borderColor: tem
+          ? "color-mix(in oklab, var(--brand-green) 55%, transparent)"
+          : "hsl(var(--border))",
+        color: tem ? "var(--brand-green)" : "hsl(var(--muted-foreground))",
+        background: tem ? "color-mix(in oklab, var(--brand-green) 12%, transparent)" : undefined,
+      }}
+    >
+      <span
+        aria-hidden
+        className="h-1.5 w-1.5 shrink-0 rounded-full"
+        style={{ background: tem ? "var(--brand-green)" : "hsl(var(--muted-foreground))" }}
+      />
+      <span className="truncate">{tem ? plano : "Sem assinatura"}</span>
+    </span>
+  );
+}
+
+type FiltroAssinatura = "TODAS" | "COM" | "SEM";
+
+
 export default function EmpresasList() {
   usePageMeta("Empresas — JH7 Gestão Fotográfica", "Gestão das empresas do SaaS.");
 
