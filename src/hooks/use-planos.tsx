@@ -37,6 +37,7 @@ function traduzErro(err: unknown) {
   }
   if (msg.includes("planos_valor_coerente")) {
     return new Error("Informe um valor válido para planos pagos.");
+  }
   if (
     msg.includes("empresa_assinaturas_plano_id_fkey") ||
     msg.includes("foreign key") ||
