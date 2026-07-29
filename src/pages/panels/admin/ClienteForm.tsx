@@ -365,7 +365,7 @@ export default function ClienteForm() {
       return;
     }
     try {
-      if (await documentoDuplicado(empresaId, form.documento!, registroId)) {
+      if (await documentoDuplicado(empresaId, form.documento!, mesclarId ?? registroId)) {
         setError("documento", "Já existe um cliente com este CPF/CNPJ.");
         notifyValidation("Já existe um cliente cadastrado com este CPF/CNPJ nesta empresa.");
         return;
@@ -376,8 +376,9 @@ export default function ClienteForm() {
 
 
     try {
+      const destinoId = mesclarId ?? registroId;
       await salvar.mutateAsync({
-        id: registroId,
+        id: destinoId,
         empresaId,
         cliente: {
           ...form,
@@ -385,12 +386,20 @@ export default function ClienteForm() {
         },
         contatos,
       });
+
+      // Unificação: leva as notas do lead para o cliente existente e remove o lead.
+      if (mesclarId && leadId && mesclarId !== leadId) {
+        await mesclarLeadEmCliente(leadId, mesclarId);
+      }
+
       notifySuccess(
         editando
           ? "Cliente atualizado com sucesso."
-          : leadId
-            ? "Lead convertido em cliente com sucesso."
-            : "Cliente cadastrado com sucesso.",
+          : mesclarId
+            ? "Lead unificado ao cliente já cadastrado. As notas foram transferidas."
+            : leadId
+              ? "Lead convertido em cliente com sucesso."
+              : "Cliente cadastrado com sucesso.",
       );
       navigate("/admin/clientes");
     } catch (err) {
