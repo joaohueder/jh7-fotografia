@@ -95,9 +95,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     setError(null);
     const { error: signOutError } = await supabase.auth.signOut();
+    clearRememberState();
     if (signOutError) setError(signOutError);
     return { error: signOutError };
   }, []);
+
 
   return (
     <AuthContext.Provider
