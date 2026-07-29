@@ -348,7 +348,10 @@
     --app-nav-h: clamp(2.75rem, 8vw, 3rem);
     --app-footer-h: clamp(2.75rem, 8vw, 3rem);
     --tap: 2.75rem; /* 44px — alvo mínimo de toque */
+    /* Largura máxima do sistema — ajustável em Configurações › Layout */
+    --app-max-w: 1200px;
   }
+
 
   html {
     -webkit-font-smoothing: antialiased;
