@@ -78,9 +78,11 @@ function ScrollToTop() {
 export default function App() {
   return (
     <ThemeProvider>
+    <AppLayoutProvider>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
+
           <ScrollToTop />
           <AuthEvents />
           <Routes>
