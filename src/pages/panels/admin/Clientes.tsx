@@ -16,6 +16,8 @@ import {
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { IconAction } from "@/components/icon-action";
+import { HelpTip, PageHelp } from "@/components/page-help";
+
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
 import { notifyError, notifySuccess } from "@/lib/system-message";
 import {
