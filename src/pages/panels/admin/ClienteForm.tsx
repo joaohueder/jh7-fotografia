@@ -252,14 +252,19 @@ export default function ClienteForm() {
       notifyValidation("Informe o nome do cliente.");
       return;
     }
-    if (form.documento?.trim() && !isValidCpfCnpj(form.documento)) {
-      notifyValidation("CPF/CNPJ inválido.");
+    if (!form.nascimento?.trim()) {
+      notifyValidation("Informe a data de nascimento.");
       return;
     }
-    if (form.contato_whatsapp?.trim() && !isValidPhone(form.contato_whatsapp)) {
-      notifyValidation("WhatsApp inválido.");
+    if (!form.documento?.trim() || !isValidCpfCnpj(form.documento)) {
+      notifyValidation("Informe um CPF/CNPJ válido.");
       return;
     }
+    if (!form.contato_whatsapp?.trim() || !isValidPhone(form.contato_whatsapp)) {
+      notifyValidation("Informe um WhatsApp válido.");
+      return;
+    }
+
     if (form.contato_email?.trim() && !isValidEmail(form.contato_email)) {
       notifyValidation("E-mail inválido.");
       return;
