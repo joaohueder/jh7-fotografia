@@ -140,13 +140,19 @@ export default function EmpresasList() {
 
   async function confirmarStatus() {
     if (!alvoStatus) return;
-    if (nota.trim().length < 5) {
+    const inativando = alvoStatus.status === "ATIVO";
+    // Justificativa só é exigida ao inativar; ativar é uma ação positiva e direta.
+    if (inativando && nota.trim().length < 5) {
       notifyValidation("Informe uma nota com pelo menos 5 caracteres.");
       return;
     }
-    const novo = alvoStatus.status === "ATIVO" ? "INATIVO" : "ATIVO";
+    const novo = inativando ? "INATIVO" : "ATIVO";
     try {
-      await setStatus.mutateAsync({ id: alvoStatus.id, status: novo, nota: nota.trim() });
+      await setStatus.mutateAsync({
+        id: alvoStatus.id,
+        status: novo,
+        nota: nota.trim() || (inativando ? "" : "Empresa reativada."),
+      });
       notifySuccess(novo === "ATIVO" ? "Empresa ativada." : "Empresa inativada.");
       setAlvoStatus(null);
       setNota("");
@@ -154,6 +160,7 @@ export default function EmpresasList() {
       notifyError(err);
     }
   }
+
 
   return (
     <PanelLayout accent="sa" menu={SA_MENU}>
