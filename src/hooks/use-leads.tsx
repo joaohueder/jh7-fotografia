@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/selfhosted/client";
 import { useEmpresaAtual } from "@/hooks/use-clientes";
+import { type NotaModulo } from "@/hooks/use-cliente-notas";
 
 const db = supabase as unknown as SupabaseClient;
 
@@ -14,6 +15,12 @@ export interface Lead {
   status: "ATIVO" | "INATIVO";
   origem: string;
   created_at: string;
+  ultima_nota?: {
+    descricao: string;
+    modulo: NotaModulo;
+    criado_por_nome: string | null;
+    created_at: string;
+  } | null;
 }
 
 /** Leads são clientes com origem = LEAD (nome + WhatsApp). */
@@ -26,17 +33,30 @@ export function useLeads() {
     queryFn: async (): Promise<Lead[]> => {
       const { data, error } = await db
         .from("clientes")
-        .select("id, empresa_id, nome, contato_whatsapp, status, origem, created_at")
+        .select(
+          "id, empresa_id, nome, contato_whatsapp, status, origem, created_at, cliente_notas(descricao, modulo, criado_por_nome, created_at)",
+        )
         .eq("empresa_id", empresaId!)
         .eq("origem", "LEAD")
         // Somente leads ainda não convertidos (sem cadastro completo)
         .is("documento", null)
+        .order("created_at", { ascending: false, foreignTable: "cliente_notas" })
+        .limit(1, { foreignTable: "cliente_notas" })
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as Lead[];
+
+      return ((data ?? []) as any[]).map((l) => {
+        const notas = Array.isArray(l.cliente_notas) ? (l.cliente_notas as Lead["ultima_nota"][]) : [];
+        const { cliente_notas: _, ...rest } = l;
+        return {
+          ...rest,
+          ultima_nota: notas[0] ?? null,
+        } as Lead;
+      });
     },
   });
 }
+
 
 interface SalvarLeadInput {
   id?: string;
