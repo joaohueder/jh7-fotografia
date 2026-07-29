@@ -1,9 +1,8 @@
-import { Check, Maximize2, RotateCcw, Settings } from "lucide-react";
+import { Check, Maximize2, RotateCcw } from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { notifyError, notifySuccess } from "@/lib/system-message";
 import { PanelLayout } from "@/components/panel-layout";
-import { PanelPage } from "@/components/panel-page";
 import { SA_MENU } from "@/pages/panels/sa/menu";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -28,8 +27,17 @@ export default function SaConfiguracoes() {
 
   return (
     <PanelLayout accent="sa" menu={SA_MENU}>
-      <PanelPage title="Configurações do sistema" subtitle="Padrões globais aplicados a novos usuários.">
-        <section className="mx-auto w-full max-w-[min(42rem,var(--app-max-w))] rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
+      <div className="mx-auto w-full max-w-[min(42rem,var(--app-max-w))] space-y-[clamp(1.5rem,4vw,2rem)]">
+        <header className="space-y-1">
+          <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">
+            Configurações do sistema
+          </h1>
+          <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
+            Padrões globais aplicados a novos usuários.
+          </p>
+        </header>
+
+        <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
           <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
             <span
               className="inline-flex h-7 w-7 items-center justify-center rounded-lg"
@@ -92,7 +100,8 @@ export default function SaConfiguracoes() {
             </div>
           </div>
         </section>
-      </PanelPage>
+      </div>
     </PanelLayout>
   );
 }
+
