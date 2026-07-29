@@ -10,21 +10,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MAX_MAX_WIDTH, MIN_MAX_WIDTH, useAppLayout } from "@/hooks/use-app-layout";
 import { usePalette } from "@/hooks/use-palette";
 import { PaletteGrid } from "@/components/palette-grid";
-import { getPalette } from "@/lib/palettes";
+import { paletteName, type CustomColors } from "@/lib/palettes";
 
 
 /** Grupo Templates — paleta de cores padrão do sistema. */
 function TemplatesSection() {
-  const { systemPalette, saveAsSystemPalette } = usePalette();
+  const { systemPalette, systemCustomColors, customColors, saveAsSystemPalette } = usePalette();
 
-  async function handleSelect(id: string) {
-    const { error } = await saveAsSystemPalette(id);
+  async function apply(id: string, colors?: CustomColors) {
+    const { error } = await saveAsSystemPalette(id, colors);
     if (error) {
       notifyError(error, { title: "Não foi possível salvar a paleta padrão" });
       return;
     }
     notifySuccess(
-      `A paleta ${getPalette(id).name} passa a ser o padrão para todos os usuários que não escolheram uma paleta própria.`,
+      `A paleta ${paletteName(id)} passa a ser o padrão para todos os usuários que não escolheram uma paleta própria.`,
       "Template aplicado",
     );
   }
@@ -49,7 +49,12 @@ function TemplatesSection() {
         destaque. Cada usuário pode definir a própria paleta nas configurações da conta.
       </p>
 
-      <PaletteGrid value={systemPalette} onChange={handleSelect} />
+      <PaletteGrid
+        value={systemPalette}
+        custom={systemCustomColors ?? customColors}
+        onChange={(id) => void apply(id)}
+        onCustomChange={(colors) => void apply("custom", colors)}
+      />
     </section>
   );
 }
