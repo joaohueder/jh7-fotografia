@@ -84,6 +84,44 @@ export function useEmpresa(id: string | undefined) {
   });
 }
 
+/** Cadastro da empresa do usuário logado (admin da empresa ou SA personificando). */
+export function useMinhaEmpresa(empresaId?: string | null) {
+  return useQuery({
+    queryKey: ["minha-empresa", empresaId ?? "self"],
+    staleTime: 0,
+    queryFn: async () => {
+      const { data, error } = await db.rpc("minha_empresa", { p_id: empresaId ?? null });
+      if (error) throw error;
+      const raw = (data ?? {}) as { empresa?: Empresa; contatos?: EmpresaContato[] };
+      if (!raw.empresa) throw new Error("Empresa não encontrada");
+      return { empresa: raw.empresa, contatos: raw.contatos ?? [] };
+    },
+  });
+}
+
+/** Atualização do cadastro pelo próprio administrador da empresa. */
+export function useUpdateMinhaEmpresa() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: {
+      empresa: Omit<EmpresaPayload, "cnpj" | "status">;
+      contatos: EmpresaContato[];
+      empresaId?: string | null;
+    }) => {
+      const { error } = await db.rpc("admin_update_empresa", {
+        p_empresa: input.empresa,
+        p_contatos: input.contatos,
+        p_id: input.empresaId ?? null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["minha-empresa"] });
+      qc.invalidateQueries({ queryKey: ["empresas"] });
+    },
+  });
+}
+
 
 export function useCreateEmpresa() {
   const qc = useQueryClient();
