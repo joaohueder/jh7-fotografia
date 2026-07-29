@@ -409,6 +409,38 @@ export default function ClienteForm() {
   const secoes = [
     { value: "dados", label: "Dados básicos", node: (
               <Section title="Dados básicos" icon={UserRound}>
+                <Field
+                  label="CPF / CNPJ"
+                  required
+                  error={errors.documento}
+                  hint="Comece por aqui: se o CPF/CNPJ já estiver cadastrado, o sistema oferece puxar os dados do cliente."
+                >
+                  <Input
+                    value={form.documento ?? ""}
+                    onChange={(e) => {
+                      set("documento", maskCpfCnpj(e.target.value));
+                      // Trocou o documento: desfaz a unificação escolhida antes.
+                      if (mesclarId) setMesclarId(null);
+                    }}
+                    onBlur={async () => {
+                      if (!form.documento?.trim()) {
+                        setError("documento", "Informe o CPF/CNPJ");
+                        return;
+                      }
+                      if (!isValidCpfCnpj(form.documento)) {
+                        setError("documento", "CPF/CNPJ inválido");
+                        return;
+                      }
+                      setError("documento", null);
+                      await conferirDocumento();
+                    }}
+                    placeholder="000.000.000-00"
+                    inputMode="numeric"
+                    required
+                    className="h-11 text-base"
+                  />
+                </Field>
+
                 <Field label="Nome" required>
                   <Input
                     value={form.nome}
@@ -456,32 +488,6 @@ export default function ClienteForm() {
                   </Select>
                 </Field>
 
-                <Field label="CPF / CNPJ" required error={errors.documento}>
-                  <Input
-                    value={form.documento ?? ""}
-                    onChange={(e) => {
-                      set("documento", maskCpfCnpj(e.target.value));
-                      // Trocou o documento: desfaz a unificação escolhida antes.
-                      if (mesclarId) setMesclarId(null);
-                    }}
-                    onBlur={async () => {
-                      if (!form.documento?.trim()) {
-                        setError("documento", "Informe o CPF/CNPJ");
-                        return;
-                      }
-                      if (!isValidCpfCnpj(form.documento)) {
-                        setError("documento", "CPF/CNPJ inválido");
-                        return;
-                      }
-                      setError("documento", null);
-                      await conferirDocumento();
-                    }}
-                    placeholder="000.000.000-00"
-                    inputMode="numeric"
-                    required
-                    className="h-11 text-base"
-                  />
-                </Field>
 
               </Section>
     ) },
