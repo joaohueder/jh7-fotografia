@@ -19,7 +19,7 @@ import {
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
-import { PageHelp } from "@/components/page-help";
+import { HelpTip } from "@/components/page-help";
 
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 import { lookupCep } from "@/hooks/use-empresas";
@@ -756,9 +756,18 @@ export default function ClienteForm() {
             Voltar para clientes
           </Button>
           <div className="space-y-1">
-            <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">
-              {editando ? "Editar cliente" : "Novo cliente"}
-            </h1>
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">
+                {editando ? "Editar cliente" : "Novo cliente"}
+              </h1>
+              <HelpTip
+                text={
+                  editando
+                    ? "Use as abas para trocar de seção. Campos com asterisco (*) são obrigatórios. Clique em Salvar para confirmar as alterações."
+                    : "Preencha cada etapa e clique em Avançar. Campos com asterisco (*) são obrigatórios. Na última etapa você revisa tudo e só então clica em “Salvar cliente”."
+                }
+              />
+            </div>
             <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
               {editando
                 ? "Dados cadastrais, endereço e contatos do cliente do estúdio."
@@ -767,22 +776,7 @@ export default function ClienteForm() {
           </div>
         </header>
 
-        <PageHelp
-          title={editando ? "Como editar este cliente" : "Como cadastrar um cliente"}
-          steps={
-            editando
-              ? [
-                  "Use as abas acima para trocar entre dados básicos, endereço, contatos e observações.",
-                  "Altere o que precisar — os campos com asterisco (*) são obrigatórios.",
-                  "Clique em Salvar para confirmar. Se desistir, use “Voltar para clientes”.",
-                ]
-              : [
-                  "Preencha os campos da etapa atual e clique em Avançar. Pode voltar quando quiser.",
-                  "Campos com asterisco (*) são obrigatórios: nome, data de nascimento, CPF/CNPJ e WhatsApp.",
-                  "Na última etapa você revê tudo e só então clica em “Salvar cliente”. Nada é gravado antes disso.",
-                ]
-          }
-        />
+
 
 
 

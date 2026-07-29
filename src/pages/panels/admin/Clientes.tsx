@@ -16,7 +16,7 @@ import {
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { IconAction } from "@/components/icon-action";
-import { HelpTip, PageHelp } from "@/components/page-help";
+import { HelpTip } from "@/components/page-help";
 
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
 import { notifyError, notifySuccess } from "@/lib/system-message";
@@ -129,7 +129,10 @@ export default function ClientesList() {
       <div className="mx-auto w-full max-w-[var(--app-max-w)] space-y-[clamp(1.5rem,4vw,2rem)]">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Clientes</h1>
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Clientes</h1>
+              <HelpTip text="Aqui ficam as pessoas e empresas que você atende. Clique em “Novo cliente” para cadastrar, use a busca para encontrar alguém e os botões de cada linha para editar, ativar/inativar ou excluir." />
+            </div>
             <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
               Cadastro dos clientes atendidos pelo estúdio.
             </p>
@@ -139,18 +142,6 @@ export default function ClientesList() {
             Novo cliente
           </Button>
         </header>
-
-        <PageHelp
-          title="Como usar a tela de Clientes"
-          steps={[
-            "Para cadastrar alguém novo, clique em “Novo cliente” e siga as etapas na ordem — nada é salvo até você confirmar no resumo final.",
-            "Use a caixa de busca para achar um cliente pelo nome, CPF/CNPJ, telefone, e-mail ou cidade.",
-            "Nos botões de cada cliente: o lápis abre para editar, o botão de liga/desliga ativa ou inativa, e a lixeira exclui de vez (sempre pedimos confirmação antes).",
-          ]}
-        >
-          Aqui ficam guardadas as pessoas e empresas que você atende. Inativar um cliente apenas o
-          esconde do dia a dia; excluir apaga o cadastro para sempre.
-        </PageHelp>
 
         <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(13rem,100%),1fr))]">
           {[

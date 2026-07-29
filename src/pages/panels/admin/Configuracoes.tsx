@@ -3,7 +3,7 @@ import { Building2 } from "lucide-react";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
-import { PageHelp } from "@/components/page-help";
+import { HelpTip } from "@/components/page-help";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DadosEmpresaTab } from "@/pages/panels/admin/DadosEmpresa";
@@ -15,23 +15,14 @@ export default function AdminConfiguracoes() {
     <PanelLayout accent="admin" menu={ADMIN_MENU}>
       <div className="mx-auto w-full max-w-[var(--app-max-w)] space-y-[clamp(1.5rem,4vw,2rem)]">
         <header className="space-y-1">
-          <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Configurações</h1>
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Configurações</h1>
+            <HelpTip text="Dados cadastrais da sua empresa. Digite o CEP para preencher o endereço automaticamente e clique em Salvar no fim da tela — nada é gravado antes disso." />
+          </div>
           <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
             Mantenha atualizados os dados cadastrais da sua empresa.
           </p>
         </header>
-
-        <PageHelp
-          title="Como usar as Configurações"
-          steps={[
-            "Preencha ou corrija os dados da sua empresa nos campos abaixo.",
-            "Digite o CEP e o endereço é preenchido automaticamente — confira e ajuste o número.",
-            "Clique em Salvar no fim da tela para guardar as alterações.",
-          ]}
-        >
-          Estes dados aparecem nos seus documentos e comunicações. Você pode voltar aqui e alterar
-          quando quiser; nada é enviado antes de você clicar em Salvar.
-        </PageHelp>
 
 
         <Tabs defaultValue="empresa" className="space-y-5">
