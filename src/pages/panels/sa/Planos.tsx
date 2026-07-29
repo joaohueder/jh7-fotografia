@@ -335,6 +335,7 @@ export default function PlanosList() {
                     arrastavel={arrastavel}
                     onEditar={abrirEdicao}
                     onExcluir={setAlvo}
+                    onToggleStatus={alternarStatus}
                   />
                 ))}
               </div>
