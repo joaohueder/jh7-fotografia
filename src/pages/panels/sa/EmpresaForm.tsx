@@ -22,6 +22,7 @@ import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-messa
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { SA_MENU } from "@/pages/panels/sa/menu";
+import { EmpresaAssinaturas } from "@/pages/panels/sa/EmpresaAssinaturas";
 import {
   checkCnpjExists,
   checkEmailExists,
