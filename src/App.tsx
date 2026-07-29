@@ -78,6 +78,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
+          <ScrollToTop />
           <AuthEvents />
           <Routes>
             <Route path="/" element={<LandingPage />} />
