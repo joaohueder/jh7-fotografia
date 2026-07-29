@@ -54,7 +54,7 @@ export default function MeuPerfil() {
     setSaving(false);
 
     if (error) {
-      notifyError(error, "Não foi possível salvar o perfil");
+      notifyError(error, { title: "Não foi possível salvar o perfil" });
       return;
     }
     notifySuccess("Seus dados de perfil foram atualizados.", "Perfil atualizado");
