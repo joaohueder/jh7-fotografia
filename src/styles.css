@@ -377,12 +377,13 @@
     line-height: 1.65;
   }
 
-  /* Largura máxima global do site: 1200px, centralizado */
+  /* Largura máxima global do site — controlada por Configurações › Layout */
   #root {
     width: 100%;
-    max-width: 75rem; /* 1200px em unidade relativa */
+    max-width: var(--app-max-w);
     margin-inline: auto;
   }
+
 
   /* Mídia é sempre fluida por padrão — evita estouro de container */
   img,
