@@ -788,8 +788,9 @@ export default function ClienteForm() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (editando || step === ultimo) void handleSubmit(e);
+            if (editando) void handleSubmit(e);
           }}
+
           className="space-y-[clamp(1rem,3vw,1.5rem)]"
         >
           {editando ? (
