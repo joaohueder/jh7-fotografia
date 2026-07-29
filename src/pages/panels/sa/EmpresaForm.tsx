@@ -89,10 +89,29 @@ const EMPTY: EmpresaPayload = {
 };
 
 /** Seção de formulário: título + grade fluida de campos. */
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({
+  title,
+  icon: Icon,
+  children,
+}: {
+  title: string;
+  icon?: ComponentType<{ className?: string }>;
+  children: ReactNode;
+}) {
   return (
     <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
-      <h2 className="mb-4 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
+      <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
+        {Icon ? (
+          <span
+            className="inline-flex h-7 w-7 items-center justify-center rounded-lg"
+            style={{
+              background: "color-mix(in oklab, var(--panel-accent) 14%, transparent)",
+              color: "var(--panel-accent)",
+            }}
+          >
+            <Icon className="h-4 w-4" />
+          </span>
+        ) : null}
         {title}
       </h2>
       <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(16rem,100%),1fr))]">
@@ -101,6 +120,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
     </section>
   );
 }
+
 
 function Field({
   label,
