@@ -188,6 +188,17 @@ const STEPS = [
 ] as const;
 const RESUMO = STEPS.length - 1;
 
+/** Abas usadas no modo de edição. */
+const TABS = [
+  { id: "empresa", label: "Dados da empresa", icon: Building2 },
+  { id: "responsavel", label: "Dados do responsável", icon: UserRound },
+  { id: "acesso", label: "Acesso ao sistema", icon: KeyRound },
+  { id: "observacoes", label: "Observações", icon: StickyNote },
+] as const;
+
+type TabId = (typeof TABS)[number]["id"];
+
+
 type Errors = Record<string, string | null>;
 
 export default function EmpresaForm() {
