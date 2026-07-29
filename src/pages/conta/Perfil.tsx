@@ -88,6 +88,7 @@ export default function MeuPerfil() {
   usePageMeta("Meu perfil — JH7 Gestão Fotográfica", "Dados da sua conta.");
   const { user } = useAuth();
   const { role } = usePrimaryRole();
+  const queryClient = useQueryClient();
 
   const [fullName, setFullName] = useState("");
   const [displayName, setDisplayName] = useState("");
