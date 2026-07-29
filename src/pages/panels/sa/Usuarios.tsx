@@ -249,18 +249,18 @@ export default function UsuariosList() {
         ) : (
           <>
             {/* Mobile: cards */}
-            <ul className="grid gap-3 md:hidden">
+            <ul className="grid gap-2 md:hidden">
               {lista.map((u) => (
-                <li key={u.id} className="rounded-xl border border-border bg-card p-4">
+                <li key={u.id} className="rounded-xl border border-border bg-card p-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate font-semibold">{u.nome}</p>
-                      <p className="mt-0.5 truncate text-sm text-muted-foreground">{u.email ?? "—"}</p>
+                      <p className="truncate font-semibold leading-tight">{u.nome}</p>
+                      <p className="truncate text-sm leading-tight text-muted-foreground">{u.email ?? "—"}</p>
                     </div>
                     <Badge cor={ROLE_COR[u.role]}>{ROLE_LABEL[u.role]}</Badge>
                   </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                    <p className="col-span-2 truncate">
+                  <div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                    <p className="col-span-2 truncate leading-tight">
                       <span className="font-medium text-foreground">Empresa:</span>{" "}
                       {u.empresa_id ? (
                         <Link to={`/sa/empresas/${u.empresa_id}`} className="hover:underline">
@@ -270,16 +270,16 @@ export default function UsuariosList() {
                         "—"
                       )}
                     </p>
-                    <p>
+                    <p className="leading-tight">
                       <span className="font-medium text-foreground">Último acesso:</span>{" "}
                       {formataDataHora(u.ultimo_login)}
                     </p>
-                    <p>
+                    <p className="leading-tight">
                       <span className="font-medium text-foreground">Criado em:</span>{" "}
                       {formataData(u.created_at)}
                     </p>
                   </div>
-                  <div className="mt-3 flex items-center justify-between gap-3">
+                  <div className="mt-2 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <Badge cor={u.ativo ? "var(--brand-green)" : "hsl(var(--destructive))"}>
                         {u.ativo ? "Ativo" : "Inativo"}
@@ -287,11 +287,11 @@ export default function UsuariosList() {
                       <ConexaoBadge logado={Boolean(u.logado)} />
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" onClick={() => setAlvoLogoff(u)}>
+                      <Button variant="outline" size="sm" className="h-8" onClick={() => setAlvoLogoff(u)}>
                         <LogOut className="mr-1.5 h-4 w-4" />
                         Logoff
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => setAlvo(u)}>
+                      <Button variant="outline" size="sm" className="h-8" onClick={() => setAlvo(u)}>
                         <Power className="mr-1.5 h-4 w-4" />
                         {u.ativo ? "Inativar" : "Ativar"}
                       </Button>
@@ -303,40 +303,40 @@ export default function UsuariosList() {
 
             {/* Desktop: tabela em 2 linhas por usuário */}
             <div className="hidden overflow-x-auto rounded-xl border border-border md:block">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm leading-tight">
                 <thead className="bg-surface/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
-                    <th className="px-4 py-3">Usuário</th>
-                    <th className="px-4 py-3">Tipo / Empresa</th>
-                    <th className="px-4 py-3">Acesso</th>
-                    <th className="px-4 py-3 text-right">Ações</th>
+                    <th className="px-3 py-2">Usuário</th>
+                    <th className="px-3 py-2">Tipo / Empresa</th>
+                    <th className="px-3 py-2">Acesso</th>
+                    <th className="px-3 py-2 text-right">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {lista.map((u) => (
                     <Fragment key={u.id}>
                       <tr className="border-t border-border">
-                        <td className="px-4 py-3 align-top">
-                          <p className="font-semibold">{u.nome}</p>
+                        <td className="px-3 py-2 align-top">
+                          <p className="font-semibold leading-tight">{u.nome}</p>
                         </td>
-                        <td className="px-4 py-3 align-top">
+                        <td className="px-3 py-2 align-top">
                           <Badge cor={ROLE_COR[u.role]}>{ROLE_LABEL[u.role]}</Badge>
                         </td>
-                        <td className="px-4 py-3 align-top">
+                        <td className="px-3 py-2 align-top">
                           <ConexaoBadge logado={Boolean(u.logado)} />
                         </td>
-                        <td className="px-4 py-3 text-right align-top">
-                          <Button variant="outline" size="sm" onClick={() => setAlvoLogoff(u)}>
+                        <td className="px-3 py-2 text-right align-top">
+                          <Button variant="outline" size="sm" className="h-8" onClick={() => setAlvoLogoff(u)}>
                             <LogOut className="mr-1.5 h-4 w-4" />
                             Logoff
                           </Button>
                         </td>
                       </tr>
                       <tr className="border-b border-border">
-                        <td className="px-4 py-3 align-top">
-                          <p className="text-muted-foreground">{u.email ?? "—"}</p>
+                        <td className="px-3 py-2 align-top">
+                          <p className="text-muted-foreground leading-tight">{u.email ?? "—"}</p>
                         </td>
-                        <td className="px-4 py-3 align-top text-muted-foreground">
+                        <td className="px-3 py-2 align-top text-muted-foreground leading-tight">
                           {u.empresa_id ? (
                             <Link to={`/sa/empresas/${u.empresa_id}`} className="hover:underline">
                               {u.empresa_nome ?? "—"}
@@ -345,8 +345,8 @@ export default function UsuariosList() {
                             "—"
                           )}
                         </td>
-                        <td className="px-4 py-3 align-top">
-                          <div className="flex flex-wrap items-center gap-2">
+                        <td className="px-3 py-2 align-top">
+                          <div className="flex flex-wrap items-center gap-2 leading-tight">
                             <Badge cor={u.ativo ? "var(--brand-green)" : "hsl(var(--destructive))"}>
                               {u.ativo ? "Ativo" : "Inativo"}
                             </Badge>
@@ -355,8 +355,8 @@ export default function UsuariosList() {
                             </span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-right align-top">
-                          <Button variant="outline" size="sm" onClick={() => setAlvo(u)}>
+                        <td className="px-3 py-2 text-right align-top">
+                          <Button variant="outline" size="sm" className="h-8" onClick={() => setAlvo(u)}>
                             <Power className="mr-1.5 h-4 w-4" />
                             {u.ativo ? "Inativar" : "Ativar"}
                           </Button>
