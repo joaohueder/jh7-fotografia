@@ -258,7 +258,7 @@ function UsuarioCard({
             className="h-9 text-xs font-bold"
             style={{
               background: u.ativo ? "var(--destructive)" : "var(--primary)",
-              color: u.ativo ? "var(--destructive-foreground)" : "var(--primary-foreground, var(--primary-foreground))",
+              color: u.ativo ? "var(--destructive-foreground)" : "var(--primary-foreground)",
             }}
             onClick={() => onToggle(u)}
           >
