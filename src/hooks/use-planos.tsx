@@ -12,8 +12,10 @@ export interface Plano {
   ativo: boolean;
   gratuito: boolean;
   valor: number | null;
+  ordem: number | null;
   created_at: string;
 }
+
 
 export interface PlanoInput {
   nome: string;
@@ -37,7 +39,7 @@ function traduzErro(err: unknown) {
   return err instanceof Error ? err : new Error(String(err));
 }
 
-const COLUNAS = "id, nome, ativo, gratuito, valor, created_at";
+const COLUNAS = "id, nome, ativo, gratuito, valor, ordem, created_at";
 
 function normaliza(input: PlanoInput) {
   return {
@@ -55,6 +57,7 @@ export function usePlanos() {
       const { data, error } = await db
         .from("planos")
         .select(COLUNAS)
+        .order("ordem", { ascending: true, nullsFirst: false })
         .order("nome", { ascending: true });
       if (error) throw error;
       return (data ?? []).map((p) => ({
@@ -64,6 +67,7 @@ export function usePlanos() {
     },
   });
 }
+
 
 export function usePlano(id: string | undefined) {
   return useQuery({
@@ -113,3 +117,23 @@ export function useDeletePlano() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["planos"] }),
   });
 }
+
+/** Grava a nova ordem dos planos (drag and drop). */
+export function useReordenarPlanos() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      await Promise.all(
+        ids.map(async (id, index) => {
+          const { error } = await db
+            .from("planos")
+            .update({ ordem: index + 1 })
+            .eq("id", id);
+          if (error) throw traduzErro(error);
+        }),
+      );
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["planos"] }),
+  });
+}
+
