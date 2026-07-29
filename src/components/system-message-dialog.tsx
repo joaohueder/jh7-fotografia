@@ -3,7 +3,7 @@ import { toPng } from "html-to-image";
 import { AlertTriangle, Camera, Check, CheckCircle2, Copy, Info, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import {
   dismissSystemMessage,
@@ -152,10 +152,7 @@ export function SystemMessageDialog() {
 
   return (
     <Dialog open={message !== null} onOpenChange={(open) => !open && dismissSystemMessage()}>
-      <DialogContent
-        showCloseButton={false}
-        className="max-w-[min(34rem,calc(100vw-2rem))] gap-0 overflow-hidden rounded-2xl p-0"
-      >
+      <DialogContent className="max-w-[min(34rem,calc(100vw-2rem))] gap-0 overflow-hidden rounded-2xl p-0 [&>button]:hidden">
         {message && (
           <div ref={cardRef} className="bg-background p-[clamp(1.125rem,4vw,1.75rem)]">
             <div className="flex items-start gap-3">
@@ -168,7 +165,10 @@ export function SystemMessageDialog() {
                 <Icon className={cn("h-5 w-5", ui.text)} />
               </span>
               <div className="min-w-0 flex-1">
-                <h2 className="text-[1.0625rem] font-semibold leading-tight">{message.title}</h2>
+                <DialogTitle className="text-[1.0625rem] font-semibold leading-tight">
+                  {message.title}
+                </DialogTitle>
+                <DialogDescription className="sr-only">{message.description}</DialogDescription>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {new Date().toLocaleString("pt-BR")}
                 </p>
