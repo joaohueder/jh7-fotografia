@@ -140,6 +140,30 @@ export default function App() {
                 </RequireAuth>
               }
             />
+            <Route
+              path="/conta/perfil"
+              element={
+                <RequireAuth>
+                  <MeuPerfil />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/conta/seguranca"
+              element={
+                <RequireAuth>
+                  <Seguranca />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/conta/senha"
+              element={
+                <RequireAuth>
+                  <AlterarSenha />
+                </RequireAuth>
+              }
+            />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
           <SystemMessageDialog />
