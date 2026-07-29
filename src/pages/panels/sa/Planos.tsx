@@ -274,6 +274,19 @@ export default function PlanosList() {
     }
   }
 
+  function abrirExclusao(plano: Plano) {
+    const uso = usoDe(plano.id);
+    if (uso.total > 0) {
+      notifyValidation(
+        uso.ativas > 0
+          ? `O plano ${plano.nome} possui ${uso.ativas} empresa(s) com assinatura ativa e não pode ser excluído. Inative o plano para deixar de oferecê-lo.`
+          : `O plano ${plano.nome} possui histórico de assinaturas e não pode ser excluído. Inative o plano para deixar de oferecê-lo.`,
+      );
+      return;
+    }
+    setAlvo(plano);
+  }
+
   async function confirmarExclusao() {
     if (!alvo) return;
     try {
