@@ -201,7 +201,7 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
                     {initials}
                   </span>
                   <span className="hidden max-w-[11rem] truncate text-sm text-muted-foreground lg:inline">
-                    {user?.email}
+                    {displayName ?? "—"}
                   </span>
                   <ChevronDown className="hidden h-4 w-4 text-muted-foreground sm:inline" />
                 </Button>
@@ -211,7 +211,12 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
                   <span className="block text-xs font-normal text-muted-foreground">
                     Conectado como
                   </span>
-                  <span className="block break-all text-sm">{user?.email ?? "—"}</span>
+                  <span className="block truncate text-sm font-semibold">
+                    {fullName ?? displayName ?? "—"}
+                  </span>
+                  <span className="block break-all text-xs font-normal text-muted-foreground">
+                    {user?.email ?? "—"}
+                  </span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => navigate("/conta/perfil")}>
