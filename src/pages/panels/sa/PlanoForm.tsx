@@ -155,6 +155,7 @@ export default function PlanoForm() {
   const [erroNome, setErroNome] = useState<string | null>(null);
   const [erroValor, setErroValor] = useState<string | null>(null);
   const [step, setStep] = useState(0);
+  const [aba, setAba] = useState("dados");
 
   const saving = create.isPending || update.isPending;
 
