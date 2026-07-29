@@ -24,7 +24,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { SA_MENU } from "@/pages/panels/sa/menu";
-import { notifyError, notifySuccess } from "@/lib/system-message";
+import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 import {
   usePlanos,
   useDeletePlano,
