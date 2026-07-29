@@ -203,7 +203,8 @@ export default function ClienteForm() {
       nome: cliente.nome ?? "",
       nascimento: cliente.nascimento ?? "",
       status: cliente.status,
-      documento: maskCpfCnpj(cliente.documento ?? ""),
+      origem: cliente.origem ?? "CLIENTE",
+
       cep: maskCep(cliente.cep ?? ""),
       endereco: cliente.endereco ?? "",
       complemento: cliente.complemento ?? "",
