@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Loader2,
+  Pencil,
   Phone,
   Plus,
   StickyNote,
@@ -241,6 +242,13 @@ export default function LeadsList() {
                 </div>
 
                 <div className="flex shrink-0 items-start gap-1">
+                  <IconAction
+                    label="Editar lead"
+                    ariaLabel={`Editar ${l.nome}`}
+                    onClick={() => abrirEdicao(l)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </IconAction>
                   <IconAction
                     label="Transformar em cliente (abre o cadastro completo)"
                     ariaLabel={`Converter ${l.nome} em cliente`}
