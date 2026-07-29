@@ -28,7 +28,9 @@ export interface PlanoInput {
 function traduzErro(err: unknown) {
   const msg = (err as { message?: string })?.message ?? "";
   if (msg.includes("planos_unico_gratuito")) {
-    return new Error("Já existe um plano gratuito. Só é permitido um.");
+    return new Error(
+      "Já existe um plano gratuito ativo. Inative ou altere o plano gratuito anterior antes de continuar.",
+    );
   }
   if (msg.includes("planos_nome_unico") || msg.includes("duplicate key")) {
     return new Error("Já existe um plano com esse nome.");
@@ -38,6 +40,24 @@ function traduzErro(err: unknown) {
   }
   return err instanceof Error ? err : new Error(String(err));
 }
+
+/** Plano gratuito ativo já cadastrado (ignora o plano em edição). */
+export function usePlanoGratuitoAtivo(ignorarId?: string) {
+  return useQuery({
+    queryKey: ["plano-gratuito-ativo", ignorarId ?? null],
+    queryFn: async (): Promise<Plano | null> => {
+      const { data, error } = await db
+        .from("planos")
+        .select(COLUNAS)
+        .eq("gratuito", true)
+        .eq("ativo", true);
+      if (error) throw error;
+      const lista = (data ?? []) as Plano[];
+      return lista.find((p) => p.id !== ignorarId) ?? null;
+    },
+  });
+}
+
 
 const COLUNAS = "id, nome, ativo, gratuito, valor, ordem, created_at";
 
