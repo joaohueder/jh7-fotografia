@@ -5,6 +5,7 @@ import {
   Pencil,
   Phone,
   Plus,
+  Heart,
   StickyNote,
   Trash2,
   UserCheck,
