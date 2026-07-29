@@ -80,9 +80,11 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
   const queryClient = useQueryClient();
   const theme = ACCENTS[accent];
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
   const initials = (displayName ?? user?.email ?? "?").slice(0, 2);
 
   async function handleSignOut() {
+    setLogoutOpen(false);
     await queryClient.cancelQueries();
     queryClient.clear();
     await signOut();
