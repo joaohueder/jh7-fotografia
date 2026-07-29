@@ -3,12 +3,13 @@ import { useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ArrowRight, Camera, Eye, EyeOff, Loader2 } from "lucide-react";
 
-import type { SupabaseClient } from "@supabase/supabase-js";
+
+
 
 import { useForcedTheme } from "@/hooks/use-theme";
 import { useForcedPalette } from "@/hooks/use-palette";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/selfhosted/client";
+import { buscarAcesso } from "@/hooks/use-acesso";
 import { setRememberMe as persistRememberMe } from "@/integrations/selfhosted/auth-storage";
 import { notifyError, notifyValidation } from "@/lib/system-message";
 
@@ -86,12 +87,20 @@ function AuthPage() {
     }
 
     // Bloqueia acesso de usuário ou empresa inativos
-    const { data: acesso } = await (supabase as unknown as SupabaseClient).rpc("meu_acesso");
-    const liberado = (acesso as { ativo?: boolean } | null)?.ativo ?? true;
-    if (!liberado) {
+    const acesso = await buscarAcesso();
+    if (!acesso.ativo) {
+      setBlockMessage(acesso.motivo ?? "Acesso bloqueado. Fale com o administrador.");
+      await signOut();
+      setIsSubmitting(false);
+      setIsCheckingAccess(false);
+      setPassword("");
+      return;
+    }
+
+    // Empresa sem assinatura ativa: admin vai contratar, usuário é avisado.
+    if (!acesso.assinatura_ativa && acesso.role === "usuario") {
       setBlockMessage(
-        (acesso as { motivo?: string } | null)?.motivo ??
-          "Acesso bloqueado. Fale com o administrador.",
+        "A sua empresa está sem uma assinatura ativa. Entre em contato com o administrador da empresa para regularizar o plano.",
       );
       await signOut();
       setIsSubmitting(false);
@@ -109,7 +118,13 @@ function AuthPage() {
       localStorage.removeItem("auth_email");
     }
 
+    if (!acesso.assinatura_ativa && acesso.role === "admin") {
+      navigate("/assinatura", { replace: true });
+      return;
+    }
+
     navigate("/dashboard", { replace: true });
+
   }
 
   if (isLoading) {

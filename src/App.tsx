@@ -18,6 +18,9 @@ import AdminDashboard from "@/pages/panels/AdminDashboard";
 import AdminConfiguracoes from "@/pages/panels/admin/Configuracoes";
 import UsuarioDashboard from "@/pages/panels/UsuarioDashboard";
 import { RoleRedirect, RequireRole } from "@/components/role-routing";
+import { AssinaturaGate, RedirectSeAssinaturaAtiva } from "@/components/assinatura-gate";
+import NovaAssinaturaPage from "@/pages/panels/admin/NovaAssinatura";
+
 import MeuPerfil from "@/pages/conta/Perfil";
 import Seguranca from "@/pages/conta/Seguranca";
 import AlterarSenha from "@/pages/conta/AlterarSenha";
@@ -39,7 +42,13 @@ const queryClient = new QueryClient({
   },
 });
 
-function RequireAuth({ children }: { children: React.ReactNode }) {
+function RequireAuth({
+  children,
+  checkAssinatura = true,
+}: {
+  children: React.ReactNode;
+  checkAssinatura?: boolean;
+}) {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
@@ -50,8 +59,11 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
     return <Navigate to="/auth" replace />;
   }
 
-  return <>{children}</>;
+  if (!checkAssinatura) return <>{children}</>;
+
+  return <AssinaturaGate>{children}</AssinaturaGate>;
 }
+
 
 function AuthEvents() {
   const navigate = useNavigate();
@@ -95,6 +107,17 @@ export default function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route
+              path="/assinatura"
+              element={
+                <RequireAuth checkAssinatura={false}>
+                  <RedirectSeAssinaturaAtiva>
+                    <NovaAssinaturaPage />
+                  </RedirectSeAssinaturaAtiva>
+                </RequireAuth>
+              }
+            />
+
             <Route
               path="/dashboard"
               element={
