@@ -248,6 +248,10 @@ export default function PlanoForm() {
       notifyValidation("Corrija o valor do plano.");
       return;
     }
+    if (gratuito && ativo && gratuitoAtivo) {
+      notifyValidation(MSG_GRATUITO);
+      return;
+    }
     const payload: PlanoInput = {
       nome: nome.trim(),
       ativo,
