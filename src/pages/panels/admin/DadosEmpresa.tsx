@@ -244,7 +244,7 @@ export function DadosEmpresaTab() {
       });
       notifySuccess("Dados da empresa atualizados com sucesso.");
     } catch (err) {
-      notifyError("Não foi possível salvar", (err as Error).message);
+      notifyError(err, { title: "Não foi possível salvar" });
     }
   }
 
