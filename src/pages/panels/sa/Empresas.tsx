@@ -192,19 +192,27 @@ export default function EmpresasList() {
               <p className="mt-1 text-xs text-muted-foreground">ativos / inativos</p>
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.25rem)]">
-              <h3 className="text-sm font-semibold text-muted-foreground">Últimos 6 meses</h3>
-              <div className="mt-2 h-[88px]">
+            <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.25rem)] md:col-span-full">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                <h3 className="text-sm font-semibold text-foreground">
+                  Novas empresas nos últimos 6 meses
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Total de cadastros por mês · {resumo.novas6m}{" "}
+                  {resumo.novas6m === 1 ? "empresa" : "empresas"} no período
+                </p>
+              </div>
+              <div className="mt-4 h-[clamp(9rem,18vw,11rem)]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={resumo.meses} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
+                  <BarChart
+                    data={resumo.meses}
+                    margin={{ top: 20, right: 8, bottom: 0, left: 8 }}
+                    barCategoryGap="28%"
+                  >
                     <defs>
                       <linearGradient id="empresaBarGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="var(--brand-green-soft)" />
                         <stop offset="100%" stopColor="var(--brand-green)" />
-                      </linearGradient>
-                      <linearGradient id="empresaBarHoverGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="var(--gold-soft)" />
-                        <stop offset="100%" stopColor="var(--gold)" />
                       </linearGradient>
                       <filter id="empresaBarShadow" x="-20%" y="-20%" width="140%" height="140%">
                         <feDropShadow
@@ -216,12 +224,18 @@ export default function EmpresasList() {
                         />
                       </filter>
                     </defs>
+                    <CartesianGrid
+                      vertical={false}
+                      strokeDasharray="3 3"
+                      stroke="color-mix(in oklab, var(--border) 70%, transparent)"
+                    />
                     <XAxis
                       dataKey="mes"
                       tickLine={false}
                       axisLine={false}
                       tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
                     />
+                    <YAxis hide domain={[0, (max: number) => Math.max(1, max)]} />
                     <Tooltip
                       cursor={{ fill: "color-mix(in oklab, var(--muted) 25%, transparent)" }}
                       content={({ active, payload }) => {
@@ -235,30 +249,63 @@ export default function EmpresasList() {
                               borderColor: "var(--border)",
                             }}
                           >
-                            <span className="font-semibold" style={{ color: "var(--brand-green)" }}>
-                              {value}
-                            </span>{" "}
-                            <span className="text-muted-foreground">
-                              {value === 1 ? "empresa" : "empresas"} em {payload[0].payload.mes}
-                            </span>
+                            <p className="font-semibold text-foreground">
+                              {payload[0].payload.mes}
+                            </p>
+                            <p className="text-muted-foreground">
+                              <span
+                                className="font-semibold"
+                                style={{ color: "var(--brand-green)" }}
+                              >
+                                {value}
+                              </span>{" "}
+                              {value === 1 ? "nova empresa" : "novas empresas"}
+                            </p>
                           </div>
                         );
                       }}
                     />
                     <Bar
                       dataKey="total"
-                      fill="url(#empresaBarGradient)"
                       radius={[5, 5, 2, 2]}
+                      minPointSize={3}
                       animationDuration={900}
                       animationBegin={150}
                     >
-                      {resumo.meses.map((entry, index) => (
+                      <LabelList
+                        dataKey="total"
+                        position="top"
+                        offset={8}
+                        content={({ x, y, width, value }) => {
+                          const total = Number(value ?? 0);
+                          return (
+                            <text
+                              x={Number(x) + Number(width) / 2}
+                              y={Number(y) - 6}
+                              textAnchor="middle"
+                              fontSize={12}
+                              fontWeight={700}
+                              fill={
+                                total === 0 ? "var(--muted-foreground)" : "var(--brand-green-soft)"
+                              }
+                              opacity={total === 0 ? 0.5 : 1}
+                            >
+                              {total}
+                            </text>
+                          );
+                        }}
+                      />
+                      {resumo.meses.map((entry) => (
                         <Cell
                           key={`cell-${entry.mes}`}
-                          fill="url(#empresaBarGradient)"
+                          fill={
+                            entry.total === 0
+                              ? "color-mix(in oklab, var(--muted-foreground) 30%, transparent)"
+                              : "url(#empresaBarGradient)"
+                          }
                           strokeWidth={0}
                           style={{
-                            filter: "url(#empresaBarShadow)",
+                            filter: entry.total === 0 ? undefined : "url(#empresaBarShadow)",
                             transition: "all 0.2s ease",
                           }}
                         />
@@ -268,6 +315,7 @@ export default function EmpresasList() {
                 </ResponsiveContainer>
               </div>
             </div>
+
           </div>
         )}
 
