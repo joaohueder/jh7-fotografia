@@ -1,32 +1,16 @@
-import { Check, Maximize2, Monitor, RotateCcw } from "lucide-react";
-
-import { usePrimaryRole } from "@/components/role-routing";
-import { notifyError, notifySuccess } from "@/lib/system-message";
+import { Monitor, Moon, Palette, RotateCcw, Sun } from "lucide-react";
 
 import { AccountShell } from "@/components/account-shell";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MAX_MAX_WIDTH, MIN_MAX_WIDTH, useAppLayout } from "@/hooks/use-app-layout";
+import { useTheme } from "@/hooks/use-theme";
+import { cn } from "@/lib/utils";
 
 /** Aba Layout — preferências visuais aplicadas em tempo real. */
 function LayoutTab() {
-  const { maxWidth, systemDefault, setMaxWidth, resetMaxWidth, saveAsSystemDefault, isDefault, isSaving } =
-    useAppLayout();
-  const { role } = usePrimaryRole();
-  const isSaAdmin = role === "sa_admin";
-
-  async function handleSaveDefault() {
-    const { error } = await saveAsSystemDefault();
-    if (error) {
-      notifyError(error, { title: "Não foi possível salvar o padrão do sistema" });
-      return;
-    }
-    notifySuccess(
-      `Novos usuários passarão a usar ${maxWidth}px como largura máxima.`,
-      "Padrão do sistema atualizado",
-    );
-  }
+  const { maxWidth, systemDefault, setMaxWidth, resetMaxWidth, isDefault, isSaving } = useAppLayout();
 
   return (
     <div className="space-y-[clamp(1rem,3vw,1.5rem)]">
@@ -39,16 +23,16 @@ function LayoutTab() {
               color: "var(--panel-accent)",
             }}
           >
-            <Maximize2 className="h-4 w-4" />
+            <Monitor className="h-4 w-4" />
           </span>
-          Largura máxima do sistema
+          Largura máxima da tela
         </h2>
 
         <div className="space-y-5">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-sm text-muted-foreground">
-                Define até onde o conteúdo se estende em telas grandes. O padrão é{" "}
+                Define até onde o conteúdo se estende em telas grandes. O padrão do sistema é{" "}
                 {systemDefault}px.
               </p>
             </div>
@@ -65,7 +49,7 @@ function LayoutTab() {
             min={MIN_MAX_WIDTH}
             max={MAX_MAX_WIDTH}
             step={10}
-            aria-label="Largura máxima do sistema em pixels"
+            aria-label="Largura máxima da tela em pixels"
             onValueChange={(values) => setMaxWidth(values[0])}
           />
 
@@ -85,31 +69,69 @@ function LayoutTab() {
               <RotateCcw className="h-4 w-4" />
               Restaurar padrão ({systemDefault}px)
             </Button>
-            {isSaAdmin && (
-              <Button type="button" onClick={handleSaveDefault} className="tap-target gap-2">
-                <Check className="h-4 w-4" />
-                Definir como padrão do sistema
-              </Button>
-            )}
             <p className="text-xs text-muted-foreground">
-              {isSaving
-                ? "Salvando..."
-                : "A alteração é aplicada imediatamente e salva na sua conta."}
+              {isSaving ? "Salvando..." : "A alteração é aplicada imediatamente e salva na sua conta."}
             </p>
           </div>
         </div>
       </section>
-
     </div>
   );
 }
 
+/** Aba Tema — preferência claro/escuro. */
+function ThemeTab() {
+  const { theme, setTheme } = useTheme();
+
+  const options = [
+    { value: "light" as const, label: "Claro", icon: Sun },
+    { value: "dark" as const, label: "Escuro", icon: Moon },
+  ];
+
+  return (
+    <div className="space-y-[clamp(1rem,3vw,1.5rem)]">
+      <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
+        <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
+          <span
+            className="inline-flex h-7 w-7 items-center justify-center rounded-lg"
+            style={{
+              background: "color-mix(in oklab, var(--panel-accent) 14%, transparent)",
+              color: "var(--panel-accent)",
+            }}
+          >
+            <Palette className="h-4 w-4" />
+          </span>
+          Aparência
+        </h2>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          {options.map(({ value, label, icon: Icon }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setTheme(value)}
+              className={cn(
+                "flex items-center gap-3 rounded-xl border p-4 text-left transition-colors",
+                theme === value
+                  ? "border-[var(--panel-accent)] bg-[color-mix(in_oklab,var(--panel-accent)_10%,transparent)]"
+                  : "border-border bg-surface hover:border-[var(--panel-accent)]",
+              )}
+            >
+              <Icon className="h-5 w-5" style={{ color: "var(--panel-accent)" }} />
+              <span className="font-semibold">{label}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
 
 export default function ConfiguracoesPage() {
   return (
     <AccountShell
       title="Configurações"
-      subtitle="Ajuste a aparência e o comportamento do sistema."
+      subtitle="Ajuste a aparência e o comportamento do sistema para a sua conta."
       width="full"
     >
       <Tabs defaultValue="layout" className="space-y-5">
@@ -118,9 +140,16 @@ export default function ConfiguracoesPage() {
             <Monitor className="h-4 w-4" />
             Layout
           </TabsTrigger>
+          <TabsTrigger value="theme" className="gap-2">
+            <Palette className="h-4 w-4" />
+            Tema
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="layout" className="mt-0">
           <LayoutTab />
+        </TabsContent>
+        <TabsContent value="theme" className="mt-0">
+          <ThemeTab />
         </TabsContent>
       </Tabs>
     </AccountShell>
