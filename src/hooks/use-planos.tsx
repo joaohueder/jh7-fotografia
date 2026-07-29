@@ -41,6 +41,45 @@ function traduzErro(err: unknown) {
   return err instanceof Error ? err : new Error(String(err));
 }
 
+export interface PlanoUso {
+  /** Empresas com assinatura ativa (vigente) neste plano. */
+  ativas: number;
+  /** Total de assinaturas já registradas para o plano (histórico). */
+  total: number;
+}
+
+/**
+ * Uso dos planos: empresas com assinatura vigente e histórico de assinaturas.
+ * Usado para exibir o contador no card e bloquear exclusões indevidas.
+ */
+export function usePlanosUso() {
+  return useQuery({
+    queryKey: ["planos-uso"],
+    queryFn: async (): Promise<Map<string, PlanoUso>> => {
+      const hoje = new Date().toISOString().slice(0, 10);
+      const { data, error } = await db
+        .from("empresa_assinaturas")
+        .select("plano_id, ativo, fim");
+      if (error) throw error;
+
+      const mapa = new Map<string, PlanoUso>();
+      for (const row of (data ?? []) as {
+        plano_id: string | null;
+        ativo: boolean;
+        fim: string | null;
+      }[]) {
+        if (!row.plano_id) continue;
+        const atual = mapa.get(row.plano_id) ?? { ativas: 0, total: 0 };
+        atual.total += 1;
+        const vigente = row.ativo && (row.fim === null || row.fim >= hoje);
+        if (vigente) atual.ativas += 1;
+        mapa.set(row.plano_id, atual);
+      }
+      return mapa;
+    },
+  });
+}
+
 /** Plano gratuito ativo já cadastrado (ignora o plano em edição). */
 export function usePlanoGratuitoAtivo(ignorarId?: string) {
   return useQuery({
