@@ -89,6 +89,7 @@ export default function ConfiguracoesPage() {
     <AccountShell
       title="Configurações"
       subtitle="Ajuste a aparência e o comportamento do sistema."
+      width="full"
     >
       <Tabs defaultValue="layout" className="space-y-5">
         <TabsList>
