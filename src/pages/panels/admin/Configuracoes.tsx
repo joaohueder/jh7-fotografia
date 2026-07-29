@@ -3,6 +3,8 @@ import { Building2 } from "lucide-react";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
+import { PageHelp } from "@/components/page-help";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DadosEmpresaTab } from "@/pages/panels/admin/DadosEmpresa";
 
