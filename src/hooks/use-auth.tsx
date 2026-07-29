@@ -71,10 +71,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     document.addEventListener("visibilitychange", onVisibility);
 
+    // Logoff remoto: se o SA encerrou as sessões deste usuário, o token atual
+    // deixa de valer e a sessão é encerrada imediatamente no navegador.
+    async function checarRevogacao() {
+      const { data: atual } = await supabase.auth.getSession();
+      if (!atual.session) return;
+      const { data, error: rpcError } = await (
+        supabase as unknown as {
+          rpc: (fn: string) => Promise<{ data: unknown; error: unknown }>;
+        }
+      ).rpc("minha_sessao_valida");
+      if (rpcError) return;
+      if (data === false) {
+        clearRememberState();
+        await supabase.auth.signOut();
+        if (mounted) {
+          setSession(null);
+          setUser(null);
+        }
+      }
+    }
+
+    void checarRevogacao();
+    const revogacaoTimer = window.setInterval(() => void checarRevogacao(), 15000);
+
+    function onVisibilityRevogacao() {
+      if (document.visibilityState === "visible") void checarRevogacao();
+    }
+    document.addEventListener("visibilitychange", onVisibilityRevogacao);
+
     return () => {
       mounted = false;
       listener.subscription.unsubscribe();
+      window.clearInterval(revogacaoTimer);
       document.removeEventListener("visibilitychange", onVisibility);
+      document.removeEventListener("visibilitychange", onVisibilityRevogacao);
     };
   }, []);
 
