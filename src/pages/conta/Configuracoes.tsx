@@ -1,7 +1,7 @@
 import { Check, Maximize2, Monitor, RotateCcw } from "lucide-react";
 
 import { usePrimaryRole } from "@/components/role-routing";
-import { showSystemMessage } from "@/lib/system-message";
+import { notifyError, notifySuccess } from "@/lib/system-message";
 
 import { AccountShell } from "@/components/account-shell";
 import { Button } from "@/components/ui/button";
@@ -18,19 +18,13 @@ function LayoutTab() {
 
   async function handleSaveDefault() {
     const { error } = await saveAsSystemDefault();
-    showSystemMessage(
-      error
-        ? {
-            variant: "error",
-            title: "Não foi possível salvar o padrão",
-            description: "A largura padrão do sistema não pôde ser atualizada.",
-            error,
-          }
-        : {
-            variant: "success",
-            title: "Padrão do sistema atualizado",
-            description: `Novos usuários passarão a usar ${maxWidth}px como largura máxima.`,
-          },
+    if (error) {
+      notifyError(error, "Não foi possível salvar o padrão do sistema");
+      return;
+    }
+    notifySuccess(
+      `Novos usuários passarão a usar ${maxWidth}px como largura máxima.`,
+      "Padrão do sistema atualizado",
     );
   }
 
@@ -55,7 +49,7 @@ function LayoutTab() {
             <div>
               <p className="text-sm text-muted-foreground">
                 Define até onde o conteúdo se estende em telas grandes. O padrão é{" "}
-                {DEFAULT_MAX_WIDTH}px.
+                {systemDefault}px.
               </p>
             </div>
             <span
