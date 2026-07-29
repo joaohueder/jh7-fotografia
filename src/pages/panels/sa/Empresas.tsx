@@ -388,14 +388,49 @@ export default function EmpresasList() {
         )}
 
         {vazio ? null : (
-          <Input
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar por razão social, nome fantasia, documento ou cidade"
-            className="h-11 text-base"
-            aria-label="Buscar empresas"
-          />
+          <div className="space-y-3">
+            <Input
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Buscar por razão social, nome fantasia, documento ou cidade"
+              className="h-11 text-base"
+              aria-label="Buscar empresas"
+            />
+            <div
+              role="group"
+              aria-label="Filtrar por assinatura"
+              className="flex w-full gap-1 rounded-xl border border-border bg-surface/50 p-1"
+            >
+              {(
+                [
+                  { key: "TODAS", label: "Todas" },
+                  { key: "COM", label: "Com assinatura" },
+                  { key: "SEM", label: "Sem assinatura" },
+                ] as { key: FiltroAssinatura; label: string }[]
+              ).map((op) => {
+                const ativo = filtroAssinatura === op.key;
+                return (
+                  <button
+                    key={op.key}
+                    type="button"
+                    aria-pressed={ativo}
+                    onClick={() => setFiltroAssinatura(op.key)}
+                    className="min-h-[var(--tap)] flex-1 rounded-lg px-3 text-[0.8125rem] font-semibold transition-colors"
+                    style={{
+                      background: ativo
+                        ? "color-mix(in oklab, var(--panel-accent) 15%, transparent)"
+                        : undefined,
+                      color: ativo ? "var(--panel-accent)" : "hsl(var(--muted-foreground))",
+                    }}
+                  >
+                    {op.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         )}
+
 
         {isLoading ? (
           <div className="flex items-center gap-2 text-muted-foreground">
