@@ -159,7 +159,7 @@ export default function LeadsList() {
           </Button>
         </header>
 
-        <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(13rem,100%),1fr))]">
+        <div className="grid gap-4 md:grid-cols-[minmax(13rem,1fr)_2fr]">
           <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
             <div className="flex items-start justify-between gap-2">
               <h3 className="text-sm font-semibold text-muted-foreground">Total de leads</h3>
@@ -172,7 +172,71 @@ export default function LeadsList() {
               {(leads ?? []).length}
             </p>
           </div>
+
+          <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="text-sm font-semibold text-muted-foreground">
+                Evolução dos últimos 6 meses
+              </h3>
+              <HelpTip text="Mostra quantos leads novos entraram em cada um dos últimos 6 meses. Se um lead virou cliente, ele continua contando no mês em que foi captado, para você acompanhar o histórico real de captação." />
+            </div>
+            <div className="mt-3 h-[9rem] w-full">
+              {carregandoEvolucao ? (
+                <div className="flex h-full items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" /> Carregando gráfico…
+                </div>
+              ) : (evolucao ?? []).every((m) => m.total === 0) ? (
+                <p className="flex h-full items-center text-sm text-muted-foreground">
+                  Ainda não há leads captados nos últimos 6 meses.
+                </p>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={evolucao ?? []} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="grad-leads" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="var(--panel-accent)" stopOpacity={0.45} />
+                        <stop offset="100%" stopColor="var(--panel-accent)" stopOpacity={0.03} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis
+                      dataKey="mes"
+                      tickLine={false}
+                      axisLine={false}
+                      tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                    />
+                    <YAxis
+                      allowDecimals={false}
+                      tickLine={false}
+                      axisLine={false}
+                      width={32}
+                      tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                    />
+                    <Tooltip
+                      cursor={{ stroke: "hsl(var(--border))" }}
+                      contentStyle={{
+                        background: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "0.75rem",
+                        fontSize: "0.8rem",
+                        color: "hsl(var(--foreground))",
+                      }}
+                      formatter={(v: number) => [`${v} lead${v === 1 ? "" : "s"}`, "Captados"]}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="total"
+                      stroke="var(--panel-accent)"
+                      strokeWidth={2}
+                      fill="url(#grad-leads)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
         </div>
+
 
         <div className="min-w-[16rem] max-w-md space-y-1">
           <label htmlFor="busca-leads" className="text-xs font-semibold text-muted-foreground">
