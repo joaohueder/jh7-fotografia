@@ -18,11 +18,14 @@ import { PanelLayout } from "@/components/panel-layout";
 import { IconAction } from "@/components/icon-action";
 import { HelpTip } from "@/components/page-help";
 
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
 import { notifyError, notifySuccess } from "@/lib/system-message";
 import {
   isMenorDeIdade,
   useClientes,
+  useClientesEvolucao,
   useDeleteCliente,
   useSetClienteStatus,
   type Cliente,
@@ -81,6 +84,7 @@ export default function ClientesList() {
 
   const navigate = useNavigate();
   const { data: clientes, isLoading, error } = useClientes();
+  const { data: evolucao, isLoading: carregandoEvolucao } = useClientesEvolucao();
   const setStatus = useSetClienteStatus();
   const remover = useDeleteCliente();
 
@@ -106,7 +110,7 @@ export default function ClientesList() {
     return {
       total: todos.length,
       ativos: todos.filter((c) => c.status === "ATIVO").length,
-      menores: todos.filter((c) => isMenorDeIdade(c.nascimento)).length,
+      inativos: todos.filter((c) => c.status === "INATIVO").length,
     };
   }, [clientes]);
 
@@ -158,41 +162,88 @@ export default function ClientesList() {
           </Button>
         </header>
 
-        <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(13rem,100%),1fr))]">
-          {[
-            {
-              title: "Total de clientes",
-              value: totais.total,
-              hint: "Todos os clientes cadastrados, somando ativos e inativos.",
-            },
-            {
-              title: "Clientes ativos",
-              value: totais.ativos,
-              hint: "Clientes que você atende normalmente hoje. Inativos continuam salvos, mas fora do dia a dia.",
-            },
-            {
-              title: "Menores de idade",
-              value: totais.menores,
-              hint: "Clientes com menos de 18 anos. Nesses casos é necessária autorização do responsável.",
-            },
-          ].map((card) => (
-            <div
-              key={card.title}
-              className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="text-sm font-semibold text-muted-foreground">{card.title}</h3>
-                <HelpTip text={card.hint} />
-              </div>
-              <p
-                className="mt-2 text-[clamp(1.5rem,5vw,2rem)] font-bold leading-tight"
-                style={{ color: "var(--panel-accent)" }}
-              >
-                {card.value}
-              </p>
+        <div className="grid gap-4 md:grid-cols-[minmax(13rem,1fr)_2fr]">
+          <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="text-sm font-semibold text-muted-foreground">Total de clientes</h3>
+              <HelpTip text="Mostra quantos clientes estão ativos (atendidos normalmente hoje) e quantos estão inativos (continuam salvos, mas fora do dia a dia)." />
             </div>
-          ))}
+            <p
+              className="mt-2 text-[clamp(1.5rem,5vw,2rem)] font-bold leading-tight"
+              style={{ color: "var(--panel-accent)" }}
+            >
+              {totais.ativos}
+              <span className="text-muted-foreground"> / {totais.inativos}</span>
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Ativos / Inativos · {totais.total} no total
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="text-sm font-semibold text-muted-foreground">
+                Evolução dos últimos 6 meses
+              </h3>
+              <HelpTip text="Mostra quantos clientes novos foram cadastrados em cada um dos últimos 6 meses. Serve para acompanhar se o estúdio está crescendo." />
+            </div>
+            <div className="mt-3 h-[9rem] w-full">
+              {carregandoEvolucao ? (
+                <div className="flex h-full items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" /> Carregando gráfico…
+                </div>
+              ) : (evolucao ?? []).every((m) => m.total === 0) ? (
+                <p className="flex h-full items-center text-sm text-muted-foreground">
+                  Ainda não há clientes cadastrados nos últimos 6 meses.
+                </p>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={evolucao ?? []} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="grad-clientes" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="var(--panel-accent)" stopOpacity={0.45} />
+                        <stop offset="100%" stopColor="var(--panel-accent)" stopOpacity={0.03} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis
+                      dataKey="mes"
+                      tickLine={false}
+                      axisLine={false}
+                      tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                    />
+                    <YAxis
+                      allowDecimals={false}
+                      tickLine={false}
+                      axisLine={false}
+                      width={32}
+                      tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                    />
+                    <Tooltip
+                      cursor={{ stroke: "hsl(var(--border))" }}
+                      contentStyle={{
+                        background: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "0.75rem",
+                        fontSize: "0.8rem",
+                        color: "hsl(var(--foreground))",
+                      }}
+                      formatter={(v: number) => [`${v} cliente${v === 1 ? "" : "s"}`, "Cadastrados"]}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="total"
+                      stroke="var(--panel-accent)"
+                      strokeWidth={2}
+                      fill="url(#grad-clientes)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
         </div>
+
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="min-w-[16rem] max-w-md flex-1 space-y-1">

@@ -211,3 +211,57 @@ export function isMenorDeIdade(nascimento: string | null | undefined) {
   limite.setFullYear(limite.getFullYear() - 18);
   return nasc > limite;
 }
+
+export interface ClienteMes {
+  /** Rótulo curto do mês, ex.: "jan/25". */
+  mes: string;
+  /** Quantidade de clientes cadastrados naquele mês. */
+  total: number;
+}
+
+/** Evolução mensal de novos clientes nos últimos 6 meses. */
+export function useClientesEvolucao() {
+  const { data: empresaId } = useEmpresaAtual();
+
+  return useQuery({
+    queryKey: ["clientes-evolucao", empresaId],
+    enabled: Boolean(empresaId),
+    staleTime: 60 * 1000,
+    queryFn: async (): Promise<ClienteMes[]> => {
+      const inicio = new Date();
+      inicio.setDate(1);
+      inicio.setHours(0, 0, 0, 0);
+      inicio.setMonth(inicio.getMonth() - 5);
+
+      const { data, error } = await db
+        .from("clientes")
+        .select("id, created_at")
+        .eq("empresa_id", empresaId!)
+        .not("documento", "is", null)
+        .gte("created_at", inicio.toISOString());
+      if (error) throw error;
+
+      const meses: ClienteMes[] = [];
+      const chaves: string[] = [];
+      for (let i = 0; i < 6; i += 1) {
+        const d = new Date(inicio);
+        d.setMonth(inicio.getMonth() + i);
+        chaves.push(`${d.getFullYear()}-${d.getMonth()}`);
+        meses.push({
+          mes: d
+            .toLocaleDateString("pt-BR", { month: "short", year: "2-digit" })
+            .replace(".", ""),
+          total: 0,
+        });
+      }
+
+      for (const c of (data ?? []) as { created_at: string }[]) {
+        const d = new Date(c.created_at);
+        const idx = chaves.indexOf(`${d.getFullYear()}-${d.getMonth()}`);
+        if (idx >= 0) meses[idx].total += 1;
+      }
+
+      return meses;
+    },
+  });
+}
