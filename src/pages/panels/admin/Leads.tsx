@@ -118,6 +118,8 @@ export default function LeadsList() {
   const [alvoExclusao, setAlvoExclusao] = useState<Lead | null>(null);
   // Lead aguardando confirmação de desistência (abre o modal de confirmação).
   const [alvoDesistencia, setAlvoDesistencia] = useState<Lead | null>(null);
+  // Lead cujas notas estão abertas (tela separada da edição de dados).
+  const [leadNotas, setLeadNotas] = useState<Lead | null>(null);
 
   const notaInicial = useNotaInicial(editando?.id);
 
@@ -482,6 +484,17 @@ export default function LeadsList() {
                         <Pencil className="h-4 w-4" />
                         Editar dados
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="tap-target gap-2"
+                        title="Ver e adicionar notas de acompanhamento deste lead."
+                        aria-label={`Abrir notas do lead ${l.nome}`}
+                        onClick={() => setLeadNotas(l)}
+                      >
+                        <StickyNote className="h-4 w-4" />
+                        Notas do lead
+                      </Button>
                       {l.situacao === "AGUARDANDO" ? (
                         <Button
                           variant="outline"
@@ -674,51 +687,66 @@ export default function LeadsList() {
                   </span>
                 ) : (
                   <span>
-                    Novas conversas devem ser adicionadas no histórico de movimentações, após salvar o lead.
+                    Novas conversas devem ser registradas no botão "Notas do lead", na lista.
                   </span>
                 )}
               </p>
             </div>
 
-            {/* Na edição, as ações ficam acima do histórico para não precisar
-                rolar até o fim da tela depois de mudar nome/WhatsApp/interesse. */}
-            {editando ? (
-              <div className="flex flex-wrap justify-end gap-2 border-t border-border pt-4">
-                <Button variant="outline" className="tap-target" onClick={() => setAberto(false)}>
-                  Cancelar
-                </Button>
-                <Button className="tap-target gap-2" onClick={handleSalvar} disabled={salvar.isPending}>
-                  {salvar.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  Salvar lead
-                </Button>
-              </div>
-            ) : null}
-
-            {editando ? (
-              <div className="border-t border-border pt-4">
-                <ClienteNotas
-                  clienteId={editando.id}
-                  modulo="LEADS"
-                  titulo="Histórico de movimentações"
-                  placeholder="Novo retorno, combinado ou andamento da negociação."
-                />
-              </div>
-            ) : null}
           </div>
 
-          {!editando ? (
-            <DialogFooter>
-              <Button variant="outline" className="tap-target" onClick={() => setAberto(false)}>
-                Cancelar
-              </Button>
-              <Button className="tap-target gap-2" onClick={handleSalvar} disabled={salvar.isPending}>
-                {salvar.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                Salvar lead
-              </Button>
-            </DialogFooter>
-          ) : null}
+          <DialogFooter>
+            <Button variant="outline" className="tap-target" onClick={() => setAberto(false)}>
+              Cancelar
+            </Button>
+            <Button className="tap-target gap-2" onClick={handleSalvar} disabled={salvar.isPending}>
+              {salvar.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Salvar lead
+            </Button>
+          </DialogFooter>
+
         </DialogContent>
       </Dialog>
+
+      {/* Notas do lead — tela separada da edição de dados */}
+      <Dialog open={!!leadNotas} onOpenChange={(o) => !o && setLeadNotas(null)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Notas do lead</DialogTitle>
+            <DialogDescription>
+              Registre aqui os retornos, combinados e o andamento da negociação com
+              {leadNotas ? ` ${leadNotas.nome}` : " este lead"}. Cada nota fica salva com data, hora
+              e quem escreveu. Para mudar nome, WhatsApp ou o interesse inicial, use o botão
+              "Editar dados".
+            </DialogDescription>
+          </DialogHeader>
+
+          {leadNotas ? (
+            <div className="space-y-4">
+              <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm">
+                <span className="mr-1 font-semibold text-foreground">Interesse inicial:</span>
+                <span className="text-muted-foreground">
+                  {leadNotas.interesse?.descricao ?? "Nenhum interesse registrado ainda."}
+                </span>
+              </div>
+              <ClienteNotas
+                clienteId={leadNotas.id}
+                modulo="LEADS"
+                titulo="Histórico de movimentações"
+                placeholder="Novo retorno, combinado ou andamento da negociação."
+              />
+            </div>
+          ) : null}
+
+          <DialogFooter>
+            <Button variant="outline" className="tap-target" onClick={() => setLeadNotas(null)}>
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
 
       <AlertDialog open={!!alvoDesistencia} onOpenChange={(o) => !o && setAlvoDesistencia(null)}>
         <AlertDialogContent>
