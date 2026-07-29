@@ -6,12 +6,14 @@ import { supabase } from "@/integrations/selfhosted/client";
 const db = supabase as unknown as SupabaseClient;
 
 export type NotaModulo = "CLIENTES" | "LEADS";
+export type NotaTipo = "NOTA" | "INTERESSE";
 
 export interface ClienteNota {
   id: string;
   cliente_id: string;
   descricao: string;
   modulo: NotaModulo;
+  tipo: NotaTipo;
   criado_por: string | null;
   criado_por_nome: string | null;
   created_at: string;
@@ -51,6 +53,7 @@ export function useNotaInicial(clienteId: string | undefined) {
         .from("cliente_notas")
         .select("*")
         .eq("cliente_id", clienteId!)
+        .eq("tipo", "INTERESSE")
         .order("created_at", { ascending: true })
         .limit(1)
         .maybeSingle();
@@ -80,6 +83,7 @@ export async function criarNotaCliente(
   clienteId: string,
   descricao: string,
   modulo: NotaModulo,
+  tipo: NotaTipo = "NOTA",
 ): Promise<void> {
   const texto = descricao.trim();
   if (!texto) return;
@@ -88,6 +92,7 @@ export async function criarNotaCliente(
     cliente_id: clienteId,
     descricao: texto,
     modulo,
+    tipo,
     criado_por: autor.id,
     criado_por_nome: autor.nome,
   });
@@ -125,7 +130,7 @@ export async function salvarNotaInicial(
 ): Promise<void> {
   const texto = descricao.trim();
   if (!notaId) {
-    await criarNotaCliente(clienteId, texto, modulo);
+    await criarNotaCliente(clienteId, texto, modulo, "INTERESSE");
     return;
   }
   if (!texto) return;
