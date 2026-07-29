@@ -19,6 +19,8 @@ import {
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
+import { PageHelp } from "@/components/page-help";
+
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
 import { lookupCep } from "@/hooks/use-empresas";
 import {
@@ -764,6 +766,25 @@ export default function ClienteForm() {
             </p>
           </div>
         </header>
+
+        <PageHelp
+          title={editando ? "Como editar este cliente" : "Como cadastrar um cliente"}
+          steps={
+            editando
+              ? [
+                  "Use as abas acima para trocar entre dados básicos, endereço, contatos e observações.",
+                  "Altere o que precisar — os campos com asterisco (*) são obrigatórios.",
+                  "Clique em Salvar para confirmar. Se desistir, use “Voltar para clientes”.",
+                ]
+              : [
+                  "Preencha os campos da etapa atual e clique em Avançar. Pode voltar quando quiser.",
+                  "Campos com asterisco (*) são obrigatórios: nome, data de nascimento, CPF/CNPJ e WhatsApp.",
+                  "Na última etapa você revê tudo e só então clica em “Salvar cliente”. Nada é gravado antes disso.",
+                ]
+          }
+        />
+
+
 
         {!editando && (
           <div className="space-y-3">

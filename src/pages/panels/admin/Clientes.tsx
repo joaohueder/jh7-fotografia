@@ -16,6 +16,8 @@ import {
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { IconAction } from "@/components/icon-action";
+import { HelpTip, PageHelp } from "@/components/page-help";
+
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
 import { notifyError, notifySuccess } from "@/lib/system-message";
 import {
@@ -138,17 +140,44 @@ export default function ClientesList() {
           </Button>
         </header>
 
+        <PageHelp
+          title="Como usar a tela de Clientes"
+          steps={[
+            "Para cadastrar alguém novo, clique em “Novo cliente” e siga as etapas na ordem — nada é salvo até você confirmar no resumo final.",
+            "Use a caixa de busca para achar um cliente pelo nome, CPF/CNPJ, telefone, e-mail ou cidade.",
+            "Nos botões de cada cliente: o lápis abre para editar, o botão de liga/desliga ativa ou inativa, e a lixeira exclui de vez (sempre pedimos confirmação antes).",
+          ]}
+        >
+          Aqui ficam guardadas as pessoas e empresas que você atende. Inativar um cliente apenas o
+          esconde do dia a dia; excluir apaga o cadastro para sempre.
+        </PageHelp>
+
         <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(13rem,100%),1fr))]">
           {[
-            { title: "Total de clientes", value: totais.total },
-            { title: "Clientes ativos", value: totais.ativos },
-            { title: "Menores de idade", value: totais.menores },
+            {
+              title: "Total de clientes",
+              value: totais.total,
+              hint: "Todos os clientes cadastrados, somando ativos e inativos.",
+            },
+            {
+              title: "Clientes ativos",
+              value: totais.ativos,
+              hint: "Clientes que você atende normalmente hoje. Inativos continuam salvos, mas fora do dia a dia.",
+            },
+            {
+              title: "Menores de idade",
+              value: totais.menores,
+              hint: "Clientes com menos de 18 anos. Nesses casos é necessária autorização do responsável.",
+            },
           ].map((card) => (
             <div
               key={card.title}
               className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]"
             >
-              <h3 className="text-sm font-semibold text-muted-foreground">{card.title}</h3>
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="text-sm font-semibold text-muted-foreground">{card.title}</h3>
+                <HelpTip text={card.hint} />
+              </div>
               <p
                 className="mt-2 text-[clamp(1.5rem,5vw,2rem)] font-bold leading-tight"
                 style={{ color: "var(--panel-accent)" }}
@@ -160,13 +189,20 @@ export default function ClientesList() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <Input
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar por nome, documento, contato ou cidade…"
-            className="h-11 max-w-md flex-1 text-base"
-          />
-          <div className="flex flex-wrap gap-2">
+          <div className="min-w-[16rem] max-w-md flex-1 space-y-1">
+            <label htmlFor="busca-clientes" className="text-xs font-semibold text-muted-foreground">
+              Buscar cliente
+            </label>
+            <Input
+              id="busca-clientes"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Digite o nome, CPF/CNPJ, telefone, e-mail ou cidade…"
+              className="h-11 w-full text-base"
+            />
+          </div>
+          <div className="flex flex-wrap gap-2 self-end">
+
             {(
               [
                 ["todos", "Todos"],
@@ -193,8 +229,10 @@ export default function ClientesList() {
           </div>
         ) : error ? (
           <p className="rounded-2xl border border-destructive/40 bg-destructive/10 p-6 text-sm">
-            Não foi possível carregar os clientes: {(error as Error).message}
+            Não conseguimos carregar a lista de clientes agora. Verifique sua conexão com a internet
+            e atualize a página. Se continuar assim, fale com o suporte JH7.
           </p>
+
         ) : totais.total === 0 ? (
           <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-border bg-card px-6 py-[clamp(2.5rem,8vw,4rem)] text-center">
             <span

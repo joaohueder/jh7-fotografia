@@ -3,6 +3,8 @@ import { Building2 } from "lucide-react";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
+import { PageHelp } from "@/components/page-help";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DadosEmpresaTab } from "@/pages/panels/admin/DadosEmpresa";
 
@@ -18,6 +20,19 @@ export default function AdminConfiguracoes() {
             Mantenha atualizados os dados cadastrais da sua empresa.
           </p>
         </header>
+
+        <PageHelp
+          title="Como usar as Configurações"
+          steps={[
+            "Preencha ou corrija os dados da sua empresa nos campos abaixo.",
+            "Digite o CEP e o endereço é preenchido automaticamente — confira e ajuste o número.",
+            "Clique em Salvar no fim da tela para guardar as alterações.",
+          ]}
+        >
+          Estes dados aparecem nos seus documentos e comunicações. Você pode voltar aqui e alterar
+          quando quiser; nada é enviado antes de você clicar em Salvar.
+        </PageHelp>
+
 
         <Tabs defaultValue="empresa" className="space-y-5">
           <TabsList>
