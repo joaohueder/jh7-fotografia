@@ -288,7 +288,14 @@ export default function EmpresasList() {
                         dataKey="total"
                         position="top"
                         offset={8}
-                        content={({ x, y, width, value }) => {
+                        content={(props: {
+                          x?: number | string;
+                          y?: number | string;
+                          width?: number | string;
+                          value?: number | string;
+                        }) => {
+                          const { x, y, width, value } = props;
+
                           const total = Number(value ?? 0);
                           return (
                             <text
