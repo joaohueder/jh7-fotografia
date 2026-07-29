@@ -314,7 +314,7 @@ export default function UsuariosList() {
                 </thead>
                 <tbody>
                   {lista.map((u) => (
-                    <React.Fragment key={u.id}>
+                    <Fragment key={u.id}>
                       <tr className="border-t border-border">
                         <td className="px-4 py-3 align-top">
                           <p className="font-semibold">{u.nome}</p>
@@ -362,7 +362,7 @@ export default function UsuariosList() {
                           </Button>
                         </td>
                       </tr>
-                    </React.Fragment>
+                    </Fragment>
                   ))}
                 </tbody>
               </table>
