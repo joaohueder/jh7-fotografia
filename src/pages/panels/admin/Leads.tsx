@@ -18,7 +18,7 @@ import {
   UserX,
 } from "lucide-react";
 
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, Bar, CartesianGrid, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
@@ -249,7 +249,7 @@ export default function LeadsList() {
               <h3 className="text-sm font-semibold text-muted-foreground">
                 Evolução dos últimos 6 meses
               </h3>
-              <HelpTip text="Mostra quantos leads novos entraram em cada um dos últimos 6 meses. Se um lead virou cliente, ele continua contando no mês em que foi captado, para você acompanhar o histórico real de captação." />
+              <HelpTip text="Mostra quantos leads novos entraram em cada um dos últimos 6 meses e, em barras, quantos deles já viraram clientes. Se um lead virou cliente, ele continua contando no mês em que foi captado, para você acompanhar o histórico real de captação e conversão." />
             </div>
             <div className="mt-3 h-[9rem] w-full">
               {carregandoEvolucao ? (
@@ -262,7 +262,7 @@ export default function LeadsList() {
                 </p>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={evolucao ?? []} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+                  <ComposedChart data={evolucao ?? []} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="grad-leads" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="var(--panel-accent)" stopOpacity={0.45} />
@@ -292,7 +292,10 @@ export default function LeadsList() {
                         fontSize: "0.8rem",
                         color: "hsl(var(--foreground))",
                       }}
-                      formatter={(v: number) => [`${v} lead${v === 1 ? "" : "s"}`, "Captados"]}
+                      formatter={(v: number, name: string) => {
+                        const label = name === "clientes" ? "Viraram cliente" : "Captados";
+                        return [`${v} lead${v === 1 ? "" : "s"}`, label];
+                      }}
                     />
                     <Area
                       type="monotone"
@@ -301,10 +304,18 @@ export default function LeadsList() {
                       strokeWidth={2}
                       fill="url(#grad-leads)"
                     />
-                  </AreaChart>
+                    <Bar
+                      dataKey="clientes"
+                      fill="var(--panel-accent)"
+                      fillOpacity={0.9}
+                      radius={[4, 4, 0, 0]}
+                      barSize={16}
+                    />
+                  </ComposedChart>
                 </ResponsiveContainer>
               )}
             </div>
+
           </div>
         </div>
 
