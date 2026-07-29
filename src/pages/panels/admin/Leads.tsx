@@ -695,6 +695,46 @@ export default function LeadsList() {
         </DialogContent>
       </Dialog>
 
+      {/* Notas do lead — tela separada da edição de dados */}
+      <Dialog open={!!leadNotas} onOpenChange={(o) => !o && setLeadNotas(null)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Notas do lead</DialogTitle>
+            <DialogDescription>
+              Registre aqui os retornos, combinados e o andamento da negociação com
+              {leadNotas ? ` ${leadNotas.nome}` : " este lead"}. Cada nota fica salva com data, hora
+              e quem escreveu. Para mudar nome, WhatsApp ou o interesse inicial, use o botão
+              "Editar dados".
+            </DialogDescription>
+          </DialogHeader>
+
+          {leadNotas ? (
+            <div className="space-y-4">
+              <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm">
+                <span className="mr-1 font-semibold text-foreground">Interesse inicial:</span>
+                <span className="text-muted-foreground">
+                  {leadNotas.interesse?.descricao ?? "Nenhum interesse registrado ainda."}
+                </span>
+              </div>
+              <ClienteNotas
+                clienteId={leadNotas.id}
+                modulo="LEADS"
+                titulo="Histórico de movimentações"
+                placeholder="Novo retorno, combinado ou andamento da negociação."
+              />
+            </div>
+          ) : null}
+
+          <DialogFooter>
+            <Button variant="outline" className="tap-target" onClick={() => setLeadNotas(null)}>
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
+
       <AlertDialog open={!!alvoDesistencia} onOpenChange={(o) => !o && setAlvoDesistencia(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
