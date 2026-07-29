@@ -39,7 +39,7 @@ export default function Seguranca() {
   ];
 
   return (
-    <AccountShell title="Segurança" subtitle="Acompanhe o estado da sua conta e da sessão atual.">
+    <AccountShell title="Segurança" subtitle="Acompanhe o estado da sua conta e da sessão atual." width="full">
       <section className="rounded-xl border border-border bg-card p-[clamp(1rem,3.5vw,1.5rem)]">
         <h2 className="flex items-center gap-2 text-sm font-semibold">
           <ShieldCheck className="h-4 w-4" style={{ color: "var(--panel-accent)" }} />
