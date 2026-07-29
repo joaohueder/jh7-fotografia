@@ -156,7 +156,10 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
                 </nav>
 
                 {user?.email ? (
-                  <p className="mt-auto break-all text-sm text-muted-foreground">{user.email}</p>
+                  <div className="mt-auto space-y-0.5">
+                    <p className="truncate text-sm font-semibold">{fullName ?? displayName ?? "—"}</p>
+                    <p className="break-all text-xs text-muted-foreground">{user.email}</p>
+                  </div>
                 ) : null}
               </SheetContent>
             </Sheet>
