@@ -59,7 +59,10 @@ export interface PanelMenuItem {
   to: string;
   /** Alinha o item à direita na barra de menu superior (desktop). */
   right?: boolean;
+  /** Itens do submenu (aparece como lista suspensa no desktop). */
+  children?: { label: string; to: string }[];
 }
+
 
 
 interface PanelLayoutProps {
