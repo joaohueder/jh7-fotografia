@@ -849,7 +849,7 @@ export default function ClienteForm() {
                   ) : (
                     <Save className="h-4 w-4" />
                   )}
-                  Cadastrar cliente
+                  Salvar cliente
                 </Button>
               ) : (
                 <Button type="button" className="tap-target gap-2" onClick={avancar}>
