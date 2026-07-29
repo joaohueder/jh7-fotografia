@@ -246,7 +246,7 @@ export default function LeadsList() {
       </div>
 
       <Dialog open={aberto} onOpenChange={setAberto}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editando ? "Editar lead" : "Novo lead"}</DialogTitle>
             <DialogDescription>

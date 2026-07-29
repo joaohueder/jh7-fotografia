@@ -19,6 +19,7 @@ import {
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
+import { ClienteNotas } from "@/components/cliente-notas";
 import { HelpTip } from "@/components/page-help";
 
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
@@ -627,6 +628,18 @@ export default function ClienteForm() {
                     onChange={(e) => set("observacoes", e.target.value)}
                     rows={5}
                     className="text-base"
+                  />
+                </div>
+              </Section>
+    ) },
+    { value: "notas", label: "Notas", node: (
+              <Section title="Notas internas" icon={StickyNote}>
+                <div className="col-span-full">
+                  <ClienteNotas
+                    clienteId={registroId}
+                    modulo="CLIENTES"
+                    titulo="Histórico de notas"
+                    placeholder="Ex.: prefere atendimento aos sábados; indicou uma amiga."
                   />
                 </div>
               </Section>
