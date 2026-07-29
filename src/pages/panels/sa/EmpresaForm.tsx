@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   Building2,
   ClipboardCopy,
+  CreditCard,
   Eye,
   EyeOff,
   KeyRound,
@@ -21,6 +22,7 @@ import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-messa
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { SA_MENU } from "@/pages/panels/sa/menu";
+import { EmpresaAssinaturas } from "@/pages/panels/sa/EmpresaAssinaturas";
 import {
   checkCnpjExists,
   checkEmailExists,
@@ -193,6 +195,7 @@ const TABS = [
   { id: "empresa", label: "Dados da empresa", icon: Building2 },
   { id: "responsavel", label: "Dados do responsável", icon: UserRound },
   { id: "acesso", label: "Acesso ao sistema", icon: KeyRound },
+  { id: "assinaturas", label: "Assinaturas", icon: CreditCard },
   { id: "observacoes", label: "Observações", icon: StickyNote },
 ] as const;
 
@@ -1178,6 +1181,11 @@ export default function EmpresaForm() {
                 </Field>
               </Section>
             )}
+
+            {editing && tab === "assinaturas" && id ? (
+              <EmpresaAssinaturas empresaId={id} />
+            ) : null}
+
 
             {showStep(4, "observacoes") && (
               <Section title="Observações" icon={StickyNote}>
