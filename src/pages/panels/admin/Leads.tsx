@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Loader2, Phone, Plus, Trash2, UserCheck, UserPlus, Users } from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
@@ -37,6 +38,7 @@ import {
 export default function LeadsList() {
   usePageMeta("Leads — JH7 Gestão Fotográfica", "Contatos interessados no seu estúdio.");
 
+  const navigate = useNavigate();
   const { data: empresaId } = useEmpresaAtual();
   const { data: leads, isLoading, error } = useLeads();
   const salvar = useSalvarLead();
@@ -216,7 +218,7 @@ export default function LeadsList() {
 
                 <div className="flex items-center gap-1">
                   <IconAction
-                    label="Transformar em cliente"
+                    label="Transformar em cliente (abre o cadastro completo)"
                     ariaLabel={`Converter ${l.nome} em cliente`}
                     onClick={() => navigate(`/admin/clientes/novo?lead=${l.id}`)}
                   >
