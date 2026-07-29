@@ -201,11 +201,13 @@ export default function PlanosList() {
 
   const navigate = useNavigate();
   const { data, isLoading, error } = usePlanos();
+  const { data: usoMapa } = usePlanosUso();
   const remover = useDeletePlano();
   const reordenar = useReordenarPlanos();
   const toggleStatus = useTogglePlanoStatus();
 
   const [busca, setBusca] = useState("");
+  const [filtroStatus, setFiltroStatus] = useState<"todos" | "ativos" | "inativos">("todos");
   const [alvo, setAlvo] = useState<Plano | null>(null);
   const [toggleAlvo, setToggleAlvo] = useState<Plano | null>(null);
   const [ordem, setOrdem] = useState<Plano[]>([]);
@@ -214,13 +216,19 @@ export default function PlanosList() {
     setOrdem(data ?? []);
   }, [data]);
 
+  const usoDe = (id: string): PlanoUso => usoMapa?.get(id) ?? { ativas: 0, total: 0 };
+
   const termo = busca.trim().toLowerCase();
-  const arrastavel = termo.length === 0;
+  const arrastavel = termo.length === 0 && filtroStatus === "todos";
 
   const planos = useMemo(() => {
-    if (!termo) return ordem;
-    return ordem.filter((p) => p.nome.toLowerCase().includes(termo));
-  }, [ordem, termo]);
+    return ordem.filter((p) => {
+      if (termo && !p.nome.toLowerCase().includes(termo)) return false;
+      if (filtroStatus === "ativos" && !p.ativo) return false;
+      if (filtroStatus === "inativos" && p.ativo) return false;
+      return true;
+    });
+  }, [ordem, termo, filtroStatus]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
