@@ -8,6 +8,7 @@ import {
   Plus,
   Clock,
   Eye,
+  FileText,
   Heart,
   StickyNote,
   Trash2,
