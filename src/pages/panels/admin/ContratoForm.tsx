@@ -44,6 +44,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 function hojeISO() {
   const d = new Date();
@@ -538,10 +539,26 @@ export default function ContratoForm() {
           </InlineNote>
         ) : null}
 
+        {/* Cada grupo de informações fica em uma aba, para a tela não ficar longa */}
+        <Tabs defaultValue="dados" className="space-y-4">
+          <TabsList className="flex h-auto flex-wrap justify-start gap-1">
+            <TabsTrigger value="dados">Dados do contrato</TabsTrigger>
+            <TabsTrigger value="vigencia">Vigência</TabsTrigger>
+            <TabsTrigger value="servicos">
+              Serviços{itens.length > 0 ? ` (${itens.length})` : ""}
+            </TabsTrigger>
+            <TabsTrigger value="valores">
+              Descontos e acréscimos{ajustes.length > 0 ? ` (${ajustes.length})` : ""}
+            </TabsTrigger>
+            <TabsTrigger value="observacoes">Observações</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="dados" className="mt-0">
         <section className="space-y-4 rounded-xl border border-border bg-card p-4">
           <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             <FileSignature className="h-4 w-4" /> Dados do contrato
           </h2>
+
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-1.5">
@@ -632,6 +649,23 @@ export default function ContratoForm() {
                 {CONTRATO_STATUS.find((s) => s.valor === status)?.ajuda}
               </p>
             </div>
+          </div>
+        </section>
+          </TabsContent>
+
+          <TabsContent value="vigencia" className="mt-0">
+        <section className="space-y-4 rounded-xl border border-border bg-card p-4">
+          <div className="space-y-1">
+            <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              <FileSignature className="h-4 w-4" /> Vigência do contrato
+              <HelpTip text="Período em que o contrato vale. Informe o início e o prazo (dias, meses ou anos) — o sistema calcula a data de fim." />
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Opcional: preencha se o contrato tem um período definido de execução.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+
 
             <div className="space-y-1.5">
               <Label htmlFor="inicio" className="flex items-center gap-1.5">
@@ -703,11 +737,13 @@ export default function ContratoForm() {
                 }}
               />
             </div>
-
           </div>
         </section>
+          </TabsContent>
 
+          <TabsContent value="servicos" className="mt-0">
         <section className="space-y-4 rounded-xl border border-border bg-card p-4">
+
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               <Wrench className="h-4 w-4" /> Serviços do contrato
@@ -913,9 +949,12 @@ export default function ContratoForm() {
             </ul>
           )}
         </section>
+          </TabsContent>
 
+          <TabsContent value="valores" className="mt-0">
         {/* Descontos e acréscimos (vários por contrato) */}
         <section className="space-y-4 rounded-xl border border-border bg-card p-4">
+
           <div className="space-y-1">
             <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               <Wrench className="h-4 w-4" /> Descontos e acréscimos
@@ -1083,9 +1122,9 @@ export default function ContratoForm() {
             </div>
           </div>
         </section>
+          </TabsContent>
 
-
-
+          <TabsContent value="observacoes" className="mt-0">
         <section className="space-y-2 rounded-xl border border-border bg-card p-4">
           <Label htmlFor="obs" className="flex items-center gap-1.5">
             Observações do contrato
@@ -1100,6 +1139,10 @@ export default function ContratoForm() {
             placeholder="Ex.: pagamento em 3x, entrega das fotos em até 30 dias após o ensaio."
           />
         </section>
+          </TabsContent>
+        </Tabs>
+
+
 
         <div className="flex flex-wrap justify-end gap-2 pb-6">
           <Button type="button" variant="outline" onClick={() => navigate(voltarPara)}>
