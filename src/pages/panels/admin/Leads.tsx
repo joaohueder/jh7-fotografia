@@ -117,12 +117,14 @@ export default function LeadsList() {
   const { data: limites, refetch: recarregarLimites } = useLimitesEmpresa();
   const { data: orcamentos } = useOrcamentos();
 
-  // Quantos orçamentos já existem para cada lead (um lead pode ter vários).
+  // Orçamentos já criados para cada lead (um lead pode ter vários).
   const orcamentosPorLead = useMemo(() => {
-    const mapa = new Map<string, number>();
+    const mapa = new Map<string, typeof orcamentos>();
     (orcamentos ?? []).forEach((o) => {
       if (!o.cliente_id) return;
-      mapa.set(o.cliente_id, (mapa.get(o.cliente_id) ?? 0) + 1);
+      const atual = mapa.get(o.cliente_id) ?? [];
+      atual.push(o);
+      mapa.set(o.cliente_id, atual);
     });
     return mapa;
   }, [orcamentos]);
