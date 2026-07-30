@@ -28,11 +28,13 @@ import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-messa
 import { formatMoney } from "@/lib/br-masks";
 import { useServicos } from "@/hooks/use-servicos";
 import {
+  useComposicaoDosServicos,
   useGrupoServico,
   useGrupoServicoItens,
   useSalvarGrupoServico,
   type GrupoServicoStatus,
 } from "@/hooks/use-grupos-servicos";
+
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
