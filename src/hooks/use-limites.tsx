@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/selfhosted/client";
 import { useEmpresaAtual } from "@/hooks/use-clientes";
+import { useRealtime } from "@/hooks/use-realtime";
 
 const db = supabase as unknown as SupabaseClient;
 
@@ -26,6 +27,14 @@ export interface LimitesEmpresa {
  */
 export function useLimitesEmpresa() {
   const { data: empresaId } = useEmpresaAtual();
+
+  // Tempo real: consumo e limites acompanham cadastros e trocas de plano.
+  useRealtime(
+    "limites-empresa",
+    ["clientes", "empresa_assinaturas", "planos"],
+    [["limites-empresa", empresaId ?? null]],
+    Boolean(empresaId),
+  );
 
   return useQuery({
     queryKey: ["limites-empresa", empresaId ?? null],

@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/selfhosted/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useRealtime } from "@/hooks/use-realtime";
 
 const db = supabase as unknown as SupabaseClient;
 
@@ -15,6 +16,9 @@ export interface PerfilBasico {
 export function useProfile() {
   const { user } = useAuth();
   const userId = user?.id ?? null;
+
+  // Tempo real: o nome exibido muda na hora se o perfil for alterado.
+  useRealtime("profile", ["profiles"], [["profile", userId]], Boolean(userId));
 
   const { data, isLoading } = useQuery({
     queryKey: ["profile", userId],

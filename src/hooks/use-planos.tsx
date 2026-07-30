@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/selfhosted/client";
+import { useRealtime } from "@/hooks/use-realtime";
 
 // Tabela do Supabase autohospedado (fora dos tipos gerados).
 const db = supabase as unknown as SupabaseClient;
@@ -76,6 +77,8 @@ export interface PlanoUso {
  * Usado para exibir o contador no card e bloquear exclusões indevidas.
  */
 export function usePlanosUso() {
+  useRealtime("planos-uso", ["empresa_assinaturas", "planos"], [["planos-uso"], ["planos"]]);
+
   return useQuery({
     queryKey: ["planos-uso"],
     queryFn: async (): Promise<Map<string, PlanoUso>> => {

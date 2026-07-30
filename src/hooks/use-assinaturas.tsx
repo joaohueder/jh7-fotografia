@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/selfhosted/client";
+import { useRealtime } from "@/hooks/use-realtime";
 
 // Tabela do Supabase autohospedado (fora dos tipos gerados).
 const db = supabase as unknown as SupabaseClient;
@@ -44,6 +45,17 @@ function traduzErro(err: unknown) {
 
 /** Histórico completo de assinaturas da empresa (mais recentes primeiro). */
 export function useAssinaturas(empresaId: string | undefined) {
+  useRealtime(
+    "assinaturas-empresa",
+    ["empresa_assinaturas", "planos"],
+    [
+      ["empresa-assinaturas", empresaId ?? null],
+      ["empresa-assinaturas-ativas"],
+      ["limites-empresa"],
+    ],
+    Boolean(empresaId),
+  );
+
   return useQuery({
     queryKey: ["empresa-assinaturas", empresaId ?? null],
     enabled: Boolean(empresaId),
@@ -118,6 +130,12 @@ export function useEncerrarAssinatura() {
  * Vigente = ativo e sem data de fim ou com fim ainda no futuro.
  */
 export function useAssinaturasAtivas() {
+  useRealtime(
+    "assinaturas-ativas",
+    ["empresa_assinaturas"],
+    [["empresa-assinaturas-ativas"], ["empresas"]],
+  );
+
   return useQuery({
     queryKey: ["empresa-assinaturas-ativas"],
     queryFn: async (): Promise<Map<string, Assinatura>> => {
@@ -150,6 +168,12 @@ export interface AssinaturaComEmpresa extends Assinatura {
 
 /** Todas as assinaturas do SaaS, com dados da empresa e dias restantes. */
 export function useTodasAssinaturas() {
+  useRealtime(
+    "assinaturas-todas",
+    ["empresa_assinaturas", "empresas", "planos"],
+    [["assinaturas-todas"], ["empresa-assinaturas-ativas"]],
+  );
+
   return useQuery({
     queryKey: ["assinaturas-todas"],
     staleTime: 0,

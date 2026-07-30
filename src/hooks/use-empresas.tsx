@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/selfhosted/client";
+import { useRealtime } from "@/hooks/use-realtime";
 
 // Tabelas do Supabase autohospedado (fora dos tipos gerados).
 const db = supabase as unknown as SupabaseClient;
@@ -50,6 +51,13 @@ export interface Empresa {
 export type EmpresaPayload = Omit<Empresa, "id" | "admin_user_id" | "created_at">;
 
 export function useEmpresas() {
+  // Tempo real: a lista acompanha qualquer mudança feita por outro usuário.
+  useRealtime(
+    "empresas",
+    ["empresas", "empresa_contatos", "empresa_assinaturas"],
+    [["empresas"], ["empresa-assinaturas-ativas"]],
+  );
+
   return useQuery({
     queryKey: ["empresas"],
     queryFn: async (): Promise<Empresa[]> => {
@@ -64,6 +72,13 @@ export function useEmpresas() {
 }
 
 export function useEmpresa(id: string | undefined) {
+  useRealtime(
+    "empresa",
+    ["empresas", "empresa_contatos"],
+    [["empresa", id ?? null], ["empresas"]],
+    Boolean(id),
+  );
+
   return useQuery({
     queryKey: ["empresa", id],
     enabled: Boolean(id),
@@ -86,6 +101,8 @@ export function useEmpresa(id: string | undefined) {
 
 /** Cadastro da empresa do usuário logado (admin da empresa ou SA personificando). */
 export function useMinhaEmpresa(empresaId?: string | null) {
+  useRealtime("minha-empresa", ["empresas", "empresa_contatos"], [["minha-empresa"]]);
+
   return useQuery({
     queryKey: ["minha-empresa", empresaId ?? "self"],
     staleTime: 0,
