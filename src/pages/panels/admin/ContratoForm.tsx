@@ -1122,9 +1122,9 @@ export default function ContratoForm() {
             </div>
           </div>
         </section>
+          </TabsContent>
 
-
-
+          <TabsContent value="observacoes" className="mt-0">
         <section className="space-y-2 rounded-xl border border-border bg-card p-4">
           <Label htmlFor="obs" className="flex items-center gap-1.5">
             Observações do contrato
@@ -1139,6 +1139,10 @@ export default function ContratoForm() {
             placeholder="Ex.: pagamento em 3x, entrega das fotos em até 30 dias após o ensaio."
           />
         </section>
+          </TabsContent>
+        </Tabs>
+
+
 
         <div className="flex flex-wrap justify-end gap-2 pb-6">
           <Button type="button" variant="outline" onClick={() => navigate(voltarPara)}>
