@@ -728,6 +728,73 @@ export default function LeadsList() {
                       <span>·</span>
                       <span>Criado em {dataHora(l.created_at)}</span>
                     </div>
+
+                    {(orcamentosPorLead.get(l.id)?.length ?? 0) > 0 ? (
+                      <div className="rounded-lg border border-border bg-muted/30 p-3">
+                        <p className="mb-2 text-xs font-semibold text-foreground">
+                          Orçamentos deste lead ({orcamentosPorLead.get(l.id)?.length})
+                          <span className="ml-1 font-normal text-muted-foreground">
+                            — só é possível alterar propostas em Rascunho; as demais abrem apenas
+                            para consulta.
+                          </span>
+                        </p>
+                        <ul className="space-y-2">
+                          {(orcamentosPorLead.get(l.id) ?? []).map((o) => (
+                            <li
+                              key={o.id}
+                              className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-card px-3 py-2"
+                            >
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-semibold">
+                                  {o.descricao || "Orçamento sem descrição"}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {rotuloStatus(o.status)}
+                                  {o.vencido ? " · Vencido" : ""} · {o.total_itens} serviço
+                                  {o.total_itens === 1 ? "" : "s"} ·{" "}
+                                  {o.total_final == null
+                                    ? "Sem valor informado"
+                                    : `R$ ${o.total_final.toLocaleString("pt-BR", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                      })}`}
+                                </p>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="tap-target gap-1"
+                                title={
+                                  o.status === "RASCUNHO"
+                                    ? "Alterar esta proposta em rascunho."
+                                    : "Esta proposta já saiu do rascunho e abre somente para consulta."
+                                }
+                                onClick={() =>
+                                  navigate(
+                                    o.status === "RASCUNHO"
+                                      ? `/admin/orcamentos/${o.id}?voltar=${encodeURIComponent("/admin/leads")}`
+                                      : `/admin/orcamentos/${o.id}?modo=ver&voltar=${encodeURIComponent("/admin/leads")}`,
+                                  )
+                                }
+                              >
+                                {o.status === "RASCUNHO" ? (
+                                  <>
+                                    <Pencil className="h-3.5 w-3.5" />
+                                    Editar
+                                  </>
+                                ) : (
+                                  <>
+                                    <Eye className="h-3.5 w-3.5" />
+                                    Visualizar
+                                  </>
+                                )}
+                              </Button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </li>
