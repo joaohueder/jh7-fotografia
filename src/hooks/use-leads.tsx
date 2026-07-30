@@ -5,6 +5,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/selfhosted/client";
 import { useEmpresaAtual } from "@/hooks/use-clientes";
 import { type NotaModulo } from "@/hooks/use-cliente-notas";
+import { ehClienteConvertido } from "@/lib/clientes";
+
 
 const db = supabase as unknown as SupabaseClient;
 
