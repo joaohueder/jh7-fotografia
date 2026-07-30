@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   ArrowRight,
   ClipboardCheck,
+  FileText,
 
   Loader2,
   MapPin,
