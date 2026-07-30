@@ -332,6 +332,12 @@ export default function Orcamentos() {
                   </div>
 
                   <div className="flex items-center gap-1">
+                    {o.cliente_origem === "LEAD" ? (
+                      <div className="flex items-center gap-1.5 rounded-md border border-dashed border-border px-2.5 py-1.5 text-xs text-muted-foreground">
+                        Situação bloqueada
+                        <HelpTip text="Este orçamento pertence a um lead. A situação só pode ser alterada depois que o lead virar cliente." />
+                      </div>
+                    ) : (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -346,6 +352,7 @@ export default function Orcamentos() {
                           Situação
                         </Button>
                       </DropdownMenuTrigger>
+
                       <DropdownMenuContent align="end" className="w-64">
                         <DropdownMenuLabel>Mudar situação do orçamento</DropdownMenuLabel>
                         <DropdownMenuSeparator />
