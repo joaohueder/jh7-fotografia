@@ -22,16 +22,20 @@ import { SearchableSelect } from "@/components/searchable-select";
 
 import { useClientes } from "@/hooks/use-clientes";
 import { useServicos } from "@/hooks/use-servicos";
+import { useProdutos } from "@/hooks/use-produtos";
 import { useComposicaoDosServicos } from "@/hooks/use-grupos-servicos";
 import { useOrcamento, useOrcamentos } from "@/hooks/use-orcamentos";
 import { ehClienteAtivoConvertido } from "@/lib/clientes";
 
 import {
   CONTRATO_STATUS,
+  aplicarAjustesContrato,
   rotuloContratoStatus,
   somarItensContrato,
   useContrato,
   useSalvarContrato,
+  type ContratoAjuste,
+  type ContratoAjusteTipo,
   type ContratoItem,
   type ContratoStatus,
 } from "@/hooks/use-contratos";
