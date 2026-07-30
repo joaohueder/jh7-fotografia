@@ -812,20 +812,102 @@ export default function ContratoForm() {
                     )}
                   </div>
 
-                  {item.produtos.length > 0 ? (
-                    <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-                      <Package className="h-3.5 w-3.5" />
-                      Produtos incluídos:
-                      {item.produtos.map((p, i) => (
-                        <span
-                          key={`${item.chave}-p-${i}`}
-                          className="rounded-full border border-border px-2 py-0.5"
-                        >
-                          {p.quantidade}x {p.nome}
-                        </span>
-                      ))}
+                  {/* Produtos deste serviço — cópia editável, igual ao orçamento */}
+                  <div className="mt-3 space-y-2 rounded-lg border border-dashed border-border p-3">
+                    <div className="flex items-center gap-1.5">
+                      <Package className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Produtos deste serviço
+                      </span>
+                      <HelpTip text="Estes produtos foram copiados do cadastro do serviço ou do orçamento. Você pode incluir, remover ou mudar a quantidade só neste contrato — o cadastro e o orçamento não mudam." />
                     </div>
-                  ) : null}
+
+                    {item.produtos.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">
+                        {somenteLeitura
+                          ? "Nenhum produto incluído neste serviço."
+                          : "Nenhum produto incluído. Use o campo abaixo para adicionar."}
+                      </p>
+                    ) : somenteLeitura ? (
+                      <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                        {item.produtos.map((p, i) => (
+                          <span
+                            key={`${item.chave}-p-${i}`}
+                            className="rounded-full border border-border px-2 py-0.5"
+                          >
+                            {p.quantidade}x {p.nome}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <ul className="space-y-2">
+                        {item.produtos.map((p, pIndice) => (
+                          <li key={`${item.chave}-p-${pIndice}`} className="flex items-center gap-2">
+                            <Input
+                              className="h-9 flex-1"
+                              value={p.nome}
+                              aria-label={`Nome do produto ${pIndice + 1}`}
+                              onChange={(e) =>
+                                atualizarProduto(item.chave, pIndice, { nome: e.target.value })
+                              }
+                            />
+                            <Input
+                              className="h-9 w-20"
+                              inputMode="decimal"
+                              aria-label={`Quantidade de ${p.nome}`}
+                              value={String(p.quantidade)}
+                              onChange={(e) =>
+                                atualizarProduto(item.chave, pIndice, {
+                                  quantidade:
+                                    Number(
+                                      e.target.value.replace(/[^\d,.]/g, "").replace(",", "."),
+                                    ) || 0,
+                                })
+                              }
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-9 w-9"
+                              aria-label={`Remover o produto ${p.nome} deste serviço`}
+                              onClick={() => removerProduto(item.chave, pIndice)}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {somenteLeitura ? null : (
+                      <div className="flex flex-col gap-2 sm:flex-row">
+                        <SearchableSelect
+                          className="sm:flex-1"
+                          value={produtoEscolhido[item.chave] ?? ""}
+                          onChange={(v) =>
+                            setProdutoEscolhido((atual) => ({ ...atual, [item.chave]: v }))
+                          }
+                          opcoes={opcoesProdutos}
+                          placeholder="Escolha um produto para incluir"
+                          placeholderBusca="Pesquisar produto…"
+                          vazio="Nenhum produto ativo encontrado."
+                          ariaLabel={`Produto para incluir em ${item.nome || "serviço"}`}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="gap-2"
+                          onClick={() => adicionarProduto(item.chave)}
+                        >
+                          <Plus className="h-4 w-4" />
+                          Incluir produto
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
                 </li>
               ))}
             </ul>
