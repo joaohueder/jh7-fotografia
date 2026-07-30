@@ -527,17 +527,41 @@ export default function OrcamentoForm() {
               <div className="space-y-2">
                 <Label className="flex items-center gap-1.5">
                   Cliente ou lead *
-                  <HelpTip text="Escolha para quem é a proposta. Aparecem os clientes cadastrados e também os leads (contatos que ainda não viraram clientes)." />
+                  <HelpTip
+                    text={
+                      clienteFixo
+                        ? "Esta proposta foi aberta pela ficha do cliente, por isso o contato já vem preenchido e não pode ser trocado aqui."
+                        : "Escolha para quem é a proposta. Aparecem os clientes cadastrados e também os leads (contatos que ainda não viraram clientes)."
+                    }
+                  />
                 </Label>
-                <SearchableSelect
-                  value={clienteId}
-                  onChange={setClienteId}
-                  opcoes={opcoesContato}
-                  placeholder="Escolha o cliente ou lead"
-                  placeholderBusca="Pesquisar pelo nome…"
-                  vazio="Nenhum cliente ou lead encontrado."
-                  ariaLabel="Cliente ou lead do orçamento"
-                />
+                {clienteFixo ? (
+                  <>
+                    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
+                      <span className="text-sm font-semibold">
+                        {opcoesContato.find((o) => o.value === clienteFixo)?.label ??
+                          "Carregando cliente…"}
+                      </span>
+                      <span className="rounded-full border border-border bg-background px-2 py-0.5 text-xs text-muted-foreground">
+                        Não pode ser alterado
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Para fazer uma proposta para outro contato, crie o orçamento pelo módulo
+                      Orçamentos.
+                    </p>
+                  </>
+                ) : (
+                  <SearchableSelect
+                    value={clienteId}
+                    onChange={setClienteId}
+                    opcoes={opcoesContato}
+                    placeholder="Escolha o cliente ou lead"
+                    placeholderBusca="Pesquisar pelo nome…"
+                    vazio="Nenhum cliente ou lead encontrado."
+                    ariaLabel="Cliente ou lead do orçamento"
+                  />
+                )}
               </div>
 
               <div className="space-y-2">
