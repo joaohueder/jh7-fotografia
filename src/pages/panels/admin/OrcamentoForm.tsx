@@ -381,7 +381,7 @@ export default function OrcamentoForm() {
             nome: i.nome,
             origem_tipo: i.origem_tipo,
             origem_nome: i.origem_nome,
-            quantidade: Number(i.quantidadeTexto.replace(",", ".")) || 1,
+            quantidade: 1,
             valor_unitario: parseMoney(i.valorTexto),
             valor_custo: i.valor_custo,
             produtos: i.produtos
