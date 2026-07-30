@@ -158,6 +158,8 @@ export default function OrcamentoForm() {
   // e não pode ser trocado; ao salvar, o usuário volta para a aba de origem.
   const clienteFixo = editando ? null : searchParams.get("cliente");
   const voltarPara = searchParams.get("voltar") || "/admin/orcamentos";
+  // Abertura apenas para consulta (orçamentos que já saíram do rascunho)
+  const somenteLeitura = editando && searchParams.get("modo") === "ver";
 
   usePageMeta(
     editando ? "Editar orçamento — JH7 Gestão de Estúdios Fotográficos" : "Novo orçamento — JH7 Gestão de Estúdios Fotográficos",
@@ -508,12 +510,18 @@ export default function OrcamentoForm() {
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">
-                {editando ? "Editar orçamento" : "Novo orçamento"}
+                {somenteLeitura
+                  ? "Visualizar orçamento"
+                  : editando
+                    ? "Editar orçamento"
+                    : "Novo orçamento"}
               </h1>
               <HelpTip text="Preencha para quem é a proposta, o que ela contempla, em que situação está e até quando ela vale. Campos com * são obrigatórios." />
             </div>
             <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
-              Registre a proposta enviada para um cliente ou lead da sua empresa.
+              {somenteLeitura
+                ? "Este orçamento já saiu do rascunho, por isso ele está aberto apenas para consulta. Para alterar valores, volte a situação para Rascunho na lista de orçamentos."
+                : "Registre a proposta enviada para um cliente ou lead da sua empresa."}
             </p>
           </div>
         </header>
@@ -525,6 +533,7 @@ export default function OrcamentoForm() {
           </div>
         ) : (
           <form onSubmit={enviar} className="space-y-6">
+            <fieldset disabled={somenteLeitura} className="min-w-0 space-y-6">
             <section className="space-y-4 rounded-xl border border-border bg-card p-4 sm:p-6">
               <div className="space-y-2">
                 <Label className="flex items-center gap-1.5">
@@ -1059,11 +1068,17 @@ export default function OrcamentoForm() {
             </section>
 
 
+            </fieldset>
+
             <div className="flex flex-wrap justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => navigate(voltarPara)}>
-                Cancelar
+                {somenteLeitura ? "Voltar" : "Cancelar"}
               </Button>
-              <Button type="submit" className="gap-2" disabled={salvar.isPending}>
+              <Button
+                type="submit"
+                className={`gap-2 ${somenteLeitura ? "hidden" : ""}`}
+                disabled={salvar.isPending}
+              >
                 {salvar.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (

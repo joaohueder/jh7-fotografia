@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Loader2, Pencil, Plus } from "lucide-react";
+import { Eye, FileText, Loader2, Pencil, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useOrcamentos, rotuloStatus } from "@/hooks/use-orcamentos";
@@ -47,7 +47,7 @@ export function ClienteOrcamentos({ clienteId }: { clienteId: string }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
           Aqui ficam todas as propostas feitas para este cliente. Ao clicar em “Novo orçamento”, o
-          cliente já vai preenchido e não pode ser trocado. Para alterar uma proposta, clique no botão “Editar” do card — ao
+          cliente já vai preenchido e não pode ser trocado. Só é possível alterar propostas que ainda estão em Rascunho; nas demais situações o botão abre a proposta apenas para consulta — ao
           salvar, voltar ou cancelar você retorna para esta aba.
         </p>
         <Button
@@ -112,10 +112,25 @@ export function ClienteOrcamentos({ clienteId }: { clienteId: string }) {
                 size="sm"
                 variant="outline"
                 className="tap-target absolute right-3 top-3 gap-1"
-                onClick={() => navigate(`/admin/orcamentos/${o.id}?voltar=${voltar}`)}
+                onClick={() =>
+                  navigate(
+                    o.status === "RASCUNHO"
+                      ? `/admin/orcamentos/${o.id}?voltar=${voltar}`
+                      : `/admin/orcamentos/${o.id}?modo=ver&voltar=${voltar}`,
+                  )
+                }
               >
-                <Pencil className="h-3.5 w-3.5" />
-                Editar
+                {o.status === "RASCUNHO" ? (
+                  <>
+                    <Pencil className="h-3.5 w-3.5" />
+                    Editar
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-3.5 w-3.5" />
+                    Visualizar
+                  </>
+                )}
               </Button>
             </li>
           ))}
