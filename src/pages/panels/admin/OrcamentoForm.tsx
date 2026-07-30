@@ -501,7 +501,9 @@ export default function OrcamentoForm() {
             onClick={() => navigate(voltarPara)}
           >
             <ArrowLeft className="h-4 w-4" />
-            {clienteFixo ? "Voltar para o cliente" : "Voltar para a lista"}
+            {voltarPara.startsWith("/admin/clientes/")
+              ? "Voltar para o cliente"
+              : "Voltar para a lista"}
           </Button>
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
