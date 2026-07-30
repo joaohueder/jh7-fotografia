@@ -308,6 +308,17 @@ export default function App() {
                 </RequireAuth>
               }
             />
+            <Route
+              path="/admin/servicos"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <ServicosList />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+
 
 
 
