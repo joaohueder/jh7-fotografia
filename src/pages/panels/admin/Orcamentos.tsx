@@ -172,7 +172,8 @@ export default function Orcamentos() {
 
   async function alterarSituacao(o: Orcamento, status: OrcamentoStatus) {
     if (o.status === status) return;
-    if (o.cliente_origem === "LEAD") {
+    // Regra única (src/lib/clientes.ts): só bloqueia enquanto for lead em aberto.
+    if (o.cliente_lead_aberto) {
       notifyValidation(
         "Este orçamento é de um lead. Converta o lead em cliente para poder mudar a situação da proposta.",
       );
