@@ -40,6 +40,7 @@ import { useClientes } from "@/hooks/use-clientes";
 import { useLeads } from "@/hooks/use-leads";
 import { useServicos } from "@/hooks/use-servicos";
 import { useComposicaoDosServicos, useGruposServicos } from "@/hooks/use-grupos-servicos";
+import { useProdutos } from "@/hooks/use-produtos";
 import {
   ORCAMENTO_STATUS,
   somarItens,
