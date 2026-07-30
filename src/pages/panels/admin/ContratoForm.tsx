@@ -133,13 +133,19 @@ export default function ContratoForm() {
     setCarregado(true);
   }, [edicao, contratoSalvo, carregado]);
 
+  // Só entram na lista os clientes de verdade e ativos. Quem veio de um lead e
+  // já foi convertido conta como cliente; quem ainda é lead fica de fora.
   const clientesAtivos = useMemo(
     () =>
-      (clientes ?? []).filter(
-        (c) => c.origem === "CLIENTE" && (c.status === "ATIVO" || c.id === clienteId),
-      ),
+      (clientes ?? []).filter((c) => {
+        if (c.id === clienteId) return true; // mantém o cliente já vinculado ao contrato
+        if (c.status !== "ATIVO") return false;
+        const convertido = (c as { lead_status?: string | null }).lead_status === "CLIENTE";
+        return c.origem === "CLIENTE" || convertido;
+      }),
     [clientes, clienteId],
   );
+
 
   // Somente orçamentos aprovados do cliente escolhido podem virar contrato.
   const orcamentosAprovados = useMemo(
@@ -351,7 +357,7 @@ export default function ContratoForm() {
             <div className="space-y-1.5">
               <Label className="flex items-center gap-1.5">
                 Cliente *
-                <HelpTip text="Somente clientes já cadastrados e ativos podem assinar contratos. Se o contato ainda é um lead, converta-o em cliente antes." />
+                <HelpTip text="Aparecem aqui apenas clientes ativos — inclusive os que começaram como lead e já foram convertidos em cliente. Contatos que ainda são leads e clientes inativos não podem assinar contrato: converta o lead ou reative o cliente antes." />
               </Label>
               <SearchableSelect
                 value={clienteId}
