@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
   Loader2,
@@ -15,16 +16,10 @@ import { PanelLayout } from "@/components/panel-layout";
 import { IconAction } from "@/components/icon-action";
 import { HelpTip } from "@/components/page-help";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
-import {
-  notifyError,
-  notifySuccess,
-  notifyValidation,
-  rawErrorMessage,
-} from "@/lib/system-message";
-import { formatMoney, maskMoney, parseMoney } from "@/lib/br-masks";
+import { notifyError, notifySuccess, rawErrorMessage } from "@/lib/system-message";
+import { formatMoney } from "@/lib/br-masks";
 import {
   useDeleteServico,
-  useSalvarServico,
   useServicos,
   useSetServicoStatus,
   type Servico,
@@ -33,15 +28,6 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,8 +40,6 @@ import {
 } from "@/components/ui/alert-dialog";
 
 type Filtro = "todos" | "ativos" | "inativos";
-
-const LIMITE_VALOR = 999999.99;
 
 function StatusBadge({ status }: { status: ServicoStatus }) {
   const ativo = status === "ATIVO";
@@ -80,6 +64,7 @@ export default function Servicos() {
     "Cadastro dos serviços prestados pelo estúdio.",
   );
 
+  const navigate = useNavigate();
   const { data: servicos, isLoading, error } = useServicos();
   // Diagnóstico amigável: se a tabela ainda não existe no banco, explicamos o
   // que precisa ser feito em vez de mostrar um erro genérico de conexão.
@@ -90,21 +75,11 @@ export default function Servicos() {
   const permissaoDesatualizada =
     /não está vinculado a uma empresa|P0001|permission denied/i.test(detalheErro);
 
-  const salvar = useSalvarServico();
   const setStatus = useSetServicoStatus();
   const remover = useDeleteServico();
 
   const [busca, setBusca] = useState("");
   const [filtro, setFiltro] = useState<Filtro>("todos");
-
-  // Formulário (modal)
-  const [aberto, setAberto] = useState(false);
-  const [editando, setEditando] = useState<Servico | null>(null);
-  const [nome, setNome] = useState("");
-  const [status, setStatusForm] = useState<ServicoStatus>("ATIVO");
-  const [custo, setCusto] = useState("");
-  const [venda, setVenda] = useState("");
-  const [erros, setErros] = useState<{ nome?: string; custo?: string; venda?: string }>({});
 
   const [alvoStatus, setAlvoStatus] = useState<Servico | null>(null);
   const [alvoExclusao, setAlvoExclusao] = useState<Servico | null>(null);
@@ -127,64 +102,6 @@ export default function Servicos() {
       inativos: todos.filter((s) => s.status === "INATIVO").length,
     };
   }, [servicos]);
-
-  function abrirNovo() {
-    setEditando(null);
-    setNome("");
-    setStatusForm("ATIVO");
-    setCusto("");
-    setVenda("");
-    setErros({});
-    setAberto(true);
-  }
-
-  function abrirEdicao(s: Servico) {
-    setEditando(s);
-    setNome(s.nome);
-    setStatusForm(s.status);
-    setCusto(formatMoney(s.valor_custo));
-    setVenda(formatMoney(s.valor_venda));
-    setErros({});
-    setAberto(true);
-  }
-
-  function validar() {
-    const novos: typeof erros = {};
-    const nomeLimpo = nome.trim();
-    if (nomeLimpo.length < 2) novos.nome = "Informe o nome do serviço (mínimo 2 caracteres).";
-
-    const c = parseMoney(custo);
-    const v = parseMoney(venda);
-    if (c === null) novos.custo = "Informe o valor de custo (use 0,00 se não houver).";
-    else if (c > LIMITE_VALOR) novos.custo = "O valor de custo deve ser no máximo R$ 999.999,99.";
-    if (v === null) novos.venda = "Informe o valor de venda.";
-    else if (v > LIMITE_VALOR) novos.venda = "O valor de venda deve ser no máximo R$ 999.999,99.";
-
-    setErros(novos);
-    return Object.keys(novos).length === 0;
-  }
-
-  async function submeter() {
-    if (!validar()) {
-      notifyValidation("Revise os campos destacados para continuar.");
-      return;
-    }
-    try {
-      await salvar.mutateAsync({
-        id: editando?.id,
-        dados: {
-          nome: nome.trim(),
-          status,
-          valor_custo: parseMoney(custo) ?? 0,
-          valor_venda: parseMoney(venda) ?? 0,
-        },
-      });
-      notifySuccess(editando ? "Serviço atualizado." : "Serviço cadastrado com sucesso.");
-      setAberto(false);
-    } catch (err) {
-      notifyError(err, { title: "Não foi possível salvar o serviço" });
-    }
-  }
 
   async function confirmarStatus() {
     if (!alvoStatus) return;
@@ -228,7 +145,7 @@ export default function Servicos() {
               Cadastro dos serviços prestados pelo estúdio.
             </p>
           </div>
-          <Button className="tap-target gap-2" onClick={abrirNovo}>
+          <Button className="tap-target gap-2" onClick={() => navigate("/admin/servicos/novo")}>
             <Plus className="h-4 w-4" />
             Novo serviço
           </Button>
@@ -293,7 +210,7 @@ export default function Servicos() {
               </p>
               <p className="text-sm text-muted-foreground">
                 {tabelaAusente || permissaoDesatualizada
-                  ? "Peça ao responsável técnico para executar o script sql/38_servicos.sql no banco de dados do sistema. Ele cria a tabela de serviços com as permissões corretas. Depois disso, recarregue esta página."
+                  ? "Peça ao responsável técnico para executar o script sql/38_servicos.sql e sql/39_servico_produtos.sql no banco de dados do sistema. Ele cria a tabela de serviços com as permissões corretas. Depois disso, recarregue esta página."
                   : "Verifique sua conexão e tente novamente em alguns instantes. Se o erro continuar, avise o administrador do sistema."}
               </p>
               <p className="text-xs text-muted-foreground/80">Detalhe técnico: {detalheErro}</p>
@@ -341,7 +258,7 @@ export default function Servicos() {
                     <IconAction
                       label="Editar serviço"
                       ariaLabel={`Editar ${s.nome}`}
-                      onClick={() => abrirEdicao(s)}
+                      onClick={() => navigate(`/admin/servicos/${s.id}`)}
                     >
                       <Pencil className="h-4 w-4" />
                     </IconAction>
@@ -367,111 +284,6 @@ export default function Servicos() {
           )}
         </div>
       </div>
-
-      {/* Cadastro / edição */}
-      <Dialog open={aberto} onOpenChange={(v) => (salvar.isPending ? null : setAberto(v))}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{editando ? "Editar serviço" : "Novo serviço"}</DialogTitle>
-            <DialogDescription>
-              Os campos marcados com <span className="text-destructive">*</span> são obrigatórios.
-              Informe quanto o serviço custa para o estúdio e por quanto ele é vendido.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="servico-nome" className="flex items-center gap-1.5">
-                Nome do serviço <span className="text-destructive">*</span>
-                <HelpTip text="Como o serviço aparece nas listas e propostas. Ex.: Cobertura de Casamento, Hora Extra, Edição Avançada." />
-              </Label>
-              <Input
-                id="servico-nome"
-                value={nome}
-                maxLength={120}
-                onChange={(e) => setNome(e.target.value)}
-                placeholder="Ex.: Cobertura de Casamento"
-              />
-              {erros.nome ? <p className="text-xs text-destructive">{erros.nome}</p> : null}
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="flex items-center gap-1.5">
-                Status <span className="text-destructive">*</span>
-                <HelpTip text="Ativo: o serviço está disponível para venda. Inativo: continua no histórico, mas não deve mais ser oferecido." />
-              </Label>
-              <div className="flex gap-2">
-                {([
-                  ["ATIVO", "Ativo"],
-                  ["INATIVO", "Inativo"],
-                ] as [ServicoStatus, string][]).map(([valor, rotulo]) => (
-                  <Button
-                    key={valor}
-                    type="button"
-                    variant={status === valor ? "default" : "outline"}
-                    onClick={() => setStatusForm(valor)}
-                  >
-                    {rotulo}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="servico-custo" className="flex items-center gap-1.5">
-                  Valor de custo <span className="text-destructive">*</span>
-                  <HelpTip text="Quanto este serviço custa para o seu estúdio (equipe, deslocamento, fornecedor). Se não houver custo, deixe 0,00." />
-                </Label>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">R$</span>
-                  <Input
-                    id="servico-custo"
-                    inputMode="numeric"
-                    value={custo}
-                    onChange={(e) => setCusto(maskMoney(e.target.value))}
-                    placeholder="0,00"
-                  />
-                </div>
-                {erros.custo ? <p className="text-xs text-destructive">{erros.custo}</p> : null}
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="servico-venda" className="flex items-center gap-1.5">
-                  Valor de venda <span className="text-destructive">*</span>
-                  <HelpTip text="Preço cobrado do cliente por este serviço." />
-                </Label>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">R$</span>
-                  <Input
-                    id="servico-venda"
-                    inputMode="numeric"
-                    value={venda}
-                    onChange={(e) => setVenda(maskMoney(e.target.value))}
-                    placeholder="0,00"
-                  />
-                </div>
-                {erros.venda ? <p className="text-xs text-destructive">{erros.venda}</p> : null}
-              </div>
-            </div>
-
-            <p className="text-xs text-muted-foreground">
-              Margem estimada: R${" "}
-              {formatMoney(Math.max((parseMoney(venda) ?? 0) - (parseMoney(custo) ?? 0), -LIMITE_VALOR))}
-            </p>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAberto(false)} disabled={salvar.isPending}>
-              Cancelar
-            </Button>
-            <Button onClick={submeter} disabled={salvar.isPending} className="gap-2">
-              {salvar.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {editando ? "Salvar alterações" : "Cadastrar serviço"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Confirmação de status */}
       <AlertDialog open={Boolean(alvoStatus)} onOpenChange={(v) => (v ? null : setAlvoStatus(null))}>
