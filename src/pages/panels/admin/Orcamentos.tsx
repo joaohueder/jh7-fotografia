@@ -288,7 +288,30 @@ export default function Orcamentos() {
                       {" · "}
                       Validade: {formatarData(o.validade)}
                     </p>
+                    <p className="text-xs text-muted-foreground">
+                      Valor final:{" "}
+                      <strong className="text-foreground">
+                        {o.total_final == null
+                          ? "sem valores informados"
+                          : `R$ ${o.total_final.toLocaleString("pt-BR", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}`}
+                      </strong>
+                      {o.ajuste_tipo !== "NENHUM" && o.ajuste_valor != null
+                        ? ` · ${o.ajuste_tipo === "DESCONTO" ? "Desconto" : "Acréscimo"} de R$ ${o.ajuste_valor.toLocaleString(
+                            "pt-BR",
+                            { minimumFractionDigits: 2, maximumFractionDigits: 2 },
+                          )}${o.ajuste_descricao ? ` (${o.ajuste_descricao})` : ""}`
+                        : ""}
+                    </p>
+                    {o.observacoes ? (
+                      <p className="line-clamp-2 text-xs text-muted-foreground">
+                        Observação: {o.observacoes}
+                      </p>
+                    ) : null}
                   </div>
+
                   <div className="flex items-center gap-1">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
