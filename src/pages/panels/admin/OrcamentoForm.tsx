@@ -522,16 +522,31 @@ export default function OrcamentoForm() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="validade" className="flex items-center gap-1.5">
-                    Validade
-                    <HelpTip text="Até quando o valor combinado vale. Pode ficar em branco se a proposta não tiver prazo." />
+                    Validade (dias)
+                    <HelpTip text="Informe quantos dias a proposta fica válida a partir da data do orçamento. Deixe em branco se não quiser prazo." />
                   </Label>
                   <Input
                     id="validade"
-                    type="date"
-                    value={validade}
-                    min={dataOrcamento || undefined}
-                    onChange={(e) => setValidade(e.target.value)}
+                    type="number"
+                    min={0}
+                    inputMode="numeric"
+                    placeholder="Ex.: 15"
+                    value={diasValidade}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setDiasValidade(v === "" ? "" : Math.max(0, Number(v)));
+                    }}
                   />
+                  {calcularValidade(dataOrcamento, diasValidade) ? (
+                    <p className="text-xs text-muted-foreground">
+                      Validade até{" "}
+                      <strong>
+                        {new Date(
+                          `${calcularValidade(dataOrcamento, diasValidade)}T00:00:00`,
+                        ).toLocaleDateString("pt-BR")}
+                      </strong>
+                    </p>
+                  ) : null}
                 </div>
               </div>
 
