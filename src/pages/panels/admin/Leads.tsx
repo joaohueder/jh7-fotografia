@@ -953,8 +953,10 @@ export default function LeadsList() {
             <AlertDialogTitle>Marcar desistência do lead</AlertDialogTitle>
             <AlertDialogDescription>
               O lead <strong>{alvoDesistencia?.nome}</strong> passará para a situação
-              &ldquo;Desistiu&rdquo; e sairá da lista de contatos aguardando retorno. Nada é
-              apagado: o histórico continua salvo e você pode retomar a negociação depois.
+              &ldquo;Desistiu&rdquo; e sairá da lista de contatos aguardando retorno. Os orçamentos
+              dele que estiverem em rascunho ou enviados passam automaticamente para
+              &ldquo;Recusado&rdquo;. Nada é apagado: o histórico continua salvo e, se você voltar o
+              lead para &ldquo;Aguardando&rdquo;, os orçamentos recusados voltam para rascunho.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
