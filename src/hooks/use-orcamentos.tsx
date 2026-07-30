@@ -278,6 +278,12 @@ export function useSalvarOrcamento() {
         status: dados.status,
         data_orcamento: dados.data_orcamento,
         validade: dados.validade || null,
+        ajuste_tipo: dados.ajuste_tipo,
+        ajuste_valor: dados.ajuste_tipo === "NENHUM" ? null : dados.ajuste_valor,
+        ajuste_descricao:
+          dados.ajuste_tipo === "NENHUM" ? null : dados.ajuste_descricao?.trim() || null,
+        observacoes: dados.observacoes?.trim() || null,
+
       };
 
       let orcamentoId = id;
