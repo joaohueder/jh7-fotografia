@@ -345,7 +345,7 @@ export default function Orcamentos() {
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {o.cliente_nome}
-                      {o.cliente_origem === "LEAD" ? " (lead)" : ""}
+                      {o.cliente_lead_aberto ? " (lead)" : ""}
                       {" · "}
                       Data: {formatarData(o.data_orcamento)}
                       {" · "}
