@@ -60,7 +60,17 @@ export interface OrcamentoItem {
 }
 
 /** Tipo de ajuste no valor final da proposta. */
-export type OrcamentoAjusteTipo = "NENHUM" | "DESCONTO" | "ACRESCIMO";
+export type OrcamentoAjusteTipo = "DESCONTO" | "ACRESCIMO";
+
+/**
+ * Desconto ou acréscimo lançado no orçamento. Podem existir vários no mesmo
+ * orçamento — cada um é um item adicional com valor e motivo próprios.
+ */
+export interface OrcamentoAjuste {
+  tipo: OrcamentoAjusteTipo;
+  valor: number;
+  descricao: string;
+}
 
 export interface Orcamento {
   id: string;
@@ -81,12 +91,8 @@ export interface Orcamento {
   total_itens: number;
   /** Soma de quantidade x valor de cada item (null quando nenhum item tem valor). */
   total_valor: number | null;
-  /** Desconto (subtrai), acréscimo (soma) ou nenhum ajuste. */
-  ajuste_tipo: OrcamentoAjusteTipo;
-  /** Valor em reais do desconto/acréscimo. */
-  ajuste_valor: number | null;
-  /** Motivo do desconto/acréscimo. */
-  ajuste_descricao: string | null;
+  /** Descontos e acréscimos lançados na proposta (podem ser vários). */
+  ajustes: OrcamentoAjuste[];
   /** Observação geral da proposta. */
   observacoes: string | null;
   /** Total dos itens já com o desconto/acréscimo aplicado. */
@@ -99,24 +105,36 @@ export interface OrcamentoPayload {
   status: OrcamentoStatus;
   data_orcamento: string;
   validade: string | null;
-  ajuste_tipo: OrcamentoAjusteTipo;
-  ajuste_valor: number | null;
-  ajuste_descricao: string | null;
+  ajustes: OrcamentoAjuste[];
   observacoes: string | null;
   /** Itens copiados, na ordem escolhida pelo usuário. */
   itens: OrcamentoItem[];
 }
 
-/** Aplica desconto/acréscimo sobre o total dos itens (nunca fica negativo). */
-export function aplicarAjuste(
+/** Soma dos descontos e acréscimos (positivo aumenta, negativo diminui). */
+export function somarAjustes(ajustes: OrcamentoAjuste[]): number {
+  return ajustes.reduce(
+    (s, a) => s + (a.tipo === "DESCONTO" ? -Number(a.valor || 0) : Number(a.valor || 0)),
+    0,
+  );
+}
+
+/** Aplica todos os descontos/acréscimos sobre o total dos itens (nunca fica negativo). */
+export function aplicarAjustes(
   totalItens: number | null,
-  tipo: OrcamentoAjusteTipo,
-  valor: number | null,
+  ajustes: OrcamentoAjuste[],
 ): number | null {
   if (totalItens == null) return null;
-  if (tipo === "NENHUM" || valor == null) return totalItens;
-  const final = tipo === "DESCONTO" ? totalItens - valor : totalItens + valor;
+  const final = totalItens + somarAjustes(ajustes);
   return final < 0 ? 0 : final;
+}
+
+function mapearAjuste(a: any): OrcamentoAjuste {
+  return {
+    tipo: (a.tipo === "ACRESCIMO" ? "ACRESCIMO" : "DESCONTO") as OrcamentoAjusteTipo,
+    valor: Number(a.valor ?? 0),
+    descricao: String(a.descricao ?? ""),
+  };
 }
 
 
@@ -167,6 +185,11 @@ export function useOrcamentos() {
       .channel("orcamentos-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "orcamentos" }, invalidar)
       .on("postgres_changes", { event: "*", schema: "public", table: "orcamento_itens" }, invalidar)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orcamento_ajustes" },
+        invalidar,
+      )
       .on("postgres_changes", { event: "*", schema: "public", table: "clientes" }, invalidar)
       .subscribe();
 
@@ -185,7 +208,7 @@ export function useOrcamentos() {
       const { data, error } = await db
         .from("orcamentos")
         .select(
-          "id, empresa_id, cliente_id, descricao, status, data_orcamento, validade, ajuste_tipo, ajuste_valor, ajuste_descricao, observacoes, created_at, clientes ( nome, origem ), orcamento_itens ( nome, origem_tipo, origem_nome, quantidade, valor_unitario, valor_custo, produtos )",
+          "id, empresa_id, cliente_id, descricao, status, data_orcamento, validade, observacoes, created_at, clientes ( nome, origem ), orcamento_itens ( nome, origem_tipo, origem_nome, quantidade, valor_unitario, valor_custo, produtos ), orcamento_ajustes ( tipo, valor, descricao, ordem )",
         )
         .eq("empresa_id", empresaId!)
         .order("data_orcamento", { ascending: false })
@@ -195,8 +218,10 @@ export function useOrcamentos() {
       return ((data ?? []) as any[]).map((o) => {
         const itens = ((o.orcamento_itens ?? []) as any[]).map(mapearItem);
         const totalItens = somarItens(itens);
-        const ajusteTipo = (o.ajuste_tipo ?? "NENHUM") as OrcamentoAjusteTipo;
-        const ajusteValor = o.ajuste_valor == null ? null : Number(o.ajuste_valor);
+        const ajustes = ((o.orcamento_ajustes ?? []) as any[])
+          .slice()
+          .sort((a, b) => Number(a.ordem ?? 0) - Number(b.ordem ?? 0))
+          .map(mapearAjuste);
         return {
           id: o.id,
           empresa_id: o.empresa_id,
@@ -211,11 +236,9 @@ export function useOrcamentos() {
           vencido: estaVencido(o.validade ?? null, o.status as OrcamentoStatus),
           total_itens: itens.length,
           total_valor: totalItens,
-          ajuste_tipo: ajusteTipo,
-          ajuste_valor: ajusteValor,
-          ajuste_descricao: o.ajuste_descricao ?? null,
+          ajustes,
           observacoes: o.observacoes ?? null,
-          total_final: aplicarAjuste(totalItens, ajusteTipo, ajusteValor),
+          total_final: aplicarAjustes(totalItens, ajustes),
         } as Orcamento;
       });
 
@@ -233,7 +256,7 @@ export function useOrcamento(id?: string) {
       const { data, error } = await db
         .from("orcamentos")
         .select(
-          "cliente_id, descricao, status, data_orcamento, validade, ajuste_tipo, ajuste_valor, ajuste_descricao, observacoes",
+          "cliente_id, descricao, status, data_orcamento, validade, observacoes",
         )
         .eq("id", id!)
         .maybeSingle();
@@ -248,15 +271,20 @@ export function useOrcamento(id?: string) {
         .order("ordem", { ascending: true });
       if (erroItens) throw erroItens;
 
+      const { data: ajustes, error: erroAjustes } = await db
+        .from("orcamento_ajustes")
+        .select("tipo, valor, descricao")
+        .eq("orcamento_id", id!)
+        .order("ordem", { ascending: true });
+      if (erroAjustes) throw erroAjustes;
+
       return {
         cliente_id: o.cliente_id,
         descricao: o.descricao,
         status: o.status as OrcamentoStatus,
         data_orcamento: o.data_orcamento,
         validade: o.validade ?? null,
-        ajuste_tipo: (o.ajuste_tipo ?? "NENHUM") as OrcamentoAjusteTipo,
-        ajuste_valor: o.ajuste_valor == null ? null : Number(o.ajuste_valor),
-        ajuste_descricao: o.ajuste_descricao ?? null,
+        ajustes: ((ajustes ?? []) as any[]).map(mapearAjuste),
         observacoes: o.observacoes ?? null,
         itens: ((itens ?? []) as any[]).map(mapearItem),
       };
@@ -278,10 +306,6 @@ export function useSalvarOrcamento() {
         status: dados.status,
         data_orcamento: dados.data_orcamento,
         validade: dados.validade || null,
-        ajuste_tipo: dados.ajuste_tipo,
-        ajuste_valor: dados.ajuste_tipo === "NENHUM" ? null : dados.ajuste_valor,
-        ajuste_descricao:
-          dados.ajuste_tipo === "NENHUM" ? null : dados.ajuste_descricao?.trim() || null,
         observacoes: dados.observacoes?.trim() || null,
 
       };
@@ -332,6 +356,31 @@ export function useSalvarOrcamento() {
         }));
         const { error: erroItens } = await db.from("orcamento_itens").insert(linhas);
         if (erroItens) throw erroItens;
+      }
+
+      // Descontos e acréscimos: também são regravados por inteiro, na ordem.
+      const { error: erroLimparAjustes } = await db
+        .from("orcamento_ajustes")
+        .delete()
+        .eq("orcamento_id", orcamentoId!);
+      if (erroLimparAjustes) throw erroLimparAjustes;
+
+      const ajustesValidos = (dados.ajustes ?? []).filter(
+        (a) => a.valor > 0 && a.descricao.trim().length >= 2,
+      );
+      if (ajustesValidos.length > 0) {
+        const linhasAjustes = ajustesValidos.map((a, indice) => ({
+          empresa_id: empresaDoOrcamento,
+          orcamento_id: orcamentoId,
+          ordem: indice,
+          tipo: a.tipo,
+          valor: a.valor,
+          descricao: a.descricao.trim().slice(0, 200),
+        }));
+        const { error: erroAjustes } = await db
+          .from("orcamento_ajustes")
+          .insert(linhasAjustes);
+        if (erroAjustes) throw erroAjustes;
       }
 
       return orcamentoId!;
