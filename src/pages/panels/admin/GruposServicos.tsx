@@ -245,50 +245,121 @@ export default function GruposServicos() {
             </div>
           ) : (
             <ul className="divide-y divide-border">
-              {lista.map((g) => (
-                <li key={g.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
-                  <div className="min-w-[12rem] flex-1 space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-semibold text-foreground">{g.nome}</span>
-                      <StatusBadge status={g.status} />
+              {lista.map((g) => {
+                const aberto = expandidos.includes(g.id);
+                return (
+                  <li key={g.id} className="px-4 py-3">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="min-w-[12rem] flex-1 space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-semibold text-foreground">{g.nome}</span>
+                          <StatusBadge status={g.status} />
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {g.total_servicos === 0
+                            ? "Nenhum serviço incluído"
+                            : `${g.total_servicos} serviço${g.total_servicos > 1 ? "s" : ""}`}
+                          {" · "}
+                          Soma de venda:{" "}
+                          {g.total_venda == null
+                            ? "não informado"
+                            : `R$ ${formatMoney(g.total_venda)}`}
+                          {g.descricao ? ` · ${g.descricao}` : ""}
+                        </p>
+                        {g.total_servicos > 0 ? (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 gap-1 px-2 text-xs"
+                            aria-expanded={aberto}
+                            onClick={() =>
+                              setExpandidos((atuais) =>
+                                atuais.includes(g.id)
+                                  ? atuais.filter((x) => x !== g.id)
+                                  : [...atuais, g.id],
+                              )
+                            }
+                          >
+                            {aberto ? (
+                              <ChevronUp className="h-3.5 w-3.5" />
+                            ) : (
+                              <ChevronDown className="h-3.5 w-3.5" />
+                            )}
+                            {aberto
+                              ? "Ocultar serviços e produtos"
+                              : "Ver serviços e produtos incluídos"}
+                          </Button>
+                        ) : null}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <IconAction
+                          label="Editar agrupamento"
+                          ariaLabel={`Editar ${g.nome}`}
+                          onClick={() => navigate(`/admin/agrupamento-servicos/${g.id}`)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </IconAction>
+                        <IconAction
+                          label={
+                            g.status === "ATIVO" ? "Inativar agrupamento" : "Ativar agrupamento"
+                          }
+                          ariaLabel={`${g.status === "ATIVO" ? "Inativar" : "Ativar"} ${g.nome}`}
+                          onClick={() => setAlvoStatus(g)}
+                        >
+                          <Power className="h-4 w-4" />
+                        </IconAction>
+                        <IconAction
+                          label="Excluir agrupamento"
+                          ariaLabel={`Excluir ${g.nome}`}
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => setAlvoExclusao(g)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </IconAction>
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {g.total_servicos === 0
-                        ? "Nenhum serviço incluído"
-                        : `${g.total_servicos} serviço${g.total_servicos > 1 ? "s" : ""}`}
-                      {" · "}
-                      Soma de venda:{" "}
-                      {g.total_venda == null ? "não informado" : `R$ ${formatMoney(g.total_venda)}`}
-                      {g.descricao ? ` · ${g.descricao}` : ""}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <IconAction
-                      label="Editar agrupamento"
-                      ariaLabel={`Editar ${g.nome}`}
-                      onClick={() => navigate(`/admin/agrupamento-servicos/${g.id}`)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </IconAction>
-                    <IconAction
-                      label={g.status === "ATIVO" ? "Inativar agrupamento" : "Ativar agrupamento"}
-                      ariaLabel={`${g.status === "ATIVO" ? "Inativar" : "Ativar"} ${g.nome}`}
-                      onClick={() => setAlvoStatus(g)}
-                    >
-                      <Power className="h-4 w-4" />
-                    </IconAction>
-                    <IconAction
-                      label="Excluir agrupamento"
-                      ariaLabel={`Excluir ${g.nome}`}
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => setAlvoExclusao(g)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </IconAction>
-                  </div>
-                </li>
-              ))}
+
+                    {aberto ? (
+                      <ul className="mt-3 space-y-2 rounded-lg border border-border bg-muted/30 p-3">
+                        {g.servicos.map((s, indice) => (
+                          <li key={`${g.id}-${s.servico_id}-${indice}`} className="space-y-1">
+                            <p className="text-sm font-medium text-foreground">
+                              {indice + 1}º · {s.nome}
+                              <span className="ml-2 text-xs font-normal text-muted-foreground">
+                                Venda:{" "}
+                                {s.valor_venda == null
+                                  ? "não informado"
+                                  : `R$ ${formatMoney(s.valor_venda)}`}
+                                {s.status !== "ATIVO" ? " · serviço inativo" : ""}
+                              </span>
+                            </p>
+                            {s.produtos.length === 0 ? (
+                              <p className="pl-4 text-xs text-muted-foreground">
+                                Este serviço não usa produtos.
+                              </p>
+                            ) : (
+                              <ul className="space-y-0.5 pl-4">
+                                {s.produtos.map((p, i) => (
+                                  <li
+                                    key={`${s.servico_id}-${p.nome}-${i}`}
+                                    className="text-xs text-foreground/80"
+                                  >
+                                    • {p.nome}{" "}
+                                    <span className="text-muted-foreground">({p.quantidade}x)</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </li>
+                );
+              })}
             </ul>
+
           )}
         </div>
       </div>
