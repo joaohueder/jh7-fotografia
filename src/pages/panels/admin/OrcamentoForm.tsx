@@ -796,20 +796,148 @@ export default function OrcamentoForm() {
               {itens.length > 0 ? (
                 <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-4 py-3">
                   <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    Total da proposta
-                    <HelpTip text="Soma dos valores dos serviços incluídos na proposta." />
+                    Total dos serviços
+                    <HelpTip text="Soma dos valores dos serviços incluídos na proposta, antes de aplicar desconto ou acréscimo." />
                   </span>
                   <strong className="text-lg">
-                    {total == null
-                      ? "Sem valores informados"
-                      : `R$ ${formatMoney(
-                          itens.reduce((s, i) => s + (parseMoney(i.valorTexto) ?? 0), 0),
-                        )}`}
-
+                    {total == null ? "Sem valores informados" : `R$ ${formatMoney(total)}`}
                   </strong>
                 </div>
               ) : null}
             </section>
+
+            {/* Desconto ou acréscimo no valor final */}
+            <section className="space-y-4 rounded-xl border border-border bg-card p-4 sm:p-6">
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5">
+                  <h2 className="text-lg font-semibold">Desconto ou acréscimo</h2>
+                  <HelpTip text="Use quando o valor final combinado for diferente da soma dos serviços. O desconto diminui o total e o acréscimo aumenta o total da proposta." />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Opcional. Escolha se vai dar um desconto ou cobrar um valor a mais e explique o
+                  motivo — assim o cliente entende como chegou no valor final.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {(
+                  [
+                    ["NENHUM", "Sem desconto/acréscimo"],
+                    ["DESCONTO", "Desconto (diminui)"],
+                    ["ACRESCIMO", "Acréscimo (aumenta)"],
+                  ] as [OrcamentoAjusteTipo, string][]
+                ).map(([valor, rotulo]) => (
+                  <Button
+                    key={valor}
+                    type="button"
+                    size="sm"
+                    variant={ajusteTipo === valor ? "default" : "outline"}
+                    onClick={() => {
+                      setAjusteTipo(valor);
+                      if (valor === "NENHUM") {
+                        setAjusteValorTexto("");
+                        setAjusteDescricao("");
+                      }
+                    }}
+                  >
+                    {rotulo}
+                  </Button>
+                ))}
+              </div>
+
+              {ajusteTipo !== "NENHUM" ? (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="ajuste-valor" className="flex items-center gap-1.5">
+                      {ajusteTipo === "DESCONTO" ? "Valor do desconto (R$) *" : "Valor do acréscimo (R$) *"}
+                      <HelpTip
+                        text={
+                          ajusteTipo === "DESCONTO"
+                            ? "Quanto será abatido do total dos serviços."
+                            : "Quanto será somado ao total dos serviços (por exemplo, deslocamento ou hora extra)."
+                        }
+                      />
+                    </Label>
+                    <Input
+                      id="ajuste-valor"
+                      inputMode="numeric"
+                      placeholder="0,00"
+                      value={ajusteValorTexto}
+                      onChange={(e) => setAjusteValorTexto(maskMoney(e.target.value))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ajuste-descricao" className="flex items-center gap-1.5">
+                      Motivo *
+                      <HelpTip text="Explique em poucas palavras, por exemplo: “Desconto para pagamento à vista” ou “Acréscimo por deslocamento”." />
+                    </Label>
+                    <Input
+                      id="ajuste-descricao"
+                      maxLength={200}
+                      value={ajusteDescricao}
+                      onChange={(e) => setAjusteDescricao(e.target.value)}
+                      placeholder={
+                        ajusteTipo === "DESCONTO"
+                          ? "Ex.: Desconto para pagamento à vista"
+                          : "Ex.: Acréscimo por deslocamento"
+                      }
+                    />
+                  </div>
+                </div>
+              ) : (
+                <InlineNote>
+                  Nenhum desconto ou acréscimo aplicado: o valor final é a soma dos serviços.
+                </InlineNote>
+              )}
+
+              <div className="space-y-1 rounded-lg border border-border bg-muted/40 px-4 py-3">
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>Total dos serviços</span>
+                  <span>{total == null ? "—" : `R$ ${formatMoney(total)}`}</span>
+                </div>
+                {ajusteTipo !== "NENHUM" && ajusteValor != null ? (
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <span>{ajusteTipo === "DESCONTO" ? "Desconto" : "Acréscimo"}</span>
+                    <span>
+                      {ajusteTipo === "DESCONTO" ? "− " : "+ "}
+                      R$ {formatMoney(ajusteValor)}
+                    </span>
+                  </div>
+                ) : null}
+                <div className="flex items-center justify-between border-t border-border pt-2">
+                  <span className="flex items-center gap-1.5 text-sm font-medium">
+                    Valor final da proposta
+                    <HelpTip text="É o total dos serviços já com o desconto abatido ou o acréscimo somado. Esse é o valor que o cliente vai pagar." />
+                  </span>
+                  <strong className="text-lg">
+                    {totalFinal == null ? "Sem valores informados" : `R$ ${formatMoney(totalFinal)}`}
+                  </strong>
+                </div>
+              </div>
+            </section>
+
+            {/* Observação geral */}
+            <section className="space-y-3 rounded-xl border border-border bg-card p-4 sm:p-6">
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5">
+                  <h2 className="text-lg font-semibold">Observação geral</h2>
+                  <HelpTip text="Espaço livre para combinados e detalhes da proposta: forma de pagamento, prazo de entrega, local, o que não está incluído etc." />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Opcional. Escreva aqui tudo o que foi combinado e que não cabe nos serviços.
+                </p>
+              </div>
+              <Textarea
+                id="observacoes"
+                rows={5}
+                maxLength={2000}
+                value={observacoes}
+                onChange={(e) => setObservacoes(e.target.value)}
+                placeholder="Ex.: Entrega das fotos em até 20 dias. Pagamento em 2x. Deslocamento incluso até 30 km."
+              />
+              <p className="text-xs text-muted-foreground">{observacoes.length}/2000 caracteres</p>
+            </section>
+
 
             <div className="flex flex-wrap justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => navigate("/admin/orcamentos")}>
