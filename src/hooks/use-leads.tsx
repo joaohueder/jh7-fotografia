@@ -169,21 +169,41 @@ export function useSalvarLead() {
   });
 }
 
-/** Marca o lead como "aguardando" ou "desistiu". */
+/**
+ * Marca o lead como "aguardando" ou "desistiu".
+ * Ao desistir, as propostas abertas (rascunho/enviado) viram "recusado";
+ * ao voltar para aguardando, as propostas recusadas voltam para "rascunho".
+ */
 export function useSituacaoLead() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, situacao }: { id: string; situacao: "AGUARDANDO" | "DESISTIU" }) => {
       const { error } = await db.from("clientes").update({ lead_status: situacao }).eq("id", id);
       if (error) throw error;
+
+      const { error: erroOrc } =
+        situacao === "DESISTIU"
+          ? await db
+              .from("orcamentos")
+              .update({ status: "RECUSADO" })
+              .eq("cliente_id", id)
+              .in("status", ["RASCUNHO", "ENVIADO"])
+          : await db
+              .from("orcamentos")
+              .update({ status: "RASCUNHO" })
+              .eq("cliente_id", id)
+              .eq("status", "RECUSADO");
+      if (erroOrc) throw erroOrc;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["leads"], refetchType: "active" });
       qc.invalidateQueries({ queryKey: ["limites-empresa"] });
       qc.invalidateQueries({ queryKey: ["leads-evolucao"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["orcamentos"], refetchType: "active" });
     },
   });
 }
+
 
 export function useDeleteLead() {
   const qc = useQueryClient();

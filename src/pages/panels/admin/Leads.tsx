@@ -195,8 +195,8 @@ export default function LeadsList() {
       await situacaoLead.mutateAsync({ id: lead.id, situacao });
       notifySuccess(
         situacao === "DESISTIU"
-          ? "Lead marcado como desistente."
-          : "Lead voltou para a lista de aguardando.",
+          ? "Lead marcado como desistente e orçamentos em aberto passaram para recusado."
+          : "Lead voltou para aguardando e os orçamentos recusados voltaram para rascunho.",
       );
     } catch (err) {
       notifyError(err, { title: "Não foi possível alterar a situação do lead" });
@@ -463,7 +463,7 @@ export default function LeadsList() {
         <div className="space-y-2">
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-semibold text-muted-foreground">Filtrar por situação</span>
-            <HelpTip text="Aguardando: contatos ainda em negociação. Desistiu: quem avisou que não tem mais interesse. Virou cliente: leads que já preencheram o cadastro completo." />
+            <HelpTip text="Aguardando: contatos ainda em negociação. Desistiu: quem avisou que não tem mais interesse (os orçamentos em rascunho ou enviados viram recusados automaticamente; ao voltar para aguardando, eles retornam para rascunho). Virou cliente: leads que já preencheram o cadastro completo." />
           </div>
           <div className="flex flex-wrap gap-2">
             {[{ valor: "TODOS" as const, rotulo: "Todos" }, ...LEAD_SITUACOES].map((op) => {
@@ -953,8 +953,10 @@ export default function LeadsList() {
             <AlertDialogTitle>Marcar desistência do lead</AlertDialogTitle>
             <AlertDialogDescription>
               O lead <strong>{alvoDesistencia?.nome}</strong> passará para a situação
-              &ldquo;Desistiu&rdquo; e sairá da lista de contatos aguardando retorno. Nada é
-              apagado: o histórico continua salvo e você pode retomar a negociação depois.
+              &ldquo;Desistiu&rdquo; e sairá da lista de contatos aguardando retorno. Os orçamentos
+              dele que estiverem em rascunho ou enviados passam automaticamente para
+              &ldquo;Recusado&rdquo;. Nada é apagado: o histórico continua salvo e, se você voltar o
+              lead para &ldquo;Aguardando&rdquo;, os orçamentos recusados voltam para rascunho.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
