@@ -22,16 +22,20 @@ import { SearchableSelect } from "@/components/searchable-select";
 
 import { useClientes } from "@/hooks/use-clientes";
 import { useServicos } from "@/hooks/use-servicos";
+import { useProdutos } from "@/hooks/use-produtos";
 import { useComposicaoDosServicos } from "@/hooks/use-grupos-servicos";
 import { useOrcamento, useOrcamentos } from "@/hooks/use-orcamentos";
 import { ehClienteAtivoConvertido } from "@/lib/clientes";
 
 import {
   CONTRATO_STATUS,
+  aplicarAjustesContrato,
   rotuloContratoStatus,
   somarItensContrato,
   useContrato,
   useSalvarContrato,
+  type ContratoAjuste,
+  type ContratoAjusteTipo,
   type ContratoItem,
   type ContratoStatus,
 } from "@/hooks/use-contratos";
@@ -106,6 +110,15 @@ function paraLinha(item: ContratoItem): ItemLinha {
   };
 }
 
+/** Linha de desconto ou acréscimo na tela (podem ser várias). */
+interface AjusteLinha {
+  chave: string;
+  tipo: ContratoAjusteTipo;
+  /** Texto mascarado do valor (R$). */
+  valorTexto: string;
+  descricao: string;
+}
+
 /** Cadastro de contrato em tela cheia: criação, edição e visualização. */
 export default function ContratoForm() {
   const { id } = useParams<{ id: string }>();
@@ -130,6 +143,7 @@ export default function ContratoForm() {
   const { data: clientes } = useClientes();
   const { data: orcamentos } = useOrcamentos();
   const { data: servicos } = useServicos();
+  const { data: produtos } = useProdutos();
   const { data: composicao } = useComposicaoDosServicos();
   const { data: contratoSalvo, isLoading } = useContrato(edicao ? id : undefined);
   const salvar = useSalvarContrato();
@@ -147,7 +161,10 @@ export default function ContratoForm() {
 
   const [observacoes, setObservacoes] = useState("");
   const [itens, setItens] = useState<ItemLinha[]>([]);
+  const [ajustes, setAjustes] = useState<AjusteLinha[]>([]);
   const [servicoEscolhido, setServicoEscolhido] = useState("");
+  /** Produto selecionado no combo de cada serviço (chave do item -> id do produto). */
+  const [produtoEscolhido, setProdutoEscolhido] = useState<Record<string, string>>({});
   const [carregado, setCarregado] = useState(false);
   /** Orçamento cujos itens já foram copiados, para não copiar duas vezes. */
   const [copiadoDe, setCopiadoDe] = useState("");
@@ -167,6 +184,14 @@ export default function ContratoForm() {
     setFim(contratoSalvo.fim_vigencia ?? "");
     setObservacoes(contratoSalvo.observacoes ?? "");
     setItens(contratoSalvo.itens.map(paraLinha));
+    setAjustes(
+      (contratoSalvo.ajustes ?? []).map((a) => ({
+        chave: novaChave(),
+        tipo: a.tipo,
+        valorTexto: formatMoney(Number(a.valor ?? 0)),
+        descricao: a.descricao ?? "",
+      })),
+    );
     setCarregado(true);
   }, [edicao, contratoSalvo, carregado]);
 
@@ -229,11 +254,23 @@ export default function ContratoForm() {
         }),
       ),
     );
+    // Descontos e acréscimos da proposta também vêm junto: o contrato
+    // precisa fechar no mesmo valor final que o cliente aprovou.
+    setAjustes(
+      (orcamentoDetalhe.ajustes ?? []).map((a) => ({
+        chave: novaChave(),
+        tipo: a.tipo,
+        valorTexto: formatMoney(Number(a.valor ?? 0)),
+        descricao: a.descricao ?? "",
+      })),
+    );
     setCopiadoDe(orcamentoId);
     if (!clienteId) setClienteId(orcamentoDetalhe.cliente_id);
     if (!titulo.trim()) setTitulo(`Contrato — ${orcamentoDetalhe.descricao}`);
     notifySuccess(
-      "Os serviços do orçamento aprovado foram copiados para o contrato. Você ainda pode ajustar os valores antes de salvar.",
+      (orcamentoDetalhe.ajustes ?? []).length > 0
+        ? "Os serviços, produtos e os descontos/acréscimos do orçamento aprovado foram copiados para o contrato. Você ainda pode ajustar tudo antes de salvar."
+        : "Os serviços do orçamento aprovado foram copiados para o contrato. Você ainda pode ajustar os valores antes de salvar.",
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orcamentoId, orcamentoDetalhe, copiadoDe, somenteLeitura]);
@@ -245,6 +282,89 @@ export default function ContratoForm() {
       ),
     [itens],
   );
+
+  const ajustesAplicados: ContratoAjuste[] = useMemo(
+    () =>
+      ajustes.map((a) => ({
+        tipo: a.tipo,
+        valor: parseMoney(a.valorTexto) ?? 0,
+        descricao: a.descricao,
+      })),
+    [ajustes],
+  );
+  const totalFinal = aplicarAjustesContrato(totalItens, ajustesAplicados);
+
+  function adicionarAjuste(tipo: ContratoAjusteTipo) {
+    setAjustes((atual) => [...atual, { chave: novaChave(), tipo, valorTexto: "", descricao: "" }]);
+  }
+
+  function atualizarAjuste(chave: string, campos: Partial<AjusteLinha>) {
+    setAjustes((atual) => atual.map((a) => (a.chave === chave ? { ...a, ...campos } : a)));
+  }
+
+  function removerAjuste(chave: string) {
+    setAjustes((atual) => atual.filter((a) => a.chave !== chave));
+  }
+
+  // Produtos ativos do cadastro, usados apenas como referência para copiar.
+  const opcoesProdutos = useMemo(
+    () =>
+      (produtos ?? [])
+        .filter((p) => p.status === "ATIVO")
+        .map((p) => ({
+          value: p.id,
+          label: p.nome,
+          descricao:
+            p.valor_custo == null ? "Sem custo cadastrado" : `Custo R$ ${formatMoney(p.valor_custo)}`,
+        })),
+    [produtos],
+  );
+
+  /** Inclui no serviço do contrato uma cópia do produto escolhido. */
+  function adicionarProduto(chave: string) {
+    const produtoId = produtoEscolhido[chave];
+    if (!produtoId) {
+      notifyValidation("Escolha um produto para incluir neste serviço.");
+      return;
+    }
+    const produto = (produtos ?? []).find((p) => p.id === produtoId);
+    if (!produto) return;
+
+    setItens((atual) =>
+      atual.map((i) =>
+        i.chave === chave
+          ? { ...i, produtos: [...i.produtos, { nome: produto.nome, quantidade: 1 }] }
+          : i,
+      ),
+    );
+    setProdutoEscolhido((atual) => ({ ...atual, [chave]: "" }));
+  }
+
+  function atualizarProduto(
+    chave: string,
+    indice: number,
+    mudanca: Partial<{ nome: string; quantidade: number }>,
+  ) {
+    setItens((atual) =>
+      atual.map((i) =>
+        i.chave === chave
+          ? {
+              ...i,
+              produtos: i.produtos.map((p, pos) => (pos === indice ? { ...p, ...mudanca } : p)),
+            }
+          : i,
+      ),
+    );
+  }
+
+  function removerProduto(chave: string, indice: number) {
+    setItens((atual) =>
+      atual.map((i) =>
+        i.chave === chave ? { ...i, produtos: i.produtos.filter((_, pos) => pos !== indice) } : i,
+      ),
+    );
+  }
+
 
   function adicionarServico() {
     const servico = (servicos ?? []).find((s) => s.id === servicoEscolhido);
@@ -313,6 +433,16 @@ export default function ContratoForm() {
       notifyValidation("Todo serviço do contrato precisa de um nome. Revise a lista.");
       return;
     }
+    if (ajustesAplicados.some((a) => a.valor <= 0)) {
+      notifyValidation(
+        "Informe um valor maior que zero em cada desconto ou acréscimo, ou remova a linha.",
+      );
+      return;
+    }
+    if (ajustesAplicados.some((a) => a.descricao.trim().length < 2)) {
+      notifyValidation("Escreva o motivo de cada desconto ou acréscimo.");
+      return;
+    }
 
     try {
       await salvar.mutateAsync({
@@ -333,8 +463,14 @@ export default function ContratoForm() {
             quantidade: 1,
             valor_unitario: parseMoney(i.valorTexto),
             valor_custo: i.valor_custo,
-            produtos: i.produtos,
+            produtos: i.produtos
+              .filter((p) => p.nome.trim().length > 0)
+              .map((p) => ({
+                nome: p.nome.trim(),
+                quantidade: p.quantidade > 0 ? p.quantidade : 1,
+              })),
           })),
+          ajustes: ajustesAplicados.map((a) => ({ ...a, descricao: a.descricao.trim() })),
         },
       });
       notifySuccess(edicao ? "Contrato atualizado." : "Contrato criado.");
@@ -578,7 +714,7 @@ export default function ContratoForm() {
               <HelpTip text="Os serviços aqui são cópias: o que você alterar não muda o cadastro de serviços nem o orçamento de origem. Assim o contrato guarda exatamente o que foi combinado com o cliente." />
             </h2>
             <span className="text-sm">
-              Valor do contrato:{" "}
+              Total dos serviços:{" "}
               <strong>
                 {totalItens == null ? "sem valores informados" : formatMoney(totalItens)}
               </strong>
@@ -676,25 +812,279 @@ export default function ContratoForm() {
                     )}
                   </div>
 
-                  {item.produtos.length > 0 ? (
-                    <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-                      <Package className="h-3.5 w-3.5" />
-                      Produtos incluídos:
-                      {item.produtos.map((p, i) => (
-                        <span
-                          key={`${item.chave}-p-${i}`}
-                          className="rounded-full border border-border px-2 py-0.5"
-                        >
-                          {p.quantidade}x {p.nome}
-                        </span>
-                      ))}
+                  {/* Produtos deste serviço — cópia editável, igual ao orçamento */}
+                  <div className="mt-3 space-y-2 rounded-lg border border-dashed border-border p-3">
+                    <div className="flex items-center gap-1.5">
+                      <Package className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Produtos deste serviço
+                      </span>
+                      <HelpTip text="Estes produtos foram copiados do cadastro do serviço ou do orçamento. Você pode incluir, remover ou mudar a quantidade só neste contrato — o cadastro e o orçamento não mudam." />
                     </div>
-                  ) : null}
+
+                    {item.produtos.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">
+                        {somenteLeitura
+                          ? "Nenhum produto incluído neste serviço."
+                          : "Nenhum produto incluído. Use o campo abaixo para adicionar."}
+                      </p>
+                    ) : somenteLeitura ? (
+                      <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                        {item.produtos.map((p, i) => (
+                          <span
+                            key={`${item.chave}-p-${i}`}
+                            className="rounded-full border border-border px-2 py-0.5"
+                          >
+                            {p.quantidade}x {p.nome}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <ul className="space-y-2">
+                        {item.produtos.map((p, pIndice) => (
+                          <li key={`${item.chave}-p-${pIndice}`} className="flex items-center gap-2">
+                            <Input
+                              className="h-9 flex-1"
+                              value={p.nome}
+                              aria-label={`Nome do produto ${pIndice + 1}`}
+                              onChange={(e) =>
+                                atualizarProduto(item.chave, pIndice, { nome: e.target.value })
+                              }
+                            />
+                            <Input
+                              className="h-9 w-20"
+                              inputMode="decimal"
+                              aria-label={`Quantidade de ${p.nome}`}
+                              value={String(p.quantidade)}
+                              onChange={(e) =>
+                                atualizarProduto(item.chave, pIndice, {
+                                  quantidade:
+                                    Number(
+                                      e.target.value.replace(/[^\d,.]/g, "").replace(",", "."),
+                                    ) || 0,
+                                })
+                              }
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-9 w-9"
+                              aria-label={`Remover o produto ${p.nome} deste serviço`}
+                              onClick={() => removerProduto(item.chave, pIndice)}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {somenteLeitura ? null : (
+                      <div className="flex flex-col gap-2 sm:flex-row">
+                        <SearchableSelect
+                          className="sm:flex-1"
+                          value={produtoEscolhido[item.chave] ?? ""}
+                          onChange={(v) =>
+                            setProdutoEscolhido((atual) => ({ ...atual, [item.chave]: v }))
+                          }
+                          opcoes={opcoesProdutos}
+                          placeholder="Escolha um produto para incluir"
+                          placeholderBusca="Pesquisar produto…"
+                          vazio="Nenhum produto ativo encontrado."
+                          ariaLabel={`Produto para incluir em ${item.nome || "serviço"}`}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="gap-2"
+                          onClick={() => adicionarProduto(item.chave)}
+                        >
+                          <Plus className="h-4 w-4" />
+                          Incluir produto
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
                 </li>
               ))}
             </ul>
           )}
         </section>
+
+        {/* Descontos e acréscimos (vários por contrato) */}
+        <section className="space-y-4 rounded-xl border border-border bg-card p-4">
+          <div className="space-y-1">
+            <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              <Wrench className="h-4 w-4" /> Descontos e acréscimos
+              <HelpTip text="São itens adicionais do contrato. Você pode lançar quantos quiser: cada desconto diminui e cada acréscimo aumenta o valor final. Quando o contrato vem de um orçamento aprovado, os descontos e acréscimos da proposta já vêm copiados." />
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Opcional. Lance quantos descontos e acréscimos precisar, cada um com valor e motivo —
+              assim o cliente entende como chegou no valor final do contrato.
+            </p>
+          </div>
+
+          {somenteLeitura ? null : (
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="gap-2"
+                onClick={() => adicionarAjuste("DESCONTO")}
+              >
+                <Plus className="h-4 w-4" />
+                Adicionar desconto
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="gap-2"
+                onClick={() => adicionarAjuste("ACRESCIMO")}
+              >
+                <Plus className="h-4 w-4" />
+                Adicionar acréscimo
+              </Button>
+            </div>
+          )}
+
+          {ajustes.length === 0 ? (
+            <InlineNote>
+              Nenhum desconto ou acréscimo lançado: o valor final é a soma dos serviços.
+            </InlineNote>
+          ) : (
+            <div className="space-y-3">
+              {ajustes.map((a) => (
+                <div
+                  key={a.chave}
+                  className="space-y-3 rounded-lg border border-border bg-muted/30 p-3 sm:p-4"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={somenteLeitura}
+                        variant={a.tipo === "DESCONTO" ? "default" : "outline"}
+                        onClick={() => atualizarAjuste(a.chave, { tipo: "DESCONTO" })}
+                      >
+                        Desconto (diminui)
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={somenteLeitura}
+                        variant={a.tipo === "ACRESCIMO" ? "default" : "outline"}
+                        onClick={() => atualizarAjuste(a.chave, { tipo: "ACRESCIMO" })}
+                      >
+                        Acréscimo (aumenta)
+                      </Button>
+                    </div>
+                    {somenteLeitura ? null : (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="gap-2 text-destructive"
+                        onClick={() => removerAjuste(a.chave)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Remover
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor={`ajuste-valor-${a.chave}`} className="flex items-center gap-1.5">
+                        {a.tipo === "DESCONTO"
+                          ? "Valor do desconto (R$) *"
+                          : "Valor do acréscimo (R$) *"}
+                        <HelpTip
+                          text={
+                            a.tipo === "DESCONTO"
+                              ? "Quanto será abatido do total dos serviços."
+                              : "Quanto será somado ao total dos serviços (por exemplo, deslocamento ou hora extra)."
+                          }
+                        />
+                      </Label>
+                      <Input
+                        id={`ajuste-valor-${a.chave}`}
+                        inputMode="numeric"
+                        placeholder="0,00"
+                        readOnly={somenteLeitura}
+                        value={a.valorTexto}
+                        onChange={(e) =>
+                          atualizarAjuste(a.chave, { valorTexto: maskMoney(e.target.value) })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor={`ajuste-descricao-${a.chave}`}
+                        className="flex items-center gap-1.5"
+                      >
+                        Motivo *
+                        <HelpTip text="Explique em poucas palavras, por exemplo: “Desconto para pagamento à vista” ou “Acréscimo por deslocamento”." />
+                      </Label>
+                      <Input
+                        id={`ajuste-descricao-${a.chave}`}
+                        maxLength={200}
+                        readOnly={somenteLeitura}
+                        value={a.descricao}
+                        onChange={(e) => atualizarAjuste(a.chave, { descricao: e.target.value })}
+                        placeholder={
+                          a.tipo === "DESCONTO"
+                            ? "Ex.: Desconto para pagamento à vista"
+                            : "Ex.: Acréscimo por deslocamento"
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="space-y-1 rounded-lg border border-border bg-muted/40 px-4 py-3">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>Total dos serviços</span>
+              <span>{totalItens == null ? "—" : `R$ ${formatMoney(totalItens)}`}</span>
+            </div>
+            {ajustesAplicados
+              .filter((a) => a.valor > 0)
+              .map((a, indice) => (
+                <div
+                  key={`resumo-${indice}`}
+                  className="flex items-center justify-between gap-3 text-sm text-muted-foreground"
+                >
+                  <span className="truncate">
+                    {a.tipo === "DESCONTO" ? "Desconto" : "Acréscimo"}
+                    {a.descricao.trim() ? ` · ${a.descricao.trim()}` : ""}
+                  </span>
+                  <span className="whitespace-nowrap">
+                    {a.tipo === "DESCONTO" ? "− " : "+ "}
+                    R$ {formatMoney(a.valor)}
+                  </span>
+                </div>
+              ))}
+            <div className="flex items-center justify-between border-t border-border pt-2">
+              <span className="flex items-center gap-1.5 text-sm font-medium">
+                Valor final do contrato
+                <HelpTip text="É o total dos serviços já com todos os descontos abatidos e os acréscimos somados. Esse é o valor que o cliente vai pagar." />
+              </span>
+              <strong className="text-lg">
+                {totalFinal == null ? "Sem valores informados" : `R$ ${formatMoney(totalFinal)}`}
+              </strong>
+            </div>
+          </div>
+        </section>
+
+
 
         <section className="space-y-2 rounded-xl border border-border bg-card p-4">
           <Label htmlFor="obs" className="flex items-center gap-1.5">

@@ -336,8 +336,8 @@ export default function Contratos() {
                       {formatarData(c.fim_vigencia)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Valor do contrato:{" "}
-                      <strong className="text-foreground">{moeda(c.total_valor)}</strong>
+                      Valor final do contrato:{" "}
+                      <strong className="text-foreground">{moeda(c.total_final ?? c.total_valor)}</strong>
                       {" · "}
                       {c.total_itens} serviço{c.total_itens === 1 ? "" : "s"}
                       {c.orcamento_descricao

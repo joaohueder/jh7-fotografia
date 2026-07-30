@@ -68,6 +68,20 @@ export interface ContratoItem {
   produtos: ContratoItemProduto[];
 }
 
+/** Tipo de ajuste no valor final do contrato. */
+export type ContratoAjusteTipo = "DESCONTO" | "ACRESCIMO";
+
+/**
+ * Desconto ou acréscimo lançado no contrato. Podem existir vários no mesmo
+ * contrato — cada um é um item adicional com valor e motivo próprios.
+ * Quando o contrato nasce de um orçamento, os ajustes são copiados de lá.
+ */
+export interface ContratoAjuste {
+  tipo: ContratoAjusteTipo;
+  valor: number;
+  descricao: string;
+}
+
 export interface Contrato {
   id: string;
   empresa_id: string;
@@ -87,6 +101,10 @@ export interface Contrato {
   vencido: boolean;
   total_itens: number;
   total_valor: number | null;
+  /** Descontos e acréscimos lançados no contrato (podem ser vários). */
+  ajustes: ContratoAjuste[];
+  /** Total dos serviços já com os descontos e acréscimos aplicados. */
+  total_final: number | null;
 }
 
 export interface ContratoPayload {
@@ -99,6 +117,7 @@ export interface ContratoPayload {
   fim_vigencia: string | null;
   observacoes: string | null;
   itens: ContratoItem[];
+  ajustes: ContratoAjuste[];
 }
 
 export function somarItensContrato(itens: ContratoItem[]): number | null {
@@ -106,6 +125,33 @@ export function somarItensContrato(itens: ContratoItem[]): number | null {
   if (comValor.length === 0) return null;
   return comValor.reduce((s, i) => s + Number(i.valor_unitario) * Number(i.quantidade || 1), 0);
 }
+
+/** Soma dos descontos e acréscimos (positivo aumenta, negativo diminui). */
+export function somarAjustesContrato(ajustes: ContratoAjuste[]): number {
+  return (ajustes ?? []).reduce(
+    (s, a) => s + (a.tipo === "DESCONTO" ? -Number(a.valor || 0) : Number(a.valor || 0)),
+    0,
+  );
+}
+
+/** Aplica todos os descontos/acréscimos sobre o total dos serviços (nunca fica negativo). */
+export function aplicarAjustesContrato(
+  totalItens: number | null,
+  ajustes: ContratoAjuste[],
+): number | null {
+  if (totalItens == null) return null;
+  const final = totalItens + somarAjustesContrato(ajustes);
+  return final < 0 ? 0 : final;
+}
+
+function mapearAjuste(a: any): ContratoAjuste {
+  return {
+    tipo: (a.tipo === "ACRESCIMO" ? "ACRESCIMO" : "DESCONTO") as ContratoAjusteTipo,
+    valor: Number(a.valor ?? 0),
+    descricao: String(a.descricao ?? ""),
+  };
+}
+
 
 function mapearItem(i: any): ContratoItem {
   return {
@@ -145,6 +191,7 @@ export function useContratos() {
       .channel("contratos-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "contratos" }, invalidar)
       .on("postgres_changes", { event: "*", schema: "public", table: "contrato_itens" }, invalidar)
+      .on("postgres_changes", { event: "*", schema: "public", table: "contrato_ajustes" }, invalidar)
       .on("postgres_changes", { event: "*", schema: "public", table: "clientes" }, invalidar)
       .subscribe();
 
@@ -163,7 +210,7 @@ export function useContratos() {
       const { data, error } = await db
         .from("contratos")
         .select(
-          "id, empresa_id, cliente_id, orcamento_id, titulo, status, data_contrato, inicio_vigencia, fim_vigencia, observacoes, created_at, clientes ( nome ), orcamentos ( descricao ), contrato_itens ( nome, origem_tipo, origem_nome, quantidade, valor_unitario, valor_custo, produtos )",
+          "id, empresa_id, cliente_id, orcamento_id, titulo, status, data_contrato, inicio_vigencia, fim_vigencia, observacoes, created_at, clientes ( nome ), orcamentos ( descricao ), contrato_itens ( nome, origem_tipo, origem_nome, quantidade, valor_unitario, valor_custo, produtos ), contrato_ajustes ( tipo, valor, descricao, ordem )",
         )
         .eq("empresa_id", empresaId!)
         .order("data_contrato", { ascending: false })
@@ -172,6 +219,11 @@ export function useContratos() {
 
       return ((data ?? []) as any[]).map((c) => {
         const itens = ((c.contrato_itens ?? []) as any[]).map(mapearItem);
+        const totalItens = somarItensContrato(itens);
+        const ajustes = ((c.contrato_ajustes ?? []) as any[])
+          .slice()
+          .sort((a, b) => Number(a.ordem ?? 0) - Number(b.ordem ?? 0))
+          .map(mapearAjuste);
         return {
           id: c.id,
           empresa_id: c.empresa_id,
@@ -188,7 +240,9 @@ export function useContratos() {
           orcamento_descricao: c.orcamentos?.descricao ?? null,
           vencido: estaVencido(c.fim_vigencia ?? null, c.status as ContratoStatus),
           total_itens: itens.length,
-          total_valor: somarItensContrato(itens),
+          total_valor: totalItens,
+          ajustes,
+          total_final: aplicarAjustesContrato(totalItens, ajustes),
         } as Contrato;
       });
     },
@@ -220,6 +274,13 @@ export function useContrato(id?: string) {
         .order("ordem", { ascending: true });
       if (erroItens) throw erroItens;
 
+      const { data: ajustes, error: erroAjustes } = await db
+        .from("contrato_ajustes")
+        .select("tipo, valor, descricao")
+        .eq("contrato_id", id!)
+        .order("ordem", { ascending: true });
+      if (erroAjustes) throw erroAjustes;
+
       return {
         cliente_id: c.cliente_id,
         orcamento_id: c.orcamento_id ?? null,
@@ -230,6 +291,7 @@ export function useContrato(id?: string) {
         fim_vigencia: c.fim_vigencia ?? null,
         observacoes: c.observacoes ?? null,
         itens: ((itens ?? []) as any[]).map(mapearItem),
+        ajustes: ((ajustes ?? []) as any[]).map(mapearAjuste),
       };
     },
   });
@@ -299,6 +361,29 @@ export function useSalvarContrato() {
         }));
         const { error: erroItens } = await db.from("contrato_itens").insert(linhas);
         if (erroItens) throw erroItens;
+      }
+
+      // Descontos e acréscimos: também são regravados por inteiro, na ordem.
+      const { error: erroLimparAjustes } = await db
+        .from("contrato_ajustes")
+        .delete()
+        .eq("contrato_id", contratoId!);
+      if (erroLimparAjustes) throw erroLimparAjustes;
+
+      const ajustesValidos = (dados.ajustes ?? []).filter(
+        (a) => a.valor > 0 && a.descricao.trim().length >= 2,
+      );
+      if (ajustesValidos.length > 0) {
+        const linhasAjustes = ajustesValidos.map((a, indice) => ({
+          empresa_id: empresaDoContrato,
+          contrato_id: contratoId,
+          ordem: indice,
+          tipo: a.tipo,
+          valor: a.valor,
+          descricao: a.descricao.trim().slice(0, 200),
+        }));
+        const { error: erroAjustes } = await db.from("contrato_ajustes").insert(linhasAjustes);
+        if (erroAjustes) throw erroAjustes;
       }
 
       return contratoId!;

@@ -95,7 +95,7 @@ export function ClienteContratos({ clienteId }: { clienteId: string }) {
                 <p className="text-xs text-muted-foreground">
                   Data: {data(c.data_contrato)} · Vigência: {data(c.inicio_vigencia)} até{" "}
                   {data(c.fim_vigencia)} · {c.total_itens} serviço
-                  {c.total_itens === 1 ? "" : "s"} · {moeda(c.total_valor)}
+                  {c.total_itens === 1 ? "" : "s"} · {moeda(c.total_final ?? c.total_valor)}
                 </p>
               </div>
               <Button
