@@ -28,18 +28,21 @@ export interface LimitesEmpresa {
 export function useLimitesEmpresa() {
   const { data: empresaId } = useEmpresaAtual();
 
-  // Tempo real: consumo e limites acompanham cadastros e trocas de plano.
+  // Tempo real: consumo e limites acompanham cadastros, trocas de plano e
+  // alterações feitas pelo super admin nos limites do plano.
   useRealtime(
     "limites-empresa",
-    ["clientes", "empresa_assinaturas", "planos"],
-    [["limites-empresa", empresaId ?? null]],
+    ["clientes", "empresa_assinaturas", "planos", "empresas"],
+    [["limites-empresa"]],
     Boolean(empresaId),
   );
 
   return useQuery({
     queryKey: ["limites-empresa", empresaId ?? null],
     enabled: Boolean(empresaId),
-    staleTime: 30 * 1000,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
     queryFn: async (): Promise<LimitesEmpresa> => {
       const assinaturaRes = await db
         .from("empresa_assinaturas")
