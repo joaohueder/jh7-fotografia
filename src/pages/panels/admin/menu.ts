@@ -11,7 +11,11 @@ export const ADMIN_MENU = [
   {
     label: "Básico",
     to: "/admin/produtos",
-    children: [{ label: "Produtos", to: "/admin/produtos" }],
+    children: [
+      { label: "Produtos", to: "/admin/produtos" },
+      { label: "Serviços", to: "/admin/servicos" },
+    ],
   },
+
   { label: "Configurações", to: "/admin/configuracoes", right: true },
 ];
