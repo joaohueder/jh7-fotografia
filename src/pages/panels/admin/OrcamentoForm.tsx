@@ -43,6 +43,7 @@ import { useComposicaoDosServicos, useGruposServicos } from "@/hooks/use-grupos-
 import { useProdutos } from "@/hooks/use-produtos";
 import {
   ORCAMENTO_STATUS,
+  rotuloStatus,
   somarItens,
   useOrcamento,
   useSalvarOrcamento,
