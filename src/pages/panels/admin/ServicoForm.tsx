@@ -494,7 +494,7 @@ export default function ServicoForm() {
                 {
                   rotulo: "Margem estimada",
                   valor: margem,
-                  ajuda: "Valor de venda menos o custo total. Só aparece quando os dois estão preenchidos. Se ficar negativo, você está vendendo abaixo do custo.",
+                  ajuda: "Valor de venda menos o custo total. Aparece assim que o valor de venda for preenchido; sem custo informado, o custo conta como zero. Se ficar negativo, você está vendendo abaixo do custo.",
                   negativo: margem !== null && margem < 0,
                 },
               ].map((card) => (
