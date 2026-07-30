@@ -1,18 +1,41 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Loader2, Save } from "lucide-react";
+import { ArrowLeft, GripVertical, Layers, Loader2, Plus, Save, Trash2, Wrench } from "lucide-react";
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { HelpTip, InlineNote } from "@/components/page-help";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
+import { formatMoney, maskMoney, parseMoney } from "@/lib/br-masks";
 import { useClientes } from "@/hooks/use-clientes";
 import { useLeads } from "@/hooks/use-leads";
+import { useServicos } from "@/hooks/use-servicos";
+import { useComposicaoDosServicos, useGruposServicos } from "@/hooks/use-grupos-servicos";
 import {
   ORCAMENTO_STATUS,
+  somarItens,
   useOrcamento,
   useSalvarOrcamento,
+  type OrcamentoItem,
   type OrcamentoStatus,
 } from "@/hooks/use-orcamentos";
 
@@ -36,6 +59,56 @@ function emDias(dias: number) {
   return `${d.getFullYear()}-${mes}-${dia}`;
 }
 
+/** Item da proposta na tela: cópia editável + identificador só para arrastar. */
+interface ItemLinha extends OrcamentoItem {
+  chave: string;
+  /** Texto mascarado do valor unitário (R$). */
+  valorTexto: string;
+  /** Texto da quantidade. */
+  quantidadeTexto: string;
+}
+
+let contadorChave = 0;
+function novaChave() {
+  contadorChave += 1;
+  return `item-${Date.now()}-${contadorChave}`;
+}
+
+/** Linha arrastável de um item do orçamento. */
+function LinhaItem({
+  id,
+  children,
+}: {
+  id: string;
+  children: (alcaProps: {
+    setActivatorNodeRef: (node: HTMLElement | null) => void;
+    listeners: Record<string, any> | undefined;
+    attributes: Record<string, any>;
+  }) => React.ReactNode;
+}) {
+  const {
+    setNodeRef,
+    setActivatorNodeRef,
+    listeners,
+    attributes,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  return (
+    <li
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={`bg-card px-3 py-3 ${
+        isDragging ? "relative z-10 rounded-lg shadow-lg ring-1 ring-primary/40" : ""
+      }`}
+    >
+      {children({ setActivatorNodeRef, listeners, attributes })}
+    </li>
+  );
+}
+
 /** Tela completa de cadastro e edição de um orçamento. */
 export default function OrcamentoForm() {
   const { id } = useParams<{ id: string }>();
@@ -50,6 +123,9 @@ export default function OrcamentoForm() {
   const { data: orcamento, isLoading: carregando } = useOrcamento(id);
   const { data: clientes } = useClientes();
   const { data: leads } = useLeads();
+  const { data: servicos } = useServicos();
+  const { data: grupos } = useGruposServicos();
+  const { data: composicao } = useComposicaoDosServicos();
   const salvar = useSalvarOrcamento();
 
   const [clienteId, setClienteId] = useState("");
@@ -57,15 +133,33 @@ export default function OrcamentoForm() {
   const [status, setStatus] = useState<OrcamentoStatus>("RASCUNHO");
   const [dataOrcamento, setDataOrcamento] = useState(hojeISO());
   const [validade, setValidade] = useState(emDias(15));
+  const [itens, setItens] = useState<ItemLinha[]>([]);
+  const [escolhido, setEscolhido] = useState("");
+  const [carregado, setCarregado] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   useEffect(() => {
+    if (!editando || carregado) return;
     if (!orcamento) return;
     setClienteId(orcamento.cliente_id);
     setDescricao(orcamento.descricao);
     setStatus(orcamento.status);
     setDataOrcamento(orcamento.data_orcamento);
     setValidade(orcamento.validade ?? "");
-  }, [orcamento]);
+    setItens(
+      orcamento.itens.map((i) => ({
+        ...i,
+        chave: novaChave(),
+        valorTexto: i.valor_unitario == null ? "" : formatMoney(i.valor_unitario),
+        quantidadeTexto: String(i.quantidade ?? 1),
+      })),
+    );
+    setCarregado(true);
+  }, [editando, carregado, orcamento]);
 
   const opcoesContato = useMemo(() => {
     const doCliente = (clientes ?? []).map((c) => ({
@@ -74,7 +168,7 @@ export default function OrcamentoForm() {
       descricao: c.contato_whatsapp ? `Cliente · ${c.contato_whatsapp}` : "Cliente",
     }));
     const dosLeads = (leads ?? [])
-      .filter((l) => !doCliente.some((c) => c.value === l.id))
+      .filter((l) => l.situacao !== "CLIENTE")
       .map((l) => ({
         value: l.id,
         label: l.nome,
@@ -82,6 +176,101 @@ export default function OrcamentoForm() {
       }));
     return [...doCliente, ...dosLeads].sort((a, b) => a.label.localeCompare(b.label, "pt-BR"));
   }, [clientes, leads]);
+
+  // Serviços e agrupamentos servem só como REFERÊNCIA para copiar os dados.
+  const opcoesCatalogo = useMemo(() => {
+    const dosServicos = (servicos ?? [])
+      .filter((s) => s.status === "ATIVO")
+      .map((s) => ({
+        value: `s:${s.id}`,
+        label: `Serviço · ${s.nome}`,
+        descricao: s.valor_venda == null ? "Sem valor cadastrado" : `R$ ${formatMoney(s.valor_venda)}`,
+      }));
+    const dosGrupos = (grupos ?? [])
+      .filter((g) => g.status === "ATIVO")
+      .map((g) => ({
+        value: `g:${g.id}`,
+        label: `Agrupamento · ${g.nome}`,
+        descricao: `${g.total_servicos} serviço(s)${
+          g.total_venda == null ? "" : ` · R$ ${formatMoney(g.total_venda)}`
+        }`,
+      }));
+    return [...dosServicos, ...dosGrupos];
+  }, [servicos, grupos]);
+
+  function adicionar() {
+    if (!escolhido) {
+      notifyValidation("Escolha um serviço ou agrupamento para incluir na proposta.");
+      return;
+    }
+    const [tipo, refId] = escolhido.split(":");
+    const novos: ItemLinha[] = [];
+
+    if (tipo === "s") {
+      const servico = (servicos ?? []).find((s) => s.id === refId);
+      if (!servico) return;
+      novos.push({
+        chave: novaChave(),
+        nome: servico.nome,
+        origem_tipo: "SERVICO",
+        origem_nome: null,
+        quantidade: 1,
+        quantidadeTexto: "1",
+        valor_unitario: servico.valor_venda,
+        valorTexto: servico.valor_venda == null ? "" : formatMoney(servico.valor_venda),
+        valor_custo: servico.valor_custo,
+        produtos: (composicao?.[servico.id] ?? []).map((p) => ({
+          nome: p.nome,
+          quantidade: p.quantidade,
+        })),
+      });
+    } else {
+      const grupo = (grupos ?? []).find((g) => g.id === refId);
+      if (!grupo) return;
+      grupo.servicos.forEach((s) => {
+        novos.push({
+          chave: novaChave(),
+          nome: s.nome,
+          origem_tipo: "GRUPO",
+          origem_nome: grupo.nome,
+          quantidade: 1,
+          quantidadeTexto: "1",
+          valor_unitario: s.valor_venda,
+          valorTexto: s.valor_venda == null ? "" : formatMoney(s.valor_venda),
+          valor_custo: null,
+          produtos: s.produtos.map((p) => ({ nome: p.nome, quantidade: p.quantidade })),
+        });
+      });
+      if (novos.length === 0) {
+        notifyValidation("Este agrupamento ainda não tem serviços cadastrados.");
+        return;
+      }
+    }
+
+    setItens((atual) => [...atual, ...novos]);
+    setEscolhido("");
+  }
+
+  function atualizarItem(chave: string, mudanca: Partial<ItemLinha>) {
+    setItens((atual) => atual.map((i) => (i.chave === chave ? { ...i, ...mudanca } : i)));
+  }
+
+  function removerItem(chave: string) {
+    setItens((atual) => atual.filter((i) => i.chave !== chave));
+  }
+
+  function aoSoltar(evento: DragEndEvent) {
+    const { active, over } = evento;
+    if (!over || active.id === over.id) return;
+    setItens((atual) => {
+      const de = atual.findIndex((i) => i.chave === active.id);
+      const para = atual.findIndex((i) => i.chave === over.id);
+      if (de < 0 || para < 0) return atual;
+      return arrayMove(atual, de, para);
+    });
+  }
+
+  const total = useMemo(() => somarItens(itens), [itens]);
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
@@ -102,6 +291,10 @@ export default function OrcamentoForm() {
       notifyValidation("A validade não pode ser anterior à data do orçamento.");
       return;
     }
+    if (itens.length === 0) {
+      notifyValidation("Inclua pelo menos um serviço ou agrupamento na proposta.");
+      return;
+    }
 
     try {
       await salvar.mutateAsync({
@@ -112,6 +305,15 @@ export default function OrcamentoForm() {
           status,
           data_orcamento: dataOrcamento,
           validade: validade || null,
+          itens: itens.map((i) => ({
+            nome: i.nome,
+            origem_tipo: i.origem_tipo,
+            origem_nome: i.origem_nome,
+            quantidade: Number(i.quantidadeTexto.replace(",", ".")) || 1,
+            valor_unitario: parseMoney(i.valorTexto),
+            valor_custo: i.valor_custo,
+            produtos: i.produtos,
+          })),
         },
       });
       notifySuccess(editando ? "Orçamento atualizado." : "Orçamento criado.");
@@ -239,6 +441,174 @@ export default function OrcamentoForm() {
                 Depois que a data de validade passar, o orçamento aparece na lista marcado como
                 “Validade vencida” — assim você sabe quem precisa de um novo contato.
               </InlineNote>
+            </section>
+
+            {/* Serviços da proposta — cópia dos cadastros */}
+            <section className="space-y-4 rounded-xl border border-border bg-card p-4 sm:p-6">
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5">
+                  <h2 className="text-lg font-semibold">Serviços da proposta *</h2>
+                  <HelpTip text="Escolha um serviço ou um agrupamento já cadastrado. Ao incluir, os dados são COPIADOS para este orçamento: se depois você alterar ou excluir o cadastro, esta proposta continua igual." />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Os cadastros de serviços e agrupamentos servem apenas como referência. Tudo o que
+                  você incluir aqui fica salvo dentro do orçamento e pode ser ajustado livremente.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <SearchableSelect
+                  className="sm:flex-1"
+                  value={escolhido}
+                  onChange={setEscolhido}
+                  opcoes={opcoesCatalogo}
+                  placeholder="Escolha um serviço ou agrupamento"
+                  placeholderBusca="Pesquisar serviço ou agrupamento…"
+                  vazio="Nenhum serviço ou agrupamento ativo encontrado."
+                  ariaLabel="Serviço ou agrupamento para incluir"
+                />
+                <Button type="button" variant="outline" className="gap-2" onClick={adicionar}>
+                  <Plus className="h-4 w-4" />
+                  Incluir na proposta
+                </Button>
+              </div>
+
+              {itens.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                  Nenhum serviço incluído ainda. Escolha acima um serviço ou agrupamento e clique em
+                  “Incluir na proposta”.
+                </p>
+              ) : (
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+                  onDragEnd={aoSoltar}
+                >
+                  <SortableContext
+                    items={itens.map((i) => i.chave)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <ul className="divide-y divide-border overflow-hidden rounded-lg border border-border">
+                      {itens.map((item) => (
+                        <LinhaItem key={item.chave} id={item.chave}>
+                          {({ setActivatorNodeRef, listeners, attributes }) => (
+                            <div className="space-y-3">
+                              <div className="flex items-start gap-2">
+                                <button
+                                  type="button"
+                                  ref={setActivatorNodeRef}
+                                  {...attributes}
+                                  {...listeners}
+                                  aria-label={`Arrastar ${item.nome} para mudar a ordem`}
+                                  className="mt-1 cursor-grab rounded p-1 text-muted-foreground hover:bg-muted active:cursor-grabbing"
+                                >
+                                  <GripVertical className="h-4 w-4" />
+                                </button>
+
+                                <div className="min-w-0 flex-1 space-y-1">
+                                  <div className="flex items-center gap-1.5 text-sm font-medium">
+                                    {item.origem_tipo === "GRUPO" ? (
+                                      <Layers className="h-4 w-4 shrink-0 text-primary" />
+                                    ) : (
+                                      <Wrench className="h-4 w-4 shrink-0 text-primary" />
+                                    )}
+                                    <span className="truncate">{item.nome}</span>
+                                  </div>
+                                  {item.origem_nome ? (
+                                    <p className="text-xs text-muted-foreground">
+                                      Copiado do agrupamento “{item.origem_nome}”
+                                    </p>
+                                  ) : null}
+                                  {item.produtos.length > 0 ? (
+                                    <p className="text-xs text-muted-foreground">
+                                      Inclui:{" "}
+                                      {item.produtos
+                                        .map((p) => `${p.quantidade}x ${p.nome}`)
+                                        .join(" · ")}
+                                    </p>
+                                  ) : null}
+                                </div>
+
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  aria-label={`Remover ${item.nome} da proposta`}
+                                  onClick={() => removerItem(item.chave)}
+                                >
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </div>
+
+                              <div className="grid gap-3 pl-8 sm:grid-cols-3">
+                                <div className="space-y-1">
+                                  <Label className="text-xs">Quantidade</Label>
+                                  <Input
+                                    inputMode="decimal"
+                                    value={item.quantidadeTexto}
+                                    onChange={(e) =>
+                                      atualizarItem(item.chave, {
+                                        quantidadeTexto: e.target.value.replace(/[^\d,.]/g, ""),
+                                      })
+                                    }
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-xs">Valor unitário (R$)</Label>
+                                  <Input
+                                    inputMode="numeric"
+                                    placeholder="0,00"
+                                    value={item.valorTexto}
+                                    onChange={(e) =>
+                                      atualizarItem(item.chave, {
+                                        valorTexto: maskMoney(e.target.value),
+                                      })
+                                    }
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-xs">Subtotal</Label>
+                                  <div className="flex h-10 items-center rounded-md border border-border bg-muted/40 px-3 text-sm">
+                                    {parseMoney(item.valorTexto) == null
+                                      ? "Não informado"
+                                      : `R$ ${formatMoney(
+                                          (parseMoney(item.valorTexto) ?? 0) *
+                                            (Number(item.quantidadeTexto.replace(",", ".")) || 1),
+                                        )}`}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </LinhaItem>
+                      ))}
+                    </ul>
+                  </SortableContext>
+                </DndContext>
+              )}
+
+              {itens.length > 0 ? (
+                <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-4 py-3">
+                  <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    Total da proposta
+                    <HelpTip text="Soma da quantidade multiplicada pelo valor de cada serviço incluído." />
+                  </span>
+                  <strong className="text-lg">
+                    {total == null
+                      ? "Sem valores informados"
+                      : `R$ ${formatMoney(
+                          itens.reduce(
+                            (s, i) =>
+                              s +
+                              (parseMoney(i.valorTexto) ?? 0) *
+                                (Number(i.quantidadeTexto.replace(",", ".")) || 1),
+                            0,
+                          ),
+                        )}`}
+                  </strong>
+                </div>
+              ) : null}
             </section>
 
             <div className="flex flex-wrap justify-end gap-2">

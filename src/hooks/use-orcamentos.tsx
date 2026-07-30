@@ -39,6 +39,26 @@ export function rotuloStatus(status: OrcamentoStatus) {
   return ORCAMENTO_STATUS.find((s) => s.valor === status)?.rotulo ?? status;
 }
 
+/** Produto copiado junto com o serviço (apenas cópia, sem vínculo). */
+export interface OrcamentoItemProduto {
+  nome: string;
+  quantidade: number;
+}
+
+/**
+ * Item do orçamento. É uma CÓPIA do serviço/agrupamento no momento em que
+ * foi incluído — nada aqui depende do cadastro de origem.
+ */
+export interface OrcamentoItem {
+  nome: string;
+  origem_tipo: "SERVICO" | "GRUPO" | "MANUAL";
+  origem_nome: string | null;
+  quantidade: number;
+  valor_unitario: number | null;
+  valor_custo: number | null;
+  produtos: OrcamentoItemProduto[];
+}
+
 export interface Orcamento {
   id: string;
   empresa_id: string;
@@ -54,6 +74,10 @@ export interface Orcamento {
   cliente_origem: "CLIENTE" | "LEAD";
   /** Verdadeiro quando a validade já passou. */
   vencido: boolean;
+  /** Quantidade de serviços incluídos na proposta. */
+  total_itens: number;
+  /** Soma de quantidade x valor de cada item (null quando nenhum item tem valor). */
+  total_valor: number | null;
 }
 
 export interface OrcamentoPayload {
@@ -62,6 +86,8 @@ export interface OrcamentoPayload {
   status: OrcamentoStatus;
   data_orcamento: string;
   validade: string | null;
+  /** Itens copiados, na ordem escolhida pelo usuário. */
+  itens: OrcamentoItem[];
 }
 
 function estaVencido(validade: string | null, status: OrcamentoStatus) {
@@ -70,6 +96,30 @@ function estaVencido(validade: string | null, status: OrcamentoStatus) {
   const hoje = new Date();
   const limite = new Date(`${validade}T23:59:59`);
   return limite.getTime() < hoje.getTime();
+}
+
+function mapearItem(i: any): OrcamentoItem {
+  return {
+    nome: i.nome,
+    origem_tipo: (i.origem_tipo ?? "SERVICO") as OrcamentoItem["origem_tipo"],
+    origem_nome: i.origem_nome ?? null,
+    quantidade: Number(i.quantidade ?? 1),
+    valor_unitario: i.valor_unitario == null ? null : Number(i.valor_unitario),
+    valor_custo: i.valor_custo == null ? null : Number(i.valor_custo),
+    produtos: Array.isArray(i.produtos)
+      ? (i.produtos as any[]).map((p) => ({
+          nome: String(p?.nome ?? "Produto"),
+          quantidade: Number(p?.quantidade ?? 1),
+        }))
+      : [],
+  };
+}
+
+/** Soma quantidade x valor unitário dos itens. */
+export function somarItens(itens: OrcamentoItem[]): number | null {
+  const comValor = itens.filter((i) => i.valor_unitario != null);
+  if (comValor.length === 0) return null;
+  return comValor.reduce((s, i) => s + Number(i.valor_unitario) * Number(i.quantidade || 1), 0);
 }
 
 /** Lista os orçamentos da empresa, com atualização em tempo real. */
@@ -81,10 +131,12 @@ export function useOrcamentos() {
     const invalidar = () => {
       qc.invalidateQueries({ queryKey: ["orcamentos"], refetchType: "active" });
       qc.invalidateQueries({ queryKey: ["orcamento"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["orcamento-itens"], refetchType: "active" });
     };
     const channel = supabase
       .channel("orcamentos-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "orcamentos" }, invalidar)
+      .on("postgres_changes", { event: "*", schema: "public", table: "orcamento_itens" }, invalidar)
       .on("postgres_changes", { event: "*", schema: "public", table: "clientes" }, invalidar)
       .subscribe();
 
@@ -103,31 +155,36 @@ export function useOrcamentos() {
       const { data, error } = await db
         .from("orcamentos")
         .select(
-          "id, empresa_id, cliente_id, descricao, status, data_orcamento, validade, created_at, clientes ( nome, origem )",
+          "id, empresa_id, cliente_id, descricao, status, data_orcamento, validade, created_at, clientes ( nome, origem ), orcamento_itens ( nome, origem_tipo, origem_nome, quantidade, valor_unitario, valor_custo, produtos )",
         )
         .eq("empresa_id", empresaId!)
         .order("data_orcamento", { ascending: false })
         .order("created_at", { ascending: false });
       if (error) throw error;
 
-      return ((data ?? []) as any[]).map((o) => ({
-        id: o.id,
-        empresa_id: o.empresa_id,
-        cliente_id: o.cliente_id,
-        descricao: o.descricao,
-        status: o.status as OrcamentoStatus,
-        data_orcamento: o.data_orcamento,
-        validade: o.validade ?? null,
-        created_at: o.created_at,
-        cliente_nome: o.clientes?.nome ?? "Contato removido",
-        cliente_origem: (o.clientes?.origem ?? "CLIENTE") as "CLIENTE" | "LEAD",
-        vencido: estaVencido(o.validade ?? null, o.status as OrcamentoStatus),
-      }));
+      return ((data ?? []) as any[]).map((o) => {
+        const itens = ((o.orcamento_itens ?? []) as any[]).map(mapearItem);
+        return {
+          id: o.id,
+          empresa_id: o.empresa_id,
+          cliente_id: o.cliente_id,
+          descricao: o.descricao,
+          status: o.status as OrcamentoStatus,
+          data_orcamento: o.data_orcamento,
+          validade: o.validade ?? null,
+          created_at: o.created_at,
+          cliente_nome: o.clientes?.nome ?? "Contato removido",
+          cliente_origem: (o.clientes?.origem ?? "CLIENTE") as "CLIENTE" | "LEAD",
+          vencido: estaVencido(o.validade ?? null, o.status as OrcamentoStatus),
+          total_itens: itens.length,
+          total_valor: somarItens(itens),
+        } as Orcamento;
+      });
     },
   });
 }
 
-/** Busca um orçamento específico (tela de edição). */
+/** Busca um orçamento específico (tela de edição), já com os itens copiados. */
 export function useOrcamento(id?: string) {
   return useQuery({
     queryKey: ["orcamento", id],
@@ -142,18 +199,27 @@ export function useOrcamento(id?: string) {
       if (error) throw error;
       if (!data) return null;
       const o = data as any;
+
+      const { data: itens, error: erroItens } = await db
+        .from("orcamento_itens")
+        .select("nome, origem_tipo, origem_nome, quantidade, valor_unitario, valor_custo, produtos")
+        .eq("orcamento_id", id!)
+        .order("ordem", { ascending: true });
+      if (erroItens) throw erroItens;
+
       return {
         cliente_id: o.cliente_id,
         descricao: o.descricao,
         status: o.status as OrcamentoStatus,
         data_orcamento: o.data_orcamento,
         validade: o.validade ?? null,
+        itens: ((itens ?? []) as any[]).map(mapearItem),
       };
     },
   });
 }
 
-/** Cria ou atualiza um orçamento. */
+/** Cria ou atualiza um orçamento e regrava a lista de itens copiados. */
 export function useSalvarOrcamento() {
   const qc = useQueryClient();
   const { data: empresaId } = useEmpresaAtual();
@@ -168,24 +234,60 @@ export function useSalvarOrcamento() {
         validade: dados.validade || null,
       };
 
+      let orcamentoId = id;
+      let empresaDoOrcamento = empresaId;
+
       if (id) {
-        const { error } = await db.from("orcamentos").update(valores).eq("id", id);
+        const { data, error } = await db
+          .from("orcamentos")
+          .update(valores)
+          .eq("id", id)
+          .select("empresa_id")
+          .single();
         if (error) throw error;
-        return id;
+        empresaDoOrcamento = (data as { empresa_id: string }).empresa_id;
+      } else {
+        if (!empresaId) throw new Error("Empresa não identificada para o cadastro.");
+        const { data, error } = await db
+          .from("orcamentos")
+          .insert({ ...valores, empresa_id: empresaId })
+          .select("id, empresa_id")
+          .single();
+        if (error) throw error;
+        orcamentoId = (data as { id: string }).id;
+        empresaDoOrcamento = (data as { empresa_id: string }).empresa_id;
       }
 
-      if (!empresaId) throw new Error("Empresa não identificada para o cadastro.");
-      const { data, error } = await db
-        .from("orcamentos")
-        .insert({ ...valores, empresa_id: empresaId })
-        .select("id")
-        .single();
-      if (error) throw error;
-      return (data as { id: string }).id;
+      // Os itens são cópias: regravamos sempre a lista inteira, na ordem.
+      const { error: erroLimpar } = await db
+        .from("orcamento_itens")
+        .delete()
+        .eq("orcamento_id", orcamentoId!);
+      if (erroLimpar) throw erroLimpar;
+
+      if (dados.itens.length > 0) {
+        const linhas = dados.itens.map((item, indice) => ({
+          empresa_id: empresaDoOrcamento,
+          orcamento_id: orcamentoId,
+          ordem: indice,
+          origem_tipo: item.origem_tipo,
+          origem_nome: item.origem_nome,
+          nome: item.nome.trim().slice(0, 200),
+          quantidade: item.quantidade > 0 ? item.quantidade : 1,
+          valor_unitario: item.valor_unitario,
+          valor_custo: item.valor_custo,
+          produtos: item.produtos,
+        }));
+        const { error: erroItens } = await db.from("orcamento_itens").insert(linhas);
+        if (erroItens) throw erroItens;
+      }
+
+      return orcamentoId!;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["orcamentos"], refetchType: "active" });
       qc.invalidateQueries({ queryKey: ["orcamento"], refetchType: "active" });
+      qc.invalidateQueries({ queryKey: ["orcamento-itens"], refetchType: "active" });
     },
   });
 }
