@@ -1058,7 +1058,7 @@ export default function OrcamentoForm() {
 
 
             <div className="flex flex-wrap justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => navigate("/admin/orcamentos")}>
+              <Button type="button" variant="outline" onClick={() => navigate(voltarPara)}>
                 Cancelar
               </Button>
               <Button type="submit" className="gap-2" disabled={salvar.isPending}>
