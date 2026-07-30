@@ -154,12 +154,13 @@ export function ConfirmarExclusaoCliente({
                 </div>
               )}
 
-              {impacto?.temOrcamentoEmAndamento && (
+              {bloqueado && (
                 <p className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                   <span>
-                    Atenção: existem orçamentos que já saíram do rascunho. Se precisar guardar esse
-                    histórico, prefira inativar o cadastro em vez de excluir.
+                    Este cadastro tem informações importantes que não podem ser perdidas: existem
+                    orçamentos que já saíram do rascunho. Por isso a exclusão está bloqueada. Você
+                    pode inativar o {tipo}: ele sai do dia a dia, mas o histórico continua guardado.
                   </span>
                 </p>
               )}
@@ -167,12 +168,19 @@ export function ConfirmarExclusaoCliente({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirmar} disabled={isLoading}>
-            Excluir mesmo assim
-          </AlertDialogAction>
+          <AlertDialogCancel>{bloqueado ? "Voltar" : "Cancelar"}</AlertDialogCancel>
+          {bloqueado ? (
+            onInativar && (
+              <AlertDialogAction onClick={onInativar}>Inativar {tipo}</AlertDialogAction>
+            )
+          ) : (
+            <AlertDialogAction onClick={onConfirmar} disabled={isLoading}>
+              Excluir mesmo assim
+            </AlertDialogAction>
+          )}
         </AlertDialogFooter>
       </AlertDialogContent>
+
     </AlertDialog>
   );
 }
