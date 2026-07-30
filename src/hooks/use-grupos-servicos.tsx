@@ -10,6 +10,21 @@ const db = supabase as unknown as SupabaseClient;
 
 export type GrupoServicoStatus = "ATIVO" | "INATIVO";
 
+/** Produto que compõe um serviço (exibido no detalhamento do agrupamento). */
+export interface ProdutoDoServico {
+  nome: string;
+  quantidade: number;
+}
+
+/** Serviço do agrupamento, já com os produtos que o compõem. */
+export interface ServicoDoGrupo {
+  servico_id: string;
+  nome: string;
+  status: GrupoServicoStatus;
+  valor_venda: number | null;
+  produtos: ProdutoDoServico[];
+}
+
 export interface GrupoServico {
   id: string;
   empresa_id: string;
@@ -21,6 +36,8 @@ export interface GrupoServico {
   total_servicos: number;
   /** Soma dos valores de venda dos serviços do grupo (ignora os sem valor). */
   total_venda: number | null;
+  /** Serviços do grupo, na ordem salva, com a composição de produtos. */
+  servicos: ServicoDoGrupo[];
 }
 
 export interface GrupoServicoItem {
@@ -29,7 +46,10 @@ export interface GrupoServicoItem {
   nome: string;
   status: GrupoServicoStatus;
   valor_venda: number | null;
+  /** Produtos que compõem o serviço. */
+  produtos: ProdutoDoServico[];
 }
+
 
 export interface GrupoServicoPayload {
   nome: string;
