@@ -210,7 +210,7 @@ export function useContratos() {
       const { data, error } = await db
         .from("contratos")
         .select(
-          "id, empresa_id, cliente_id, orcamento_id, titulo, status, data_contrato, inicio_vigencia, fim_vigencia, observacoes, created_at, clientes ( nome ), orcamentos ( descricao ), contrato_itens ( nome, origem_tipo, origem_nome, quantidade, valor_unitario, valor_custo, produtos )",
+          "id, empresa_id, cliente_id, orcamento_id, titulo, status, data_contrato, inicio_vigencia, fim_vigencia, observacoes, created_at, clientes ( nome ), orcamentos ( descricao ), contrato_itens ( nome, origem_tipo, origem_nome, quantidade, valor_unitario, valor_custo, produtos ), contrato_ajustes ( tipo, valor, descricao, ordem )",
         )
         .eq("empresa_id", empresaId!)
         .order("data_contrato", { ascending: false })
