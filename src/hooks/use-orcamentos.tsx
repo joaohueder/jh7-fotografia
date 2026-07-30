@@ -59,6 +59,9 @@ export interface OrcamentoItem {
   produtos: OrcamentoItemProduto[];
 }
 
+/** Tipo de ajuste no valor final da proposta. */
+export type OrcamentoAjusteTipo = "NENHUM" | "DESCONTO" | "ACRESCIMO";
+
 export interface Orcamento {
   id: string;
   empresa_id: string;
@@ -78,6 +81,16 @@ export interface Orcamento {
   total_itens: number;
   /** Soma de quantidade x valor de cada item (null quando nenhum item tem valor). */
   total_valor: number | null;
+  /** Desconto (subtrai), acréscimo (soma) ou nenhum ajuste. */
+  ajuste_tipo: OrcamentoAjusteTipo;
+  /** Valor em reais do desconto/acréscimo. */
+  ajuste_valor: number | null;
+  /** Motivo do desconto/acréscimo. */
+  ajuste_descricao: string | null;
+  /** Observação geral da proposta. */
+  observacoes: string | null;
+  /** Total dos itens já com o desconto/acréscimo aplicado. */
+  total_final: number | null;
 }
 
 export interface OrcamentoPayload {
@@ -86,9 +99,26 @@ export interface OrcamentoPayload {
   status: OrcamentoStatus;
   data_orcamento: string;
   validade: string | null;
+  ajuste_tipo: OrcamentoAjusteTipo;
+  ajuste_valor: number | null;
+  ajuste_descricao: string | null;
+  observacoes: string | null;
   /** Itens copiados, na ordem escolhida pelo usuário. */
   itens: OrcamentoItem[];
 }
+
+/** Aplica desconto/acréscimo sobre o total dos itens (nunca fica negativo). */
+export function aplicarAjuste(
+  totalItens: number | null,
+  tipo: OrcamentoAjusteTipo,
+  valor: number | null,
+): number | null {
+  if (totalItens == null) return null;
+  if (tipo === "NENHUM" || valor == null) return totalItens;
+  const final = tipo === "DESCONTO" ? totalItens - valor : totalItens + valor;
+  return final < 0 ? 0 : final;
+}
+
 
 function estaVencido(validade: string | null, status: OrcamentoStatus) {
   if (!validade) return false;
