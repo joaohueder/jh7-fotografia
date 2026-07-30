@@ -7,6 +7,7 @@ import {
   Loader2,
   Pencil,
   Plus,
+  RefreshCw,
   Search,
   Trash2,
 } from "lucide-react";
@@ -22,12 +23,21 @@ import {
   rotuloStatus,
   useDeleteOrcamento,
   useOrcamentos,
+  useSetOrcamentoStatus,
   type Orcamento,
   type OrcamentoStatus,
 } from "@/hooks/use-orcamentos";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -89,6 +99,7 @@ export default function Orcamentos() {
   const navigate = useNavigate();
   const { data: orcamentos, isLoading, error } = useOrcamentos();
   const remover = useDeleteOrcamento();
+  const mudarStatus = useSetOrcamentoStatus();
 
   const detalheErro = error ? rawErrorMessage(error) : "";
   const tabelaAusente = /does not exist|schema cache|relation|not find the table|404/i.test(
@@ -119,6 +130,16 @@ export default function Orcamentos() {
       vencidos: todos.filter((o) => o.vencido).length,
     };
   }, [orcamentos]);
+
+  async function alterarSituacao(o: Orcamento, status: OrcamentoStatus) {
+    if (o.status === status) return;
+    try {
+      await mudarStatus.mutateAsync({ id: o.id, status });
+      notifySuccess(`Situação alterada para “${rotuloStatus(status)}”.`);
+    } catch (err) {
+      notifyError(err, { title: "Não foi possível alterar a situação" });
+    }
+  }
 
   async function confirmarExclusao() {
     if (!alvoExclusao) return;
@@ -269,6 +290,39 @@ export default function Orcamentos() {
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5"
+                          aria-label={`Alterar situação de ${o.descricao}`}
+                          disabled={mudarStatus.isPending}
+                        >
+                          <RefreshCw className="h-3.5 w-3.5" />
+                          Situação
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-64">
+                        <DropdownMenuLabel>Mudar situação do orçamento</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {ORCAMENTO_STATUS.map((s) => (
+                          <DropdownMenuItem
+                            key={s.valor}
+                            disabled={o.status === s.valor}
+                            onSelect={() => alterarSituacao(o, s.valor)}
+                            className="flex flex-col items-start gap-0.5"
+                          >
+                            <span className="text-sm font-medium">
+                              {s.rotulo}
+                              {o.status === s.valor ? " (atual)" : ""}
+                            </span>
+                            <span className="text-xs text-muted-foreground">{s.ajuda}</span>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                     <IconAction
                       label="Editar orçamento"
                       ariaLabel={`Editar ${o.descricao}`}
