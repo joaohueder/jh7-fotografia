@@ -195,8 +195,8 @@ export default function LeadsList() {
       await situacaoLead.mutateAsync({ id: lead.id, situacao });
       notifySuccess(
         situacao === "DESISTIU"
-          ? "Lead marcado como desistente."
-          : "Lead voltou para a lista de aguardando.",
+          ? "Lead marcado como desistente e orçamentos em aberto passaram para recusado."
+          : "Lead voltou para aguardando e os orçamentos recusados voltaram para rascunho.",
       );
     } catch (err) {
       notifyError(err, { title: "Não foi possível alterar a situação do lead" });
