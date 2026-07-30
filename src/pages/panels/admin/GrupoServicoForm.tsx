@@ -28,11 +28,13 @@ import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-messa
 import { formatMoney } from "@/lib/br-masks";
 import { useServicos } from "@/hooks/use-servicos";
 import {
+  useComposicaoDosServicos,
   useGrupoServico,
   useGrupoServicoItens,
   useSalvarGrupoServico,
   type GrupoServicoStatus,
 } from "@/hooks/use-grupos-servicos";
+
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -96,6 +98,8 @@ export default function GrupoServicoForm() {
 
   const { data: grupo, isLoading: carregandoGrupo } = useGrupoServico(id);
   const { data: itensSalvos, isLoading: carregandoItens } = useGrupoServicoItens(id);
+  const { data: composicao } = useComposicaoDosServicos();
+
   const { data: servicos } = useServicos();
   const salvar = useSalvarGrupoServico();
 
@@ -297,7 +301,7 @@ export default function GrupoServicoForm() {
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                   Serviços do agrupamento
                 </h2>
-                <HelpTip text="Inclua aqui os serviços que fazem parte deste agrupamento. Arraste pelo ícone de alça (⠿) para mudar a ordem em que eles aparecem. A soma dos valores de venda é calculada automaticamente (serviços sem valor informado entram como zero)." />
+                <HelpTip text="Inclua aqui os serviços que fazem parte deste agrupamento. Abaixo do nome de cada serviço aparecem os produtos que o compõem, com a quantidade usada — assim você confere tudo o que o pacote entrega. Arraste pelo ícone de alça (⠿) para mudar a ordem em que eles aparecem. A soma dos valores de venda é calculada automaticamente (serviços sem valor informado entram como zero)." />
               </div>
 
               <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
@@ -351,6 +355,7 @@ export default function GrupoServicoForm() {
                     <ul className="divide-y divide-border rounded-lg border border-border">
                       {itens.map((servicoId, indice) => {
                         const s = servicoPorId.get(servicoId);
+                        const produtosDoServico = composicao?.[servicoId] ?? [];
                         return (
                           <LinhaServico key={servicoId} id={servicoId}>
                             {({ setActivatorNodeRef, listeners, attributes }) => (
@@ -369,7 +374,7 @@ export default function GrupoServicoForm() {
                                 <span className="w-6 shrink-0 text-xs font-semibold text-muted-foreground">
                                   {indice + 1}º
                                 </span>
-                                <div className="min-w-[10rem] flex-1">
+                                <div className="min-w-[10rem] flex-1 space-y-1.5">
                                   <p className="text-sm font-medium text-foreground">
                                     {s?.nome ?? "Serviço removido"}
                                   </p>
@@ -380,7 +385,32 @@ export default function GrupoServicoForm() {
                                       : `R$ ${formatMoney(s.valor_venda)}`}
                                     {s && s.status !== "ATIVO" ? " · serviço inativo" : ""}
                                   </p>
+                                  <div className="rounded-md bg-muted/40 px-2.5 py-1.5">
+                                    <p className="text-[0.7rem] font-semibold uppercase tracking-wide text-muted-foreground">
+                                      Produtos deste serviço
+                                    </p>
+                                    {produtosDoServico.length === 0 ? (
+                                      <p className="text-xs text-muted-foreground">
+                                        Este serviço não usa produtos.
+                                      </p>
+                                    ) : (
+                                      <ul className="mt-0.5 space-y-0.5">
+                                        {produtosDoServico.map((p, i) => (
+                                          <li
+                                            key={`${servicoId}-${p.nome}-${i}`}
+                                            className="text-xs text-foreground/80"
+                                          >
+                                            • {p.nome}{" "}
+                                            <span className="text-muted-foreground">
+                                              ({p.quantidade}x)
+                                            </span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    )}
+                                  </div>
                                 </div>
+
                                 <Button
                                   type="button"
                                   variant="ghost"
