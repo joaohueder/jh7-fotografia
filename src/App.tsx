@@ -28,6 +28,9 @@ import GruposServicosList from "@/pages/panels/admin/GruposServicos";
 import GrupoServicoForm from "@/pages/panels/admin/GrupoServicoForm";
 import OrcamentosList from "@/pages/panels/admin/Orcamentos";
 import OrcamentoForm from "@/pages/panels/admin/OrcamentoForm";
+import ContratosList from "@/pages/panels/admin/Contratos";
+import ContratoForm from "@/pages/panels/admin/ContratoForm";
+
 
 
 
