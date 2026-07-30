@@ -601,6 +601,26 @@ export default function LeadsList() {
                         <StickyNote className="h-4 w-4" />
                         Notas do lead
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="tap-target gap-2"
+                        title="Criar uma nova proposta para este lead. Um mesmo lead pode ter vários orçamentos."
+                        aria-label={`Adicionar orçamento para o lead ${l.nome}`}
+                        onClick={() =>
+                          navigate(
+                            `/admin/orcamentos/novo?cliente=${l.id}&voltar=${encodeURIComponent("/admin/leads")}`,
+                          )
+                        }
+                      >
+                        <FileText className="h-4 w-4" />
+                        Novo orçamento
+                        {(orcamentosPorLead.get(l.id) ?? 0) > 0 && (
+                          <span className="rounded-full bg-muted px-2 text-xs text-muted-foreground">
+                            {orcamentosPorLead.get(l.id)}
+                          </span>
+                        )}
+                      </Button>
                       {l.situacao === "AGUARDANDO" ? (
                         <Button
                           variant="outline"
