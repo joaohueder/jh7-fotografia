@@ -10,7 +10,7 @@
 -- =====================================================================
 
 alter table public.servicos
-  add column if not exists custo_adicional numeric(12, 2) not null default 0;
+  add column if not exists custo_adicional numeric(12, 2);
 
 create table if not exists public.servico_produtos (
   id uuid primary key default gen_random_uuid(),
