@@ -4,6 +4,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/selfhosted/client";
 import { useEmpresaAtual } from "@/hooks/use-clientes";
+import { ehLeadEmAberto } from "@/lib/clientes";
+
 
 // Tabelas do Supabase autohospedado (fora dos tipos gerados).
 const db = supabase as unknown as SupabaseClient;
