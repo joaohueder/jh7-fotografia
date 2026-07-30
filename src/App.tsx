@@ -339,6 +339,36 @@ export default function App() {
                 </RequireAuth>
               }
             />
+            <Route
+              path="/admin/agrupamento-servicos"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <GruposServicosList />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/agrupamento-servicos/novo"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <GrupoServicoForm />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/agrupamento-servicos/:id"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <GrupoServicoForm />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
 
 
 
