@@ -68,6 +68,20 @@ export interface ContratoItem {
   produtos: ContratoItemProduto[];
 }
 
+/** Tipo de ajuste no valor final do contrato. */
+export type ContratoAjusteTipo = "DESCONTO" | "ACRESCIMO";
+
+/**
+ * Desconto ou acréscimo lançado no contrato. Podem existir vários no mesmo
+ * contrato — cada um é um item adicional com valor e motivo próprios.
+ * Quando o contrato nasce de um orçamento, os ajustes são copiados de lá.
+ */
+export interface ContratoAjuste {
+  tipo: ContratoAjusteTipo;
+  valor: number;
+  descricao: string;
+}
+
 export interface Contrato {
   id: string;
   empresa_id: string;
@@ -87,6 +101,10 @@ export interface Contrato {
   vencido: boolean;
   total_itens: number;
   total_valor: number | null;
+  /** Descontos e acréscimos lançados no contrato (podem ser vários). */
+  ajustes: ContratoAjuste[];
+  /** Total dos serviços já com os descontos e acréscimos aplicados. */
+  total_final: number | null;
 }
 
 export interface ContratoPayload {
@@ -99,6 +117,7 @@ export interface ContratoPayload {
   fim_vigencia: string | null;
   observacoes: string | null;
   itens: ContratoItem[];
+  ajustes: ContratoAjuste[];
 }
 
 export function somarItensContrato(itens: ContratoItem[]): number | null {
@@ -106,6 +125,33 @@ export function somarItensContrato(itens: ContratoItem[]): number | null {
   if (comValor.length === 0) return null;
   return comValor.reduce((s, i) => s + Number(i.valor_unitario) * Number(i.quantidade || 1), 0);
 }
+
+/** Soma dos descontos e acréscimos (positivo aumenta, negativo diminui). */
+export function somarAjustesContrato(ajustes: ContratoAjuste[]): number {
+  return (ajustes ?? []).reduce(
+    (s, a) => s + (a.tipo === "DESCONTO" ? -Number(a.valor || 0) : Number(a.valor || 0)),
+    0,
+  );
+}
+
+/** Aplica todos os descontos/acréscimos sobre o total dos serviços (nunca fica negativo). */
+export function aplicarAjustesContrato(
+  totalItens: number | null,
+  ajustes: ContratoAjuste[],
+): number | null {
+  if (totalItens == null) return null;
+  const final = totalItens + somarAjustesContrato(ajustes);
+  return final < 0 ? 0 : final;
+}
+
+function mapearAjuste(a: any): ContratoAjuste {
+  return {
+    tipo: (a.tipo === "ACRESCIMO" ? "ACRESCIMO" : "DESCONTO") as ContratoAjusteTipo,
+    valor: Number(a.valor ?? 0),
+    descricao: String(a.descricao ?? ""),
+  };
+}
+
 
 function mapearItem(i: any): ContratoItem {
   return {
