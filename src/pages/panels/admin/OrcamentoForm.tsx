@@ -384,7 +384,12 @@ export default function OrcamentoForm() {
             quantidade: Number(i.quantidadeTexto.replace(",", ".")) || 1,
             valor_unitario: parseMoney(i.valorTexto),
             valor_custo: i.valor_custo,
-            produtos: i.produtos,
+            produtos: i.produtos
+              .filter((p) => p.nome.trim().length > 0)
+              .map((p) => ({
+                nome: p.nome.trim(),
+                quantidade: p.quantidade > 0 ? p.quantidade : 1,
+              })),
           })),
         },
       });
