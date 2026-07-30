@@ -15,6 +15,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { useImpersonacao } from "@/hooks/use-impersonacao";
+import { useLimitesEmpresa } from "@/hooks/use-limites";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -89,6 +90,10 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
   const theme = ACCENTS[accent];
   const { empresa, impersonando, encerrar } = useImpersonacao();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  // Mantém os limites do plano sempre atualizados em tempo real em todas as
+  // telas do painel — assim qualquer bloqueio (leads/clientes) reage na hora,
+  // mesmo que a tela aberta não consulte os limites diretamente.
+  useLimitesEmpresa();
   const [logoutOpen, setLogoutOpen] = useState(false);
   const initials = (displayName ?? user?.email ?? "?").slice(0, 2);
 

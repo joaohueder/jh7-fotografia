@@ -32,7 +32,7 @@ export function useLimitesEmpresa() {
   // alterações feitas pelo super admin nos limites do plano.
   useRealtime(
     "limites-empresa",
-    ["clientes", "empresa_assinaturas", "planos", "empresas"],
+    ["clientes", "empresa_assinaturas", "planos", "empresas", "cliente_notas"],
     [["limites-empresa"]],
     Boolean(empresaId),
   );
@@ -43,6 +43,10 @@ export function useLimitesEmpresa() {
     staleTime: 0,
     refetchOnMount: "always",
     refetchOnWindowFocus: true,
+    // Rede de segurança: se o tempo real do banco falhar (conexão instável ou
+    // publicação desativada), o bloqueio ainda se atualiza sozinho.
+    refetchInterval: 15 * 1000,
+    refetchIntervalInBackground: false,
     queryFn: async (): Promise<LimitesEmpresa> => {
       const assinaturaRes = await db
         .from("empresa_assinaturas")

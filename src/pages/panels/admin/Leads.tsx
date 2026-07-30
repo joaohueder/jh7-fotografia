@@ -110,7 +110,7 @@ export default function LeadsList() {
   const salvar = useSalvarLead();
   const remover = useDeleteLead();
   const situacaoLead = useSituacaoLead();
-  const { data: limites } = useLimitesEmpresa();
+  const { data: limites, refetch: recarregarLimites } = useLimitesEmpresa();
 
   // Regra de limite: o plano da empresa define quantos leads podem existir.
   const limiteLeads = limites?.limite_leads ?? null;
@@ -233,6 +233,19 @@ export default function LeadsList() {
     if (!empresaId) return;
     // Revalida o limite no momento de gravar: outra pessoa da equipe pode ter
     // ocupado a última vaga enquanto este formulário estava aberto.
+    // Confere o limite no banco no instante do salvamento (tempo real):
+    // outra pessoa da equipe pode ter usado a última vaga agora mesmo.
+    if (!editando) {
+      const atual = (await recarregarLimites()).data;
+      const lim = atual?.limite_leads ?? null;
+      const uso = atual?.usado_leads ?? 0;
+      if (lim !== null && uso >= lim) {
+        notifyValidation(
+          `Limite de leads do plano atingido (${uso} de ${lim}). Fale com o administrador para contratar um plano maior.`,
+        );
+        return;
+      }
+    }
     if (!editando && limiteAtingido) {
       notifyValidation(
         `Limite de leads do plano atingido (${usadoLeads} de ${limiteLeads}). Fale com o administrador para contratar um plano maior.`,

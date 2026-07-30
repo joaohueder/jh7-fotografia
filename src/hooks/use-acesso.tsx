@@ -48,7 +48,7 @@ export function useAcesso() {
   // Tempo real: bloqueio/liberação por empresa, papel ou assinatura vale na hora.
   useRealtime(
     "meu-acesso",
-    ["empresas", "empresa_assinaturas", "user_roles", "profiles"],
+    ["empresas", "empresa_assinaturas", "user_roles", "profiles", "planos"],
     [["meu-acesso", user?.id ?? null]],
     Boolean(user),
   );
@@ -56,7 +56,13 @@ export function useAcesso() {
   return useQuery({
     queryKey: ["meu-acesso", user?.id ?? null],
     enabled: Boolean(user) && !authLoading,
-    staleTime: 60 * 1000,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+    // Fallback caso o tempo real do banco esteja indisponível: o bloqueio por
+    // assinatura vencida ou empresa inativa entra em vigor em até 15 segundos.
+    refetchInterval: 15 * 1000,
+    refetchIntervalInBackground: false,
     queryFn: buscarAcesso,
   });
 }
