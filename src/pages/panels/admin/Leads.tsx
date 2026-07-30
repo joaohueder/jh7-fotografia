@@ -240,7 +240,7 @@ export default function LeadsList() {
       const lim = atual?.limite_leads ?? null;
       const uso = atual?.usado_leads ?? 0;
       if (lim !== null && uso >= lim) {
-        toast.error(
+        notifyValidation(
           `Limite de leads do plano atingido (${uso} de ${lim}). Fale com o administrador para contratar um plano maior.`,
         );
         return;

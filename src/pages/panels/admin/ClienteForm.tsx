@@ -388,7 +388,7 @@ export default function ClienteForm() {
       const lim = atual?.limite_clientes ?? null;
       const uso = atual?.usado_clientes ?? 0;
       if (lim !== null && uso >= lim) {
-        toast.error(
+        notifyValidation(
           `Limite de clientes do plano atingido (${uso} de ${lim}). Contrate um plano maior para cadastrar novos clientes.`,
         );
         return;
