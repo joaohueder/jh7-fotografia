@@ -463,21 +463,14 @@ export default function ClientesList() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!alvoExclusao} onOpenChange={(o) => !o && setAlvoExclusao(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Excluir cliente</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação não pode ser desfeita. O cliente <strong>{alvoExclusao?.nome}</strong> e seus
-              contatos serão removidos.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmarExclusao}>Excluir</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmarExclusaoCliente
+        clienteId={alvoExclusao?.id ?? null}
+        nome={alvoExclusao?.nome ?? null}
+        tipo="cliente"
+        onCancelar={() => setAlvoExclusao(null)}
+        onConfirmar={confirmarExclusao}
+      />
+
     </PanelLayout>
   );
 }
