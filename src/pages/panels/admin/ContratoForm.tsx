@@ -539,10 +539,26 @@ export default function ContratoForm() {
           </InlineNote>
         ) : null}
 
+        {/* Cada grupo de informações fica em uma aba, para a tela não ficar longa */}
+        <Tabs defaultValue="dados" className="space-y-4">
+          <TabsList className="flex h-auto flex-wrap justify-start gap-1">
+            <TabsTrigger value="dados">Dados do contrato</TabsTrigger>
+            <TabsTrigger value="vigencia">Vigência</TabsTrigger>
+            <TabsTrigger value="servicos">
+              Serviços{itens.length > 0 ? ` (${itens.length})` : ""}
+            </TabsTrigger>
+            <TabsTrigger value="valores">
+              Descontos e acréscimos{ajustes.length > 0 ? ` (${ajustes.length})` : ""}
+            </TabsTrigger>
+            <TabsTrigger value="observacoes">Observações</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="dados" className="mt-0">
         <section className="space-y-4 rounded-xl border border-border bg-card p-4">
           <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             <FileSignature className="h-4 w-4" /> Dados do contrato
           </h2>
+
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-1.5">
