@@ -387,10 +387,11 @@ export default function Produtos() {
           <DialogHeader>
             <DialogTitle>{editando ? "Editar produto" : "Novo produto"}</DialogTitle>
             <DialogDescription>
-              Os campos marcados com <span className="text-destructive">*</span> são obrigatórios.
-              Informe quanto o item custa para o estúdio e por quanto ele é vendido.
+              Preencha o nome e o status. Os valores de custo e venda são opcionais e podem ser
+              informados depois, quando você souber os preços exatos.
             </DialogDescription>
           </DialogHeader>
+
 
           <div className="space-y-4">
             <div className="space-y-1.5">
@@ -433,8 +434,8 @@ export default function Produtos() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="produto-custo" className="flex items-center gap-1.5">
-                  Valor de custo <span className="text-destructive">*</span>
-                  <HelpTip text="Quanto este item custa para o seu estúdio (material, laboratório, fornecedor). Se não houver custo, deixe 0,00." />
+                  Valor de custo
+                  <HelpTip text="Quanto este item custa para o seu estúdio (material, laboratório, fornecedor). Deixe em branco se ainda não souber." />
                 </Label>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">R$</span>
@@ -443,16 +444,17 @@ export default function Produtos() {
                     inputMode="numeric"
                     value={custo}
                     onChange={(e) => setCusto(maskMoney(e.target.value))}
-                    placeholder="0,00"
+                    placeholder="Deixe em branco se não souber"
                   />
                 </div>
                 {erros.custo ? <p className="text-xs text-destructive">{erros.custo}</p> : null}
               </div>
 
+
               <div className="space-y-1.5">
                 <Label htmlFor="produto-venda" className="flex items-center gap-1.5">
-                  Valor de venda <span className="text-destructive">*</span>
-                  <HelpTip text="Preço cobrado do cliente por este produto ou serviço." />
+                  Valor de venda
+                  <HelpTip text="Preço cobrado do cliente por este produto ou serviço. Deixe em branco se ainda não foi definido." />
                 </Label>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">R$</span>
@@ -461,11 +463,12 @@ export default function Produtos() {
                     inputMode="numeric"
                     value={venda}
                     onChange={(e) => setVenda(maskMoney(e.target.value))}
-                    placeholder="0,00"
+                    placeholder="Deixe em branco se não souber"
                   />
                 </div>
                 {erros.venda ? <p className="text-xs text-destructive">{erros.venda}</p> : null}
               </div>
+
             </div>
 
             <p className="text-xs text-muted-foreground">
