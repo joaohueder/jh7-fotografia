@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
+import { cn } from "@/lib/utils";
 import { PanelLayout } from "@/components/panel-layout";
 import { IconAction } from "@/components/icon-action";
 import { HelpTip } from "@/components/page-help";
