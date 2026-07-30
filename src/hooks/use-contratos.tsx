@@ -363,6 +363,29 @@ export function useSalvarContrato() {
         if (erroItens) throw erroItens;
       }
 
+      // Descontos e acréscimos: também são regravados por inteiro, na ordem.
+      const { error: erroLimparAjustes } = await db
+        .from("contrato_ajustes")
+        .delete()
+        .eq("contrato_id", contratoId!);
+      if (erroLimparAjustes) throw erroLimparAjustes;
+
+      const ajustesValidos = (dados.ajustes ?? []).filter(
+        (a) => a.valor > 0 && a.descricao.trim().length >= 2,
+      );
+      if (ajustesValidos.length > 0) {
+        const linhasAjustes = ajustesValidos.map((a, indice) => ({
+          empresa_id: empresaDoContrato,
+          contrato_id: contratoId,
+          ordem: indice,
+          tipo: a.tipo,
+          valor: a.valor,
+          descricao: a.descricao.trim().slice(0, 200),
+        }));
+        const { error: erroAjustes } = await db.from("contrato_ajustes").insert(linhasAjustes);
+        if (erroAjustes) throw erroAjustes;
+      }
+
       return contratoId!;
     },
     onSuccess: () => {
