@@ -357,7 +357,7 @@ export default function ContratoForm() {
             <div className="space-y-1.5">
               <Label className="flex items-center gap-1.5">
                 Cliente *
-                <HelpTip text="Somente clientes já cadastrados e ativos podem assinar contratos. Se o contato ainda é um lead, converta-o em cliente antes." />
+                <HelpTip text="Aparecem aqui apenas clientes ativos — inclusive os que começaram como lead e já foram convertidos em cliente. Contatos que ainda são leads e clientes inativos não podem assinar contrato: converta o lead ou reative o cliente antes." />
               </Label>
               <SearchableSelect
                 value={clienteId}
