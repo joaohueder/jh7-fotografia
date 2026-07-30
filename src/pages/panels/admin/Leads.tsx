@@ -854,21 +854,14 @@ export default function LeadsList() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!alvoExclusao} onOpenChange={(o) => !o && setAlvoExclusao(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Excluir lead</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação não pode ser desfeita. O lead <strong>{alvoExclusao?.nome}</strong> será
-              removido da lista.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmarExclusao}>Excluir</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmarExclusaoCliente
+        clienteId={alvoExclusao?.id ?? null}
+        nome={alvoExclusao?.nome ?? null}
+        tipo="lead"
+        onCancelar={() => setAlvoExclusao(null)}
+        onConfirmar={confirmarExclusao}
+      />
+
     </PanelLayout>
   );
 }
