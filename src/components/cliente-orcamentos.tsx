@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Loader2, Plus } from "lucide-react";
+import { FileText, Loader2, Pencil, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useOrcamentos, rotuloStatus } from "@/hooks/use-orcamentos";
@@ -27,6 +27,8 @@ export function ClienteOrcamentos({ clienteId }: { clienteId: string }) {
   const navigate = useNavigate();
   const { data: todos, isLoading } = useOrcamentos();
 
+  const voltar = encodeURIComponent(`/admin/clientes/${clienteId}?aba=orcamentos`);
+
   const lista = useMemo(
     () => (todos ?? []).filter((o) => o.cliente_id === clienteId),
     [todos, clienteId],
@@ -45,8 +47,8 @@ export function ClienteOrcamentos({ clienteId }: { clienteId: string }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
           Aqui ficam todas as propostas feitas para este cliente. Ao clicar em “Novo orçamento”, o
-          cliente já vai preenchido e não pode ser trocado — depois de salvar você volta para esta
-          aba.
+          cliente já vai preenchido e não pode ser trocado. Use “Editar” para alterar uma proposta — ao
+          salvar, voltar ou cancelar você retorna para esta aba.
         </p>
         <Button
           type="button"
@@ -54,9 +56,7 @@ export function ClienteOrcamentos({ clienteId }: { clienteId: string }) {
           className="tap-target gap-2"
           onClick={() =>
             navigate(
-              `/admin/orcamentos/novo?cliente=${clienteId}&voltar=${encodeURIComponent(
-                `/admin/clientes/${clienteId}?aba=orcamentos`,
-              )}`,
+              `/admin/orcamentos/novo?cliente=${clienteId}&voltar=${voltar}`,
             )
           }
         >
@@ -77,11 +77,11 @@ export function ClienteOrcamentos({ clienteId }: { clienteId: string }) {
       ) : (
         <ul className="space-y-3">
           {lista.map((o) => (
-            <li key={o.id}>
+            <li key={o.id} className="relative">
               <button
                 type="button"
-                onClick={() => navigate(`/admin/orcamentos/${o.id}`)}
-                className="w-full rounded-xl border border-border bg-card p-4 text-left transition-colors hover:border-[var(--panel-accent)]"
+                onClick={() => navigate(`/admin/orcamentos/${o.id}?voltar=${voltar}`)}
+                className="w-full rounded-xl border border-border bg-card p-4 pr-28 text-left transition-colors hover:border-[var(--panel-accent)]"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="font-semibold">{o.descricao || "Orçamento sem descrição"}</span>
@@ -111,6 +111,16 @@ export function ClienteOrcamentos({ clienteId }: { clienteId: string }) {
                   <span className="font-semibold text-foreground">{moeda(o.total_final)}</span>
                 </div>
               </button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="tap-target absolute right-3 top-3 gap-1"
+                onClick={() => navigate(`/admin/orcamentos/${o.id}?voltar=${voltar}`)}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+                Editar
+              </Button>
             </li>
           ))}
         </ul>
