@@ -44,14 +44,21 @@ export function ClienteOrcamentos({ clienteId }: { clienteId: string }) {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          Aqui ficam todas as propostas feitas para este cliente. Clique em uma delas para abrir o
-          orçamento completo.
+          Aqui ficam todas as propostas feitas para este cliente. Ao clicar em “Novo orçamento”, o
+          cliente já vai preenchido e não pode ser trocado — depois de salvar você volta para esta
+          aba.
         </p>
         <Button
           type="button"
           variant="outline"
           className="tap-target gap-2"
-          onClick={() => navigate("/admin/orcamentos/novo")}
+          onClick={() =>
+            navigate(
+              `/admin/orcamentos/novo?cliente=${clienteId}&voltar=${encodeURIComponent(
+                `/admin/clientes/${clienteId}?aba=orcamentos`,
+              )}`,
+            )
+          }
         >
           <Plus className="h-4 w-4" />
           Novo orçamento
