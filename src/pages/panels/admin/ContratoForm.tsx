@@ -133,13 +133,19 @@ export default function ContratoForm() {
     setCarregado(true);
   }, [edicao, contratoSalvo, carregado]);
 
+  // Só entram na lista os clientes de verdade e ativos. Quem veio de um lead e
+  // já foi convertido conta como cliente; quem ainda é lead fica de fora.
   const clientesAtivos = useMemo(
     () =>
-      (clientes ?? []).filter(
-        (c) => c.origem === "CLIENTE" && (c.status === "ATIVO" || c.id === clienteId),
-      ),
+      (clientes ?? []).filter((c) => {
+        if (c.id === clienteId) return true; // mantém o cliente já vinculado ao contrato
+        if (c.status !== "ATIVO") return false;
+        const convertido = (c as { lead_status?: string | null }).lead_status === "CLIENTE";
+        return c.origem === "CLIENTE" || convertido;
+      }),
     [clientes, clienteId],
   );
+
 
   // Somente orçamentos aprovados do cliente escolhido podem virar contrato.
   const orcamentosAprovados = useMemo(
