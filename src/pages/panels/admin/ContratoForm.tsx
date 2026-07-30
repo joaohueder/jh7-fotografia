@@ -1,0 +1,643 @@
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  ArrowLeft,
+  FileSignature,
+  FileText,
+  Loader2,
+  Package,
+  Plus,
+  Save,
+  Trash2,
+  Wrench,
+} from "lucide-react";
+
+import { usePageMeta } from "@/hooks/use-page-meta";
+import { PanelLayout } from "@/components/panel-layout";
+import { HelpTip, InlineNote } from "@/components/page-help";
+import { ADMIN_MENU } from "@/pages/panels/admin/menu";
+import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
+import { formatMoney, maskMoney, parseMoney } from "@/lib/br-masks";
+import { SearchableSelect } from "@/components/searchable-select";
+
+import { useClientes } from "@/hooks/use-clientes";
+import { useServicos } from "@/hooks/use-servicos";
+import { useComposicaoDosServicos } from "@/hooks/use-grupos-servicos";
+import { useOrcamento, useOrcamentos } from "@/hooks/use-orcamentos";
+import {
+  CONTRATO_STATUS,
+  rotuloContratoStatus,
+  somarItensContrato,
+  useContrato,
+  useSalvarContrato,
+  type ContratoItem,
+  type ContratoStatus,
+} from "@/hooks/use-contratos";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+function hojeISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate(),
+  ).padStart(2, "0")}`;
+}
+
+function somarDias(base: string, dias: number) {
+  const d = new Date(`${base}T00:00:00`);
+  d.setDate(d.getDate() + dias);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate(),
+  ).padStart(2, "0")}`;
+}
+
+let contador = 0;
+function novaChave() {
+  contador += 1;
+  return `linha-${Date.now()}-${contador}`;
+}
+
+interface ItemLinha extends ContratoItem {
+  chave: string;
+  valorTexto: string;
+}
+
+function paraLinha(item: ContratoItem): ItemLinha {
+  return {
+    ...item,
+    chave: novaChave(),
+    valorTexto: item.valor_unitario == null ? "" : formatMoney(item.valor_unitario),
+  };
+}
+
+/** Cadastro de contrato em tela cheia: criação, edição e visualização. */
+export default function ContratoForm() {
+  const { id } = useParams<{ id: string }>();
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+
+  const edicao = Boolean(id && id !== "novo");
+  const somenteLeitura = params.get("modo") === "ver";
+  const voltarPara = params.get("voltar")
+    ? decodeURIComponent(params.get("voltar")!)
+    : "/admin/contratos";
+  const clientePreSelecionado = params.get("cliente") ?? "";
+  const orcamentoPreSelecionado = params.get("orcamento") ?? "";
+
+  usePageMeta(
+    edicao
+      ? "Editar contrato — JH7 Gestão de Estúdios Fotográficos"
+      : "Novo contrato — JH7 Gestão de Estúdios Fotográficos",
+    "Formalize com o cliente os serviços aprovados no orçamento.",
+  );
+
+  const { data: clientes } = useClientes();
+  const { data: orcamentos } = useOrcamentos();
+  const { data: servicos } = useServicos();
+  const { data: composicao } = useComposicaoDosServicos();
+  const { data: contratoSalvo, isLoading } = useContrato(edicao ? id : undefined);
+  const salvar = useSalvarContrato();
+
+  const [clienteId, setClienteId] = useState(clientePreSelecionado);
+  const [orcamentoId, setOrcamentoId] = useState(orcamentoPreSelecionado);
+  const [titulo, setTitulo] = useState("");
+  const [status, setStatus] = useState<ContratoStatus>("RASCUNHO");
+  const [dataContrato, setDataContrato] = useState(hojeISO());
+  const [inicio, setInicio] = useState(hojeISO());
+  const [fim, setFim] = useState("");
+  const [observacoes, setObservacoes] = useState("");
+  const [itens, setItens] = useState<ItemLinha[]>([]);
+  const [servicoEscolhido, setServicoEscolhido] = useState("");
+  const [carregado, setCarregado] = useState(false);
+  /** Orçamento cujos itens já foram copiados, para não copiar duas vezes. */
+  const [copiadoDe, setCopiadoDe] = useState("");
+
+  const { data: orcamentoDetalhe } = useOrcamento(orcamentoId || undefined);
+
+  // Carrega o contrato existente uma única vez.
+  useEffect(() => {
+    if (!edicao || !contratoSalvo || carregado) return;
+    setClienteId(contratoSalvo.cliente_id);
+    setOrcamentoId(contratoSalvo.orcamento_id ?? "");
+    setCopiadoDe(contratoSalvo.orcamento_id ?? "");
+    setTitulo(contratoSalvo.titulo);
+    setStatus(contratoSalvo.status);
+    setDataContrato(contratoSalvo.data_contrato);
+    setInicio(contratoSalvo.inicio_vigencia ?? "");
+    setFim(contratoSalvo.fim_vigencia ?? "");
+    setObservacoes(contratoSalvo.observacoes ?? "");
+    setItens(contratoSalvo.itens.map(paraLinha));
+    setCarregado(true);
+  }, [edicao, contratoSalvo, carregado]);
+
+  const clientesAtivos = useMemo(
+    () =>
+      (clientes ?? []).filter(
+        (c) => c.origem === "CLIENTE" && (c.status === "ATIVO" || c.id === clienteId),
+      ),
+    [clientes, clienteId],
+  );
+
+  // Somente orçamentos aprovados do cliente escolhido podem virar contrato.
+  const orcamentosAprovados = useMemo(
+    () =>
+      (orcamentos ?? []).filter(
+        (o) => o.status === "APROVADO" && (!clienteId || o.cliente_id === clienteId),
+      ),
+    [orcamentos, clienteId],
+  );
+
+  // Ao escolher um orçamento aprovado, copiamos os serviços para o contrato.
+  useEffect(() => {
+    if (somenteLeitura) return;
+    if (!orcamentoId || orcamentoId === copiadoDe) return;
+    if (!orcamentoDetalhe) return;
+
+    setItens(
+      orcamentoDetalhe.itens.map((i) =>
+        paraLinha({
+          nome: i.nome,
+          origem_tipo: "ORCAMENTO",
+          origem_nome: i.origem_nome ?? orcamentoDetalhe.descricao,
+          quantidade: i.quantidade,
+          valor_unitario: i.valor_unitario,
+          valor_custo: i.valor_custo,
+          produtos: i.produtos,
+        }),
+      ),
+    );
+    setCopiadoDe(orcamentoId);
+    if (!clienteId) setClienteId(orcamentoDetalhe.cliente_id);
+    if (!titulo.trim()) setTitulo(`Contrato — ${orcamentoDetalhe.descricao}`);
+    notifySuccess(
+      "Os serviços do orçamento aprovado foram copiados para o contrato. Você ainda pode ajustar os valores antes de salvar.",
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orcamentoId, orcamentoDetalhe, copiadoDe, somenteLeitura]);
+
+  const totalItens = useMemo(
+    () =>
+      somarItensContrato(
+        itens.map((i) => ({ ...i, valor_unitario: parseMoney(i.valorTexto) })),
+      ),
+    [itens],
+  );
+
+  function adicionarServico() {
+    const servico = (servicos ?? []).find((s) => s.id === servicoEscolhido);
+    if (!servico) {
+      notifyValidation("Escolha um serviço na lista para incluir no contrato.");
+      return;
+    }
+    setItens((atual) => [
+      ...atual,
+      paraLinha({
+        nome: servico.nome,
+        origem_tipo: "SERVICO",
+        origem_nome: servico.nome,
+        quantidade: 1,
+        valor_unitario: servico.valor_venda,
+        valor_custo: servico.valor_custo,
+        produtos: (composicao?.[servico.id] ?? []).map((p) => ({
+          nome: p.nome,
+          quantidade: p.quantidade,
+        })),
+      }),
+    ]);
+    setServicoEscolhido("");
+  }
+
+  function adicionarManual() {
+    setItens((atual) => [
+      ...atual,
+      paraLinha({
+        nome: "",
+        origem_tipo: "MANUAL",
+        origem_nome: null,
+        quantidade: 1,
+        valor_unitario: null,
+        valor_custo: null,
+        produtos: [],
+      }),
+    ]);
+  }
+
+  async function submeter() {
+    if (somenteLeitura) return;
+    if (!clienteId) {
+      notifyValidation("Escolha o cliente do contrato. Esse campo é obrigatório.");
+      return;
+    }
+    if (!titulo.trim()) {
+      notifyValidation("Informe um título para o contrato, por exemplo “Ensaio gestante 2026”.");
+      return;
+    }
+    if (!dataContrato) {
+      notifyValidation("Informe a data do contrato.");
+      return;
+    }
+    if (inicio && fim && fim < inicio) {
+      notifyValidation("A data de fim da vigência não pode ser anterior à data de início.");
+      return;
+    }
+    if (itens.length === 0) {
+      notifyValidation(
+        "Inclua pelo menos um serviço no contrato. Você pode gerar a partir de um orçamento aprovado ou adicionar serviços do seu cadastro.",
+      );
+      return;
+    }
+    if (itens.some((i) => !i.nome.trim())) {
+      notifyValidation("Todo serviço do contrato precisa de um nome. Revise a lista.");
+      return;
+    }
+
+    try {
+      await salvar.mutateAsync({
+        id: edicao ? id : undefined,
+        dados: {
+          cliente_id: clienteId,
+          orcamento_id: orcamentoId || null,
+          titulo,
+          status,
+          data_contrato: dataContrato,
+          inicio_vigencia: inicio || null,
+          fim_vigencia: fim || null,
+          observacoes,
+          itens: itens.map((i) => ({
+            nome: i.nome,
+            origem_tipo: i.origem_tipo,
+            origem_nome: i.origem_nome,
+            quantidade: 1,
+            valor_unitario: parseMoney(i.valorTexto),
+            valor_custo: i.valor_custo,
+            produtos: i.produtos,
+          })),
+        },
+      });
+      notifySuccess(edicao ? "Contrato atualizado." : "Contrato criado.");
+      navigate(voltarPara);
+    } catch (err) {
+      notifyError(err, { title: "Não foi possível salvar o contrato" });
+    }
+  }
+
+  if (edicao && isLoading) {
+    return (
+      <PanelLayout accent="admin" menu={ADMIN_MENU}>
+        <div className="mx-auto flex w-full max-w-[var(--app-max-w)] items-center gap-2 p-10 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" /> Carregando contrato…
+        </div>
+      </PanelLayout>
+    );
+  }
+
+  return (
+    <PanelLayout accent="admin" menu={ADMIN_MENU}>
+      <div className="mx-auto w-full max-w-[var(--app-max-w)] space-y-6">
+        <header className="flex flex-wrap items-start justify-between gap-3">
+          <div className="space-y-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="-ml-2 gap-2"
+              onClick={() => navigate(voltarPara)}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
+            </Button>
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-[clamp(1.35rem,4.5vw,1.9rem)] font-bold tracking-tight">
+                {somenteLeitura
+                  ? "Visualizar contrato"
+                  : edicao
+                    ? "Editar contrato"
+                    : "Novo contrato"}
+              </h1>
+              <HelpTip text="Preencha os dados do contrato, escolha o cliente e, se quiser, um orçamento já aprovado. Ao escolher o orçamento, todos os serviços dele são copiados para cá — as alterações que você fizer aqui não mexem no orçamento original. Campos marcados com * são obrigatórios." />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Formalize com o cliente os serviços aprovados e registre o período de execução.
+            </p>
+          </div>
+          {somenteLeitura ? null : (
+            <Button className="tap-target gap-2" onClick={submeter} disabled={salvar.isPending}>
+              {salvar.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              Salvar contrato
+            </Button>
+          )}
+        </header>
+
+        {somenteLeitura ? (
+          <InlineNote>
+            Este contrato já saiu da situação “Rascunho”, então está aberto apenas para consulta.
+            Para mudar a situação, use o botão “Situação” na lista de contratos.
+          </InlineNote>
+        ) : null}
+
+        <section className="space-y-4 rounded-xl border border-border bg-card p-4">
+          <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            <FileSignature className="h-4 w-4" /> Dados do contrato
+          </h2>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5">
+                Cliente *
+                <HelpTip text="Somente clientes já cadastrados e ativos podem assinar contratos. Se o contato ainda é um lead, converta-o em cliente antes." />
+              </Label>
+              <SearchableSelect
+                value={clienteId}
+                onChange={(v) => {
+                  setClienteId(v);
+                  setOrcamentoId("");
+                }}
+                disabled={somenteLeitura || Boolean(clientePreSelecionado) || edicao}
+                ariaLabel="Cliente do contrato"
+                placeholder="Escolha o cliente"
+                opcoes={clientesAtivos.map((c) => ({
+                  value: c.id,
+                  label: c.nome,
+                  descricao: c.contato_whatsapp ?? undefined,
+                }))}
+              />
+              {clientePreSelecionado || edicao ? (
+                <p className="text-xs text-muted-foreground">
+                  O cliente do contrato não pode ser trocado depois de criado.
+                </p>
+              ) : null}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5">
+                Orçamento aprovado (opcional)
+                <HelpTip text="Ao escolher um orçamento aprovado deste cliente, os serviços e produtos da proposta são copiados para o contrato. Só aparecem aqui orçamentos com a situação “Aprovado”." />
+              </Label>
+              <SearchableSelect
+                value={orcamentoId}
+                onChange={setOrcamentoId}
+                disabled={somenteLeitura || !clienteId}
+                ariaLabel="Orçamento aprovado que origina o contrato"
+                placeholder={
+                  clienteId ? "Escolha um orçamento aprovado" : "Escolha primeiro o cliente"
+                }
+                vazio="Este cliente não tem orçamentos aprovados."
+                opcoes={orcamentosAprovados.map((o) => ({
+                  value: o.id,
+                  label: o.descricao || "Orçamento sem descrição",
+                  descricao:
+                    o.total_final == null ? "Sem valor informado" : formatMoney(o.total_final),
+                }))}
+              />
+            </div>
+
+            <div className="space-y-1.5 md:col-span-2">
+              <Label htmlFor="titulo" className="flex items-center gap-1.5">
+                Título do contrato *
+                <HelpTip text="Um nome curto para identificar o contrato na lista, por exemplo “Casamento Ana e João — pacote completo”." />
+              </Label>
+              <Input
+                id="titulo"
+                value={titulo}
+                readOnly={somenteLeitura}
+                onChange={(e) => setTitulo(e.target.value)}
+                placeholder="Ex.: Casamento Ana e João — pacote completo"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="data" className="flex items-center gap-1.5">
+                Data do contrato *
+                <HelpTip text="Dia em que o contrato foi feito/assinado com o cliente." />
+              </Label>
+              <Input
+                id="data"
+                type="date"
+                value={dataContrato}
+                readOnly={somenteLeitura}
+                onChange={(e) => setDataContrato(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5">
+                Situação
+                <HelpTip text="No cadastro a situação é apenas informativa. Toda movimentação (assinado, vigente, concluído, cancelado) é feita pelo botão “Situação” na lista de contratos." />
+              </Label>
+              <Input value={rotuloContratoStatus(status)} readOnly className="bg-muted/40" />
+              <p className="text-xs text-muted-foreground">
+                {CONTRATO_STATUS.find((s) => s.valor === status)?.ajuda}
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="inicio" className="flex items-center gap-1.5">
+                Início da vigência
+                <HelpTip text="A partir de quando os serviços do contrato começam a valer." />
+              </Label>
+              <Input
+                id="inicio"
+                type="date"
+                value={inicio}
+                readOnly={somenteLeitura}
+                onChange={(e) => setInicio(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="fim" className="flex items-center gap-1.5">
+                Fim da vigência
+                <HelpTip text="Até quando o contrato vale. Depois dessa data, contratos ainda abertos aparecem marcados como “Vigência encerrada” na lista." />
+              </Label>
+              <Input
+                id="fim"
+                type="date"
+                value={fim}
+                readOnly={somenteLeitura}
+                onChange={(e) => setFim(e.target.value)}
+              />
+              {somenteLeitura ? null : (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {[30, 60, 90, 180, 365].map((dias) => (
+                    <Button
+                      key={dias}
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setFim(somarDias(inicio || dataContrato || hojeISO(), dias))}
+                    >
+                      {dias} dias
+                    </Button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-4 rounded-xl border border-border bg-card p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              <Wrench className="h-4 w-4" /> Serviços do contrato
+              <HelpTip text="Os serviços aqui são cópias: o que você alterar não muda o cadastro de serviços nem o orçamento de origem. Assim o contrato guarda exatamente o que foi combinado com o cliente." />
+            </h2>
+            <span className="text-sm">
+              Valor do contrato:{" "}
+              <strong>
+                {totalItens == null ? "sem valores informados" : formatMoney(totalItens)}
+              </strong>
+            </span>
+          </div>
+
+          {somenteLeitura ? null : (
+            <div className="flex flex-wrap items-end gap-2">
+              <div className="min-w-[16rem] flex-1 space-y-1.5">
+                <Label className="text-xs">Incluir um serviço do seu cadastro</Label>
+                <SearchableSelect
+                  value={servicoEscolhido}
+                  onChange={setServicoEscolhido}
+                  ariaLabel="Serviço para incluir no contrato"
+                  placeholder="Escolha um serviço"
+                  opcoes={(servicos ?? [])
+                    .filter((s) => s.status === "ATIVO")
+                    .map((s) => ({
+                      value: s.id,
+                      label: s.nome,
+                      descricao:
+                        s.valor_venda == null ? "Sem valor de venda" : formatMoney(s.valor_venda),
+                    }))}
+                />
+              </div>
+              <Button type="button" variant="outline" className="gap-2" onClick={adicionarServico}>
+                <Plus className="h-4 w-4" /> Incluir serviço
+              </Button>
+              <Button type="button" variant="ghost" className="gap-2" onClick={adicionarManual}>
+                <Plus className="h-4 w-4" /> Item avulso
+              </Button>
+            </div>
+          )}
+
+          {itens.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border p-6 text-center">
+              <FileText className="mx-auto mb-2 h-6 w-6 text-muted-foreground" />
+              <p className="text-sm font-semibold">Nenhum serviço no contrato ainda</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Escolha um orçamento aprovado acima para copiar os serviços dele, ou inclua
+                serviços do seu cadastro.
+              </p>
+            </div>
+          ) : (
+            <ul className="space-y-3">
+              {itens.map((item, indice) => (
+                <li key={item.chave} className="rounded-xl border border-border p-3">
+                  <div className="flex flex-wrap items-end gap-3">
+                    <div className="min-w-[14rem] flex-1 space-y-1.5">
+                      <Label className="text-xs">Serviço *</Label>
+                      <Input
+                        value={item.nome}
+                        readOnly={somenteLeitura}
+                        onChange={(e) =>
+                          setItens((atual) =>
+                            atual.map((l, i) =>
+                              i === indice ? { ...l, nome: e.target.value } : l,
+                            ),
+                          )
+                        }
+                        placeholder="Nome do serviço"
+                      />
+                    </div>
+                    <div className="w-40 space-y-1.5">
+                      <Label className="text-xs">Valor (R$)</Label>
+                      <Input
+                        value={item.valorTexto}
+                        readOnly={somenteLeitura}
+                        inputMode="numeric"
+                        onChange={(e) =>
+                          setItens((atual) =>
+                            atual.map((l, i) =>
+                              i === indice
+                                ? { ...l, valorTexto: maskMoney(e.target.value) }
+                                : l,
+                            ),
+                          )
+                        }
+                        placeholder="0,00"
+                      />
+                    </div>
+                    {somenteLeitura ? null : (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Remover ${item.nome || "item"} do contrato`}
+                        className="text-destructive hover:text-destructive"
+                        onClick={() =>
+                          setItens((atual) => atual.filter((_, i) => i !== indice))
+                        }
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+
+                  {item.produtos.length > 0 ? (
+                    <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                      <Package className="h-3.5 w-3.5" />
+                      Produtos incluídos:
+                      {item.produtos.map((p, i) => (
+                        <span
+                          key={`${item.chave}-p-${i}`}
+                          className="rounded-full border border-border px-2 py-0.5"
+                        >
+                          {p.quantidade}x {p.nome}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section className="space-y-2 rounded-xl border border-border bg-card p-4">
+          <Label htmlFor="obs" className="flex items-center gap-1.5">
+            Observações do contrato
+            <HelpTip text="Combinados que não cabem nos serviços: forma de pagamento, prazo de entrega das fotos, regras de remarcação etc." />
+          </Label>
+          <Textarea
+            id="obs"
+            value={observacoes}
+            readOnly={somenteLeitura}
+            onChange={(e) => setObservacoes(e.target.value)}
+            rows={4}
+            placeholder="Ex.: pagamento em 3x, entrega das fotos em até 30 dias após o ensaio."
+          />
+        </section>
+
+        <div className="flex flex-wrap justify-end gap-2 pb-6">
+          <Button type="button" variant="outline" onClick={() => navigate(voltarPara)}>
+            {somenteLeitura ? "Voltar" : "Cancelar"}
+          </Button>
+          {somenteLeitura ? null : (
+            <Button className="gap-2" onClick={submeter} disabled={salvar.isPending}>
+              {salvar.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              Salvar contrato
+            </Button>
+          )}
+        </div>
+      </div>
+    </PanelLayout>
+  );
+}

@@ -18,6 +18,8 @@ export const ADMIN_MENU = [
     ],
   },
   { label: "Orçamentos", to: "/admin/orcamentos" },
+  { label: "Contratos", to: "/admin/contratos" },
+
 
   { label: "Configurações", to: "/admin/configuracoes", right: true },
 

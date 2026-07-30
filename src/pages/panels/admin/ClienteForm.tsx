@@ -5,7 +5,9 @@ import {
   ArrowLeft,
   ArrowRight,
   ClipboardCheck,
+  FileSignature,
   FileText,
+
 
   Loader2,
   MapPin,
@@ -23,6 +25,8 @@ import { PanelLayout } from "@/components/panel-layout";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
 import { ClienteNotas } from "@/components/cliente-notas";
 import { ClienteOrcamentos } from "@/components/cliente-orcamentos";
+import { ClienteContratos } from "@/components/cliente-contratos";
+
 import { HelpTip } from "@/components/page-help";
 
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
@@ -796,7 +800,20 @@ export default function ClienteForm() {
         </Section>
       ),
     });
+
+    secoes.push({
+      value: "contratos",
+      label: "Contratos",
+      node: (
+        <Section title="Contratos do cliente" icon={FileSignature}>
+          <div className="col-span-full">
+            <ClienteContratos clienteId={registroId} />
+          </div>
+        </Section>
+      ),
+    });
   }
+
 
   if (!editando) {
     secoes.push({
