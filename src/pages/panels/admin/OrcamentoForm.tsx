@@ -62,12 +62,24 @@ function hojeISO() {
   return `${agora.getFullYear()}-${mes}-${dia}`;
 }
 
-function emDias(dias: number) {
-  const d = new Date();
-  d.setDate(d.getDate() + dias);
+function dataISO(d: Date) {
   const mes = String(d.getMonth() + 1).padStart(2, "0");
   const dia = String(d.getDate()).padStart(2, "0");
   return `${d.getFullYear()}-${mes}-${dia}`;
+}
+
+function diasEntre(inicio: string, fim: string) {
+  const a = new Date(`${inicio}T00:00:00`);
+  const b = new Date(`${fim}T00:00:00`);
+  const diff = Math.round((b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24));
+  return diff;
+}
+
+function calcularValidade(dataOrcamento: string, dias: number | "") {
+  if (!dataOrcamento || dias === "" || dias < 0) return null;
+  const d = new Date(`${dataOrcamento}T00:00:00`);
+  d.setDate(d.getDate() + Number(dias));
+  return dataISO(d);
 }
 
 /** Item da proposta na tela: cópia editável + identificador só para arrastar. */
@@ -144,7 +156,7 @@ export default function OrcamentoForm() {
   const [descricao, setDescricao] = useState("");
   const [status, setStatus] = useState<OrcamentoStatus>("RASCUNHO");
   const [dataOrcamento, setDataOrcamento] = useState(hojeISO());
-  const [validade, setValidade] = useState(emDias(15));
+  const [diasValidade, setDiasValidade] = useState<number | "">(15);
   const [itens, setItens] = useState<ItemLinha[]>([]);
   const [escolhido, setEscolhido] = useState("");
   // Produto selecionado no combo de cada item (chave do item -> id do produto).
@@ -163,7 +175,9 @@ export default function OrcamentoForm() {
     setDescricao(orcamento.descricao);
     setStatus(orcamento.status);
     setDataOrcamento(orcamento.data_orcamento);
-    setValidade(orcamento.validade ?? "");
+    setDiasValidade(
+      orcamento.validade ? diasEntre(orcamento.data_orcamento, orcamento.validade) : "",
+    );
     setItens(
       orcamento.itens.map((i) => ({
         ...i,
@@ -174,6 +188,8 @@ export default function OrcamentoForm() {
     );
     setCarregado(true);
   }, [editando, carregado, orcamento]);
+
+  const dataValidadeCalculada = calcularValidade(dataOrcamento, diasValidade);
 
   const opcoesContato = useMemo(() => {
     const doCliente = (clientes ?? []).map((c) => ({
@@ -359,8 +375,8 @@ export default function OrcamentoForm() {
       notifyValidation("Informe a data do orçamento.");
       return;
     }
-    if (validade && validade < dataOrcamento) {
-      notifyValidation("A validade não pode ser anterior à data do orçamento.");
+    if (diasValidade !== "" && diasValidade < 0) {
+      notifyValidation("A validade deve ter um número de dias positivo.");
       return;
     }
     if (itens.length === 0) {
@@ -376,7 +392,7 @@ export default function OrcamentoForm() {
           descricao,
           status,
           data_orcamento: dataOrcamento,
-          validade: validade || null,
+          validade: calcularValidade(dataOrcamento, diasValidade),
           itens: itens.map((i) => ({
             nome: i.nome,
             origem_tipo: i.origem_tipo,
@@ -501,21 +517,34 @@ export default function OrcamentoForm() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="validade" className="flex items-center gap-1.5">
-                    Validade
-                    <HelpTip text="Até quando o valor combinado vale. Pode ficar em branco se a proposta não tiver prazo." />
+                    Validade (dias)
+                    <HelpTip text="Informe quantos dias a proposta fica válida a partir da data do orçamento. Deixe em branco se não quiser prazo." />
                   </Label>
                   <Input
                     id="validade"
-                    type="date"
-                    value={validade}
-                    min={dataOrcamento || undefined}
-                    onChange={(e) => setValidade(e.target.value)}
+                    type="number"
+                    min={0}
+                    inputMode="numeric"
+                    placeholder="Ex.: 15"
+                    value={diasValidade}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setDiasValidade(v === "" ? "" : Math.max(0, Number(v)));
+                    }}
                   />
+                  {dataValidadeCalculada ? (
+                    <p className="text-xs text-muted-foreground">
+                      Validade até{" "}
+                      <strong>
+                        {new Date(`${dataValidadeCalculada}T00:00:00`).toLocaleDateString("pt-BR")}
+                      </strong>
+                    </p>
+                  ) : null}
                 </div>
               </div>
 
               <InlineNote>
-                Depois que a data de validade passar, o orçamento aparece na lista marcado como
+                Depois que o prazo de validade terminar, o orçamento aparece na lista marcado como
                 “Validade vencida” — assim você sabe quem precisa de um novo contato.
               </InlineNote>
             </section>
