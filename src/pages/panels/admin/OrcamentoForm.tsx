@@ -381,7 +381,7 @@ export default function OrcamentoForm() {
             nome: i.nome,
             origem_tipo: i.origem_tipo,
             origem_nome: i.origem_nome,
-            quantidade: Number(i.quantidadeTexto.replace(",", ".")) || 1,
+            quantidade: 1,
             valor_unitario: parseMoney(i.valorTexto),
             valor_custo: i.valor_custo,
             produtos: i.produtos
@@ -618,18 +618,6 @@ export default function OrcamentoForm() {
 
                               <div className="grid gap-3 pl-8 sm:grid-cols-3">
                                 <div className="space-y-1">
-                                  <Label className="text-xs">Quantidade</Label>
-                                  <Input
-                                    inputMode="decimal"
-                                    value={item.quantidadeTexto}
-                                    onChange={(e) =>
-                                      atualizarItem(item.chave, {
-                                        quantidadeTexto: e.target.value.replace(/[^\d,.]/g, ""),
-                                      })
-                                    }
-                                  />
-                                </div>
-                                <div className="space-y-1">
                                   <Label className="text-xs">Valor unitário (R$)</Label>
                                   <Input
                                     inputMode="numeric"
@@ -642,18 +630,8 @@ export default function OrcamentoForm() {
                                     }
                                   />
                                 </div>
-                                <div className="space-y-1">
-                                  <Label className="text-xs">Subtotal</Label>
-                                  <div className="flex h-10 items-center rounded-md border border-border bg-muted/40 px-3 text-sm">
-                                    {parseMoney(item.valorTexto) == null
-                                      ? "Não informado"
-                                      : `R$ ${formatMoney(
-                                          (parseMoney(item.valorTexto) ?? 0) *
-                                            (Number(item.quantidadeTexto.replace(",", ".")) || 1),
-                                        )}`}
-                                  </div>
-                                </div>
                               </div>
+
 
                               {/* Produtos deste serviço — cópia editável */}
                               <div className="space-y-2 rounded-lg border border-dashed border-border p-3 pl-3 sm:ml-8">
@@ -754,20 +732,15 @@ export default function OrcamentoForm() {
                 <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-4 py-3">
                   <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                     Total da proposta
-                    <HelpTip text="Soma da quantidade multiplicada pelo valor de cada serviço incluído." />
+                    <HelpTip text="Soma dos valores dos serviços incluídos na proposta." />
                   </span>
                   <strong className="text-lg">
                     {total == null
                       ? "Sem valores informados"
                       : `R$ ${formatMoney(
-                          itens.reduce(
-                            (s, i) =>
-                              s +
-                              (parseMoney(i.valorTexto) ?? 0) *
-                                (Number(i.quantidadeTexto.replace(",", ".")) || 1),
-                            0,
-                          ),
+                          itens.reduce((s, i) => s + (parseMoney(i.valorTexto) ?? 0), 0),
                         )}`}
+
                   </strong>
                 </div>
               ) : null}
