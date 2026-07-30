@@ -168,7 +168,7 @@ function AuthPage() {
               <Camera className="h-[1.125rem] w-[1.125rem] text-gold" />
             </span>
             <span className="truncate text-[0.8125rem] font-bold tracking-[0.16em] uppercase text-muted-foreground">
-              JH7 <span className="text-foreground">Gestão Fotográfica</span>
+              JH7 <span className="text-foreground">Gestão de Estúdios Fotográficos</span>
             </span>
           </header>
 
@@ -206,7 +206,7 @@ function AuthPage() {
                 <Camera className="h-[1.125rem] w-[1.125rem] text-gold" />
               </span>
               <span className="truncate text-[0.8125rem] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                JH7 <span className="text-foreground">Gestão Fotográfica</span>
+                JH7 <span className="text-foreground">Gestão de Estúdios Fotográficos</span>
               </span>
             </div>
 
