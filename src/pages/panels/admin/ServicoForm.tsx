@@ -60,8 +60,8 @@ function LinhaComposicao({
   id: string;
   children: (alcaProps: {
     setActivatorNodeRef: (node: HTMLElement | null) => void;
-    listeners: Record<string, unknown> | undefined;
-    attributes: Record<string, unknown>;
+    listeners: Record<string, any> | undefined;
+    attributes: Record<string, any>;
   }) => React.ReactNode;
 }) {
   const { setNodeRef, setActivatorNodeRef, listeners, attributes, transform, transition, isDragging } =
