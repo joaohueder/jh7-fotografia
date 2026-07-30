@@ -168,7 +168,7 @@ export default function OrcamentoForm() {
       descricao: c.contato_whatsapp ? `Cliente · ${c.contato_whatsapp}` : "Cliente",
     }));
     const dosLeads = (leads ?? [])
-      .filter((l) => l.status !== "CLIENTE")
+      .filter((l) => l.situacao !== "CLIENTE")
       .map((l) => ({
         value: l.id,
         label: l.nome,
