@@ -47,7 +47,7 @@ export function ClienteOrcamentos({ clienteId }: { clienteId: string }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
           Aqui ficam todas as propostas feitas para este cliente. Ao clicar em “Novo orçamento”, o
-          cliente já vai preenchido e não pode ser trocado. Use “Editar” para alterar uma proposta — ao
+          cliente já vai preenchido e não pode ser trocado. Para alterar uma proposta, clique no botão “Editar” do card — ao
           salvar, voltar ou cancelar você retorna para esta aba.
         </p>
         <Button
@@ -78,11 +78,7 @@ export function ClienteOrcamentos({ clienteId }: { clienteId: string }) {
         <ul className="space-y-3">
           {lista.map((o) => (
             <li key={o.id} className="relative">
-              <button
-                type="button"
-                onClick={() => navigate(`/admin/orcamentos/${o.id}?voltar=${voltar}`)}
-                className="w-full rounded-xl border border-border bg-card p-4 pr-28 text-left transition-colors hover:border-[var(--panel-accent)]"
-              >
+              <div className="w-full rounded-xl border border-border bg-card p-4 pr-28 text-left">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="font-semibold">{o.descricao || "Orçamento sem descrição"}</span>
                   <span className="flex items-center gap-2 text-xs">
@@ -110,7 +106,7 @@ export function ClienteOrcamentos({ clienteId }: { clienteId: string }) {
                   </span>
                   <span className="font-semibold text-foreground">{moeda(o.total_final)}</span>
                 </div>
-              </button>
+              </div>
               <Button
                 type="button"
                 size="sm"
