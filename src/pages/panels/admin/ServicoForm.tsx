@@ -140,8 +140,9 @@ export default function ServicoForm() {
   // Sem custo adicional e sem produtos, o custo total fica "não informado".
   const custoTotal: number | null =
     custoAdicionalNum === null && itens.length === 0 ? null : (custoAdicionalNum ?? 0) + custoProdutos;
-  const margem: number | null =
-    vendaNum === null || custoTotal === null ? null : vendaNum - custoTotal;
+  // Com o valor de venda preenchido já dá para estimar a margem: quando não há
+  // custo informado, ele conta como zero.
+  const margem: number | null = vendaNum === null ? null : vendaNum - (custoTotal ?? 0);
 
   function adicionarProduto() {
     if (!produtoEscolhido) {
