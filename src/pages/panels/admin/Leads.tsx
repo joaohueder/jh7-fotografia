@@ -463,7 +463,7 @@ export default function LeadsList() {
         <div className="space-y-2">
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-semibold text-muted-foreground">Filtrar por situação</span>
-            <HelpTip text="Aguardando: contatos ainda em negociação. Desistiu: quem avisou que não tem mais interesse. Virou cliente: leads que já preencheram o cadastro completo." />
+            <HelpTip text="Aguardando: contatos ainda em negociação. Desistiu: quem avisou que não tem mais interesse (os orçamentos em rascunho ou enviados viram recusados automaticamente; ao voltar para aguardando, eles retornam para rascunho). Virou cliente: leads que já preencheram o cadastro completo." />
           </div>
           <div className="flex flex-wrap gap-2">
             {[{ valor: "TODOS" as const, rotulo: "Todos" }, ...LEAD_SITUACOES].map((op) => {
