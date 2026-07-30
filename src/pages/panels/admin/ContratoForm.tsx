@@ -649,6 +649,23 @@ export default function ContratoForm() {
                 {CONTRATO_STATUS.find((s) => s.valor === status)?.ajuda}
               </p>
             </div>
+          </div>
+        </section>
+          </TabsContent>
+
+          <TabsContent value="vigencia" className="mt-0">
+        <section className="space-y-4 rounded-xl border border-border bg-card p-4">
+          <div className="space-y-1">
+            <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              <FileSignature className="h-4 w-4" /> Vigência do contrato
+              <HelpTip text="Período em que o contrato vale. Informe o início e o prazo (dias, meses ou anos) — o sistema calcula a data de fim." />
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Opcional: preencha se o contrato tem um período definido de execução.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+
 
             <div className="space-y-1.5">
               <Label htmlFor="inicio" className="flex items-center gap-1.5">
