@@ -174,7 +174,7 @@ export default function Orcamentos() {
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Orçamentos</h1>
-              <HelpTip text="Um orçamento é a proposta que você envia para um cliente ou lead. Clique em “Novo orçamento” para informar a descrição, os serviços, quantos descontos e acréscimos precisar, a observação geral, a data e até quando a proposta vale. Aqui na lista aparece o valor final (já com desconto ou acréscimo). Use os filtros para ver só os que estão aguardando resposta, os aprovados ou os recusados. Quando a data de validade passa, o orçamento aparece marcado como “Validade vencida”. Esta tela se atualiza sozinha quando alguém da sua equipe altera algo." />
+              <HelpTip text="Um orçamento é a proposta que você envia para um cliente ou lead. Clique em “Novo orçamento” para informar a descrição, os serviços, quantos descontos e acréscimos precisar, a observação geral, a data e até quando a proposta vale. Aqui na lista aparece o valor final (já com desconto ou acréscimo). Importante: propostas de leads ficam com a situação bloqueada — só é possível mudar a situação depois que o lead virar cliente. Use os filtros para ver só os que estão aguardando resposta, os aprovados ou os recusados. Quando a data de validade passa, o orçamento aparece marcado como “Validade vencida”. Esta tela se atualiza sozinha quando alguém da sua equipe altera algo." />
             </div>
             <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
               Acompanhe as propostas enviadas para clientes e leads.
