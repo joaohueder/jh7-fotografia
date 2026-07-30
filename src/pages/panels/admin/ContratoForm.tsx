@@ -254,11 +254,23 @@ export default function ContratoForm() {
         }),
       ),
     );
+    // Descontos e acréscimos da proposta também vêm junto: o contrato
+    // precisa fechar no mesmo valor final que o cliente aprovou.
+    setAjustes(
+      (orcamentoDetalhe.ajustes ?? []).map((a) => ({
+        chave: novaChave(),
+        tipo: a.tipo,
+        valorTexto: formatMoney(Number(a.valor ?? 0)),
+        descricao: a.descricao ?? "",
+      })),
+    );
     setCopiadoDe(orcamentoId);
     if (!clienteId) setClienteId(orcamentoDetalhe.cliente_id);
     if (!titulo.trim()) setTitulo(`Contrato — ${orcamentoDetalhe.descricao}`);
     notifySuccess(
-      "Os serviços do orçamento aprovado foram copiados para o contrato. Você ainda pode ajustar os valores antes de salvar.",
+      (orcamentoDetalhe.ajustes ?? []).length > 0
+        ? "Os serviços, produtos e os descontos/acréscimos do orçamento aprovado foram copiados para o contrato. Você ainda pode ajustar tudo antes de salvar."
+        : "Os serviços do orçamento aprovado foram copiados para o contrato. Você ainda pode ajustar os valores antes de salvar.",
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orcamentoId, orcamentoDetalhe, copiadoDe, somenteLeitura]);
@@ -270,6 +282,89 @@ export default function ContratoForm() {
       ),
     [itens],
   );
+
+  const ajustesAplicados: ContratoAjuste[] = useMemo(
+    () =>
+      ajustes.map((a) => ({
+        tipo: a.tipo,
+        valor: parseMoney(a.valorTexto) ?? 0,
+        descricao: a.descricao,
+      })),
+    [ajustes],
+  );
+  const totalFinal = aplicarAjustesContrato(totalItens, ajustesAplicados);
+
+  function adicionarAjuste(tipo: ContratoAjusteTipo) {
+    setAjustes((atual) => [...atual, { chave: novaChave(), tipo, valorTexto: "", descricao: "" }]);
+  }
+
+  function atualizarAjuste(chave: string, campos: Partial<AjusteLinha>) {
+    setAjustes((atual) => atual.map((a) => (a.chave === chave ? { ...a, ...campos } : a)));
+  }
+
+  function removerAjuste(chave: string) {
+    setAjustes((atual) => atual.filter((a) => a.chave !== chave));
+  }
+
+  // Produtos ativos do cadastro, usados apenas como referência para copiar.
+  const opcoesProdutos = useMemo(
+    () =>
+      (produtos ?? [])
+        .filter((p) => p.status === "ATIVO")
+        .map((p) => ({
+          value: p.id,
+          label: p.nome,
+          descricao:
+            p.valor_custo == null ? "Sem custo cadastrado" : `Custo R$ ${formatMoney(p.valor_custo)}`,
+        })),
+    [produtos],
+  );
+
+  /** Inclui no serviço do contrato uma cópia do produto escolhido. */
+  function adicionarProduto(chave: string) {
+    const produtoId = produtoEscolhido[chave];
+    if (!produtoId) {
+      notifyValidation("Escolha um produto para incluir neste serviço.");
+      return;
+    }
+    const produto = (produtos ?? []).find((p) => p.id === produtoId);
+    if (!produto) return;
+
+    setItens((atual) =>
+      atual.map((i) =>
+        i.chave === chave
+          ? { ...i, produtos: [...i.produtos, { nome: produto.nome, quantidade: 1 }] }
+          : i,
+      ),
+    );
+    setProdutoEscolhido((atual) => ({ ...atual, [chave]: "" }));
+  }
+
+  function atualizarProduto(
+    chave: string,
+    indice: number,
+    mudanca: Partial<{ nome: string; quantidade: number }>,
+  ) {
+    setItens((atual) =>
+      atual.map((i) =>
+        i.chave === chave
+          ? {
+              ...i,
+              produtos: i.produtos.map((p, pos) => (pos === indice ? { ...p, ...mudanca } : p)),
+            }
+          : i,
+      ),
+    );
+  }
+
+  function removerProduto(chave: string, indice: number) {
+    setItens((atual) =>
+      atual.map((i) =>
+        i.chave === chave ? { ...i, produtos: i.produtos.filter((_, pos) => pos !== indice) } : i,
+      ),
+    );
+  }
+
 
   function adicionarServico() {
     const servico = (servicos ?? []).find((s) => s.id === servicoEscolhido);
