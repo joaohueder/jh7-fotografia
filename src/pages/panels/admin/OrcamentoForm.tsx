@@ -182,7 +182,9 @@ export default function OrcamentoForm() {
     setDescricao(orcamento.descricao);
     setStatus(orcamento.status);
     setDataOrcamento(orcamento.data_orcamento);
-    setValidade(orcamento.validade ?? "");
+    setDiasValidade(
+      orcamento.validade ? diasEntre(orcamento.data_orcamento, orcamento.validade) : "",
+    );
     setItens(
       orcamento.itens.map((i) => ({
         ...i,
