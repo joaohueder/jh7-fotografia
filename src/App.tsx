@@ -375,6 +375,39 @@ export default function App() {
               }
             />
 
+            <Route
+              path="/admin/orcamentos"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <OrcamentosList />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/orcamentos/novo"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <OrcamentoForm />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/orcamentos/:id"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <OrcamentoForm />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+
+
+
 
 
 
