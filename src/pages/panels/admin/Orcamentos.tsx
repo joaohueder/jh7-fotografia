@@ -372,6 +372,8 @@ export default function Orcamentos() {
                         ))}
                       </DropdownMenuContent>
                     </DropdownMenu>
+                    )}
+
                     <IconAction
                       label="Editar orçamento"
                       ariaLabel={`Editar ${o.descricao}`}
