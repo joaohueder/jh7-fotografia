@@ -546,7 +546,7 @@ export default function OrcamentoForm() {
               </div>
 
               <InlineNote>
-                Depois que a data de validade passar, o orçamento aparece na lista marcado como
+                Depois que o prazo de validade terminar, o orçamento aparece na lista marcado como
                 “Validade vencida” — assim você sabe quem precisa de um novo contato.
               </InlineNote>
             </section>
