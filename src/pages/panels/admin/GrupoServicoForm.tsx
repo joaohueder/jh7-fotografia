@@ -301,7 +301,7 @@ export default function GrupoServicoForm() {
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                   Serviços do agrupamento
                 </h2>
-                <HelpTip text="Inclua aqui os serviços que fazem parte deste agrupamento. Arraste pelo ícone de alça (⠿) para mudar a ordem em que eles aparecem. A soma dos valores de venda é calculada automaticamente (serviços sem valor informado entram como zero)." />
+                <HelpTip text="Inclua aqui os serviços que fazem parte deste agrupamento. Abaixo do nome de cada serviço aparecem os produtos que o compõem, com a quantidade usada — assim você confere tudo o que o pacote entrega. Arraste pelo ícone de alça (⠿) para mudar a ordem em que eles aparecem. A soma dos valores de venda é calculada automaticamente (serviços sem valor informado entram como zero)." />
               </div>
 
               <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
