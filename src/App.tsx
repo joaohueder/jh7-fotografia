@@ -26,6 +26,9 @@ import ServicosList from "@/pages/panels/admin/Servicos";
 import ServicoForm from "@/pages/panels/admin/ServicoForm";
 import GruposServicosList from "@/pages/panels/admin/GruposServicos";
 import GrupoServicoForm from "@/pages/panels/admin/GrupoServicoForm";
+import OrcamentosList from "@/pages/panels/admin/Orcamentos";
+import OrcamentoForm from "@/pages/panels/admin/OrcamentoForm";
+
 
 
 
