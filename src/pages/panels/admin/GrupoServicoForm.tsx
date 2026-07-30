@@ -98,6 +98,8 @@ export default function GrupoServicoForm() {
 
   const { data: grupo, isLoading: carregandoGrupo } = useGrupoServico(id);
   const { data: itensSalvos, isLoading: carregandoItens } = useGrupoServicoItens(id);
+  const { data: composicao } = useComposicaoDosServicos();
+
   const { data: servicos } = useServicos();
   const salvar = useSalvarGrupoServico();
 
