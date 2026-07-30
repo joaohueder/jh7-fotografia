@@ -76,6 +76,12 @@ export default function Produtos() {
   );
 
   const { data: produtos, isLoading, error } = useProdutos();
+  // Diagnóstico amigável: se a tabela ainda não existe no banco, explicamos o
+  // que precisa ser feito em vez de mostrar um erro genérico de conexão.
+  const detalheErro = error ? rawErrorMessage(error) : "";
+  const tabelaAusente = /produtos/i.test(detalheErro)
+    ? /does not exist|schema cache|relation|not find the table|404/i.test(detalheErro)
+    : /schema cache|does not exist/i.test(detalheErro);
   const salvar = useSalvarProduto();
   const setStatus = useSetProdutoStatus();
   const remover = useDeleteProduto();
