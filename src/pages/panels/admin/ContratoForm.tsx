@@ -48,13 +48,44 @@ function hojeISO() {
   ).padStart(2, "0")}`;
 }
 
-function somarDias(base: string, dias: number) {
-  const d = new Date(`${base}T00:00:00`);
-  d.setDate(d.getDate() + dias);
+function paraISO(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
     d.getDate(),
   ).padStart(2, "0")}`;
 }
+
+/** Unidades aceitas para informar o prazo do contrato. */
+type UnidadeVigencia = "DIAS" | "MESES" | "ANOS";
+
+const UNIDADES: { valor: UnidadeVigencia; rotulo: string }[] = [
+  { valor: "DIAS", rotulo: "dia(s)" },
+  { valor: "MESES", rotulo: "mês(es)" },
+  { valor: "ANOS", rotulo: "ano(s)" },
+];
+
+/**
+ * Converte um prazo (quantidade + unidade) na data de fim da vigência.
+ * Meses e anos usam o calendário: quando o dia não existe no mês de destino
+ * (ex.: 31/01 + 1 mês), o sistema ajusta para o último dia daquele mês.
+ */
+function calcularFim(base: string, quantidade: number, unidade: UnidadeVigencia) {
+  const d = new Date(`${base}T00:00:00`);
+  if (Number.isNaN(d.getTime()) || quantidade <= 0) return "";
+
+  if (unidade === "DIAS") {
+    d.setDate(d.getDate() + quantidade);
+    return paraISO(d);
+  }
+
+  const meses = unidade === "ANOS" ? quantidade * 12 : quantidade;
+  const dia = d.getDate();
+  d.setDate(1);
+  d.setMonth(d.getMonth() + meses);
+  const ultimoDia = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(dia, ultimoDia));
+  return paraISO(d);
+}
+
 
 let contador = 0;
 function novaChave() {
