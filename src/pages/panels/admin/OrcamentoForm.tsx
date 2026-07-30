@@ -136,6 +136,7 @@ export default function OrcamentoForm() {
   const { data: leads } = useLeads();
   const { data: servicos } = useServicos();
   const { data: grupos } = useGruposServicos();
+  const { data: produtos } = useProdutos();
   const { data: composicao } = useComposicaoDosServicos();
   const salvar = useSalvarOrcamento();
 
