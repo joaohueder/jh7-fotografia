@@ -43,10 +43,12 @@ import { useComposicaoDosServicos, useGruposServicos } from "@/hooks/use-grupos-
 import { useProdutos } from "@/hooks/use-produtos";
 import {
   ORCAMENTO_STATUS,
+  aplicarAjuste,
   rotuloStatus,
   somarItens,
   useOrcamento,
   useSalvarOrcamento,
+  type OrcamentoAjusteTipo,
   type OrcamentoItem,
   type OrcamentoStatus,
 } from "@/hooks/use-orcamentos";
@@ -54,7 +56,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { SearchableSelect } from "@/components/searchable-select";
+
 
 function hojeISO() {
   const agora = new Date();
