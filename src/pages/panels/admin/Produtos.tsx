@@ -472,9 +472,12 @@ export default function Produtos() {
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Margem estimada: R${" "}
-              {formatMoney(Math.max((parseMoney(venda) ?? 0) - (parseMoney(custo) ?? 0), -LIMITE_VALOR))}
+              Margem estimada:{" "}
+              {custo.trim() || venda.trim()
+                ? `R$ ${formatMoney(Math.max((parseMoney(venda) ?? 0) - (parseMoney(custo) ?? 0), -LIMITE_VALOR))}`
+                : "—"}
             </p>
+
           </div>
 
           <DialogFooter>
