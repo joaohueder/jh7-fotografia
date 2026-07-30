@@ -191,6 +191,7 @@ export function useContratos() {
       .channel("contratos-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "contratos" }, invalidar)
       .on("postgres_changes", { event: "*", schema: "public", table: "contrato_itens" }, invalidar)
+      .on("postgres_changes", { event: "*", schema: "public", table: "contrato_ajustes" }, invalidar)
       .on("postgres_changes", { event: "*", schema: "public", table: "clientes" }, invalidar)
       .subscribe();
 
