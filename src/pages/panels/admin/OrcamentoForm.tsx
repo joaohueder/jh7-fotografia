@@ -520,14 +520,12 @@ export default function OrcamentoForm() {
                                       Copiado do agrupamento “{item.origem_nome}”
                                     </p>
                                   ) : null}
-                                  {item.produtos.length > 0 ? (
-                                    <p className="text-xs text-muted-foreground">
-                                      Inclui:{" "}
-                                      {item.produtos
-                                        .map((p) => `${p.quantidade}x ${p.nome}`)
-                                        .join(" · ")}
-                                    </p>
-                                  ) : null}
+                                  <p className="text-xs text-muted-foreground">
+                                    {item.produtos.length === 0
+                                      ? "Sem produtos incluídos neste serviço."
+                                      : `${item.produtos.length} produto(s) incluído(s)`}
+                                  </p>
+
                                 </div>
 
                                 <Button
