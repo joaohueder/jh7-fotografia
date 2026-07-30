@@ -269,6 +269,64 @@ export default function OrcamentoForm() {
     setItens((atual) => atual.map((i) => (i.chave === chave ? { ...i, ...mudanca } : i)));
   }
 
+  // Produtos ativos do cadastro, usados apenas como referência para copiar.
+  const opcoesProdutos = useMemo(
+    () =>
+      (produtos ?? [])
+        .filter((p) => p.status === "ATIVO")
+        .map((p) => ({
+          value: p.id,
+          label: p.nome,
+          descricao: p.valor_custo == null ? "Sem custo cadastrado" : `Custo R$ ${formatMoney(p.valor_custo)}`,
+        })),
+    [produtos],
+  );
+
+  /** Inclui no serviço do orçamento uma cópia do produto escolhido. */
+  function adicionarProduto(chave: string) {
+    const produtoId = produtoEscolhido[chave];
+    if (!produtoId) {
+      notifyValidation("Escolha um produto para incluir neste serviço.");
+      return;
+    }
+    const produto = (produtos ?? []).find((p) => p.id === produtoId);
+    if (!produto) return;
+
+    setItens((atual) =>
+      atual.map((i) =>
+        i.chave === chave
+          ? { ...i, produtos: [...i.produtos, { nome: produto.nome, quantidade: 1 }] }
+          : i,
+      ),
+    );
+    setProdutoEscolhido((atual) => ({ ...atual, [chave]: "" }));
+  }
+
+  function atualizarProduto(
+    chave: string,
+    indice: number,
+    mudanca: Partial<{ nome: string; quantidade: number }>,
+  ) {
+    setItens((atual) =>
+      atual.map((i) =>
+        i.chave === chave
+          ? {
+              ...i,
+              produtos: i.produtos.map((p, pos) => (pos === indice ? { ...p, ...mudanca } : p)),
+            }
+          : i,
+      ),
+    );
+  }
+
+  function removerProduto(chave: string, indice: number) {
+    setItens((atual) =>
+      atual.map((i) =>
+        i.chave === chave ? { ...i, produtos: i.produtos.filter((_, pos) => pos !== indice) } : i,
+      ),
+    );
+  }
+
   function removerItem(chave: string) {
     setItens((atual) => atual.filter((i) => i.chave !== chave));
   }
