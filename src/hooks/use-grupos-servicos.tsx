@@ -195,10 +195,44 @@ export function useGrupoServicoItens(grupoId?: string) {
         valor_venda: item.servicos?.valor_venda == null ? null : Number(item.servicos.valor_venda),
         produtos: mapearProdutos(item.servicos?.servico_produtos),
       }));
-
     },
   });
 }
+
+/**
+ * Composição de produtos de todos os serviços da empresa.
+ * Usado na tela de cadastro para detalhar o que cada serviço inclui.
+ */
+export function useComposicaoDosServicos() {
+  const { data: empresaId } = useEmpresaAtual();
+
+  return useQuery({
+    queryKey: ["servico-composicao-empresa", empresaId],
+    enabled: Boolean(empresaId),
+    staleTime: 0,
+    refetchOnMount: "always",
+    queryFn: async (): Promise<Record<string, ProdutoDoServico[]>> => {
+      const { data, error } = await db
+        .from("servico_produtos")
+        .select("servico_id, quantidade, ordem, produtos ( nome )")
+        .eq("empresa_id", empresaId!)
+        .order("ordem", { ascending: true });
+      if (error) throw error;
+
+      const mapa: Record<string, ProdutoDoServico[]> = {};
+      ((data ?? []) as any[]).forEach((p) => {
+        const lista = mapa[p.servico_id] ?? (mapa[p.servico_id] = []);
+        lista.push({
+          nome: p.produtos?.nome ?? "Produto removido",
+          quantidade: Number(p.quantidade ?? 0),
+        });
+      });
+      return mapa;
+    },
+  });
+}
+
+
 
 /** Cria ou atualiza um agrupamento junto da lista ordenada de serviços. */
 export function useSalvarGrupoServico() {
