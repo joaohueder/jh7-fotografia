@@ -781,6 +781,21 @@ export default function ClienteForm() {
     });
   }
 
+  // Orçamentos só fazem sentido para clientes já salvos.
+  if (editando && registroId) {
+    secoes.push({
+      value: "orcamentos",
+      label: "Orçamentos",
+      node: (
+        <Section title="Orçamentos do cliente" icon={FileText}>
+          <div className="col-span-full">
+            <ClienteOrcamentos clienteId={registroId} />
+          </div>
+        </Section>
+      ),
+    });
+  }
+
   if (!editando) {
     secoes.push({
       value: "resumo",
