@@ -37,13 +37,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/searchable-select";
+
 
 const LIMITE_VALOR = 999999.99;
 
@@ -365,26 +360,29 @@ export default function ServicoForm() {
               <div className="grid gap-3 sm:grid-cols-[1fr_8rem_auto] sm:items-end">
                 <div className="space-y-1.5">
                   <Label className="text-sm">Produto</Label>
-                  <Select value={produtoEscolhido} onValueChange={setProdutoEscolhido}>
-                    <SelectTrigger aria-label="Escolher produto">
-                      <SelectValue placeholder="Escolha um produto" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {disponiveis.length === 0 ? (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">
-                          Nenhum produto disponível para incluir.
-                        </div>
-                      ) : (
-                        disponiveis.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>
-                            {p.nome} {p.valor_custo != null ? `— R$ ${formatMoney(p.valor_custo)}` : "— custo não informado"}
-                          </SelectItem>
-                        ))
-
-                      )}
-                    </SelectContent>
-                  </Select>
+                  <SearchableSelect
+                    value={produtoEscolhido}
+                    onChange={setProdutoEscolhido}
+                    ariaLabel="Escolher produto"
+                    placeholder={
+                      disponiveis.length === 0
+                        ? "Nenhum produto disponível para incluir"
+                        : "Escolha um produto"
+                    }
+                    placeholderBusca="Pesquisar produto pelo nome…"
+                    vazio="Nenhum produto encontrado com esse nome."
+                    disabled={disponiveis.length === 0}
+                    opcoes={disponiveis.map((p) => ({
+                      value: p.id,
+                      label: p.nome,
+                      descricao:
+                        p.valor_custo != null
+                          ? `— R$ ${formatMoney(p.valor_custo)}`
+                          : "— custo não informado",
+                    }))}
+                  />
                 </div>
+
                 <div className="space-y-1.5">
                   <Label className="text-sm" htmlFor="servico-qtd">
                     Quantidade
