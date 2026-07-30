@@ -185,7 +185,7 @@ export function useOrcamentos() {
       const { data, error } = await db
         .from("orcamentos")
         .select(
-          "id, empresa_id, cliente_id, descricao, status, data_orcamento, validade, created_at, clientes ( nome, origem ), orcamento_itens ( nome, origem_tipo, origem_nome, quantidade, valor_unitario, valor_custo, produtos )",
+          "id, empresa_id, cliente_id, descricao, status, data_orcamento, validade, ajuste_tipo, ajuste_valor, ajuste_descricao, observacoes, created_at, clientes ( nome, origem ), orcamento_itens ( nome, origem_tipo, origem_nome, quantidade, valor_unitario, valor_custo, produtos )",
         )
         .eq("empresa_id", empresaId!)
         .order("data_orcamento", { ascending: false })
@@ -194,6 +194,9 @@ export function useOrcamentos() {
 
       return ((data ?? []) as any[]).map((o) => {
         const itens = ((o.orcamento_itens ?? []) as any[]).map(mapearItem);
+        const totalItens = somarItens(itens);
+        const ajusteTipo = (o.ajuste_tipo ?? "NENHUM") as OrcamentoAjusteTipo;
+        const ajusteValor = o.ajuste_valor == null ? null : Number(o.ajuste_valor);
         return {
           id: o.id,
           empresa_id: o.empresa_id,
@@ -207,9 +210,15 @@ export function useOrcamentos() {
           cliente_origem: (o.clientes?.origem ?? "CLIENTE") as "CLIENTE" | "LEAD",
           vencido: estaVencido(o.validade ?? null, o.status as OrcamentoStatus),
           total_itens: itens.length,
-          total_valor: somarItens(itens),
+          total_valor: totalItens,
+          ajuste_tipo: ajusteTipo,
+          ajuste_valor: ajusteValor,
+          ajuste_descricao: o.ajuste_descricao ?? null,
+          observacoes: o.observacoes ?? null,
+          total_final: aplicarAjuste(totalItens, ajusteTipo, ajusteValor),
         } as Orcamento;
       });
+
     },
   });
 }
