@@ -22,6 +22,7 @@ import { useLimitesEmpresa } from "@/hooks/use-limites";
 import { PanelLayout } from "@/components/panel-layout";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
 import { ClienteNotas } from "@/components/cliente-notas";
+import { ClienteOrcamentos } from "@/components/cliente-orcamentos";
 import { HelpTip } from "@/components/page-help";
 
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
