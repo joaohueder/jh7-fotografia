@@ -15,17 +15,20 @@ export interface Produto {
   empresa_id: string;
   nome: string;
   status: ProdutoStatus;
-  valor_custo: number;
-  valor_venda: number;
+  /** Pode ser nulo quando o custo ainda não é conhecido. */
+  valor_custo: number | null;
+  /** Pode ser nulo quando o preço de venda ainda não foi definido. */
+  valor_venda: number | null;
   created_at: string;
 }
 
 export interface ProdutoPayload {
   nome: string;
   status: ProdutoStatus;
-  valor_custo: number;
-  valor_venda: number;
+  valor_custo: number | null;
+  valor_venda: number | null;
 }
+
 
 /** Lista os produtos da empresa em contexto, com atualização em tempo real. */
 export function useProdutos() {
@@ -64,9 +67,10 @@ export function useProdutos() {
 
       return ((data ?? []) as any[]).map((p) => ({
         ...p,
-        valor_custo: Number(p.valor_custo ?? 0),
-        valor_venda: Number(p.valor_venda ?? 0),
+        valor_custo: p.valor_custo ?? null,
+        valor_venda: p.valor_venda ?? null,
       })) as Produto[];
+
     },
   });
 }
