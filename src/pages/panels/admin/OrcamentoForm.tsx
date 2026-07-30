@@ -482,25 +482,25 @@ export default function OrcamentoForm() {
               </div>
 
               <div className="space-y-2">
+              <div className="space-y-2">
                 <Label className="flex items-center gap-1.5">
-                  Situação *
-                  <HelpTip text="Indica em que ponto a proposta está: rascunho (ainda montando), enviado (aguardando resposta), aprovado, recusado ou cancelado." />
+                  Situação (somente leitura)
+                  <HelpTip text="A situação mostra em que ponto a proposta está. Ela não é alterada por aqui: para mudar, use o botão de situação na lista de orçamentos." />
                 </Label>
-                <div className="flex flex-wrap gap-2">
-                  {ORCAMENTO_STATUS.map((s) => (
-                    <Button
-                      key={s.valor}
-                      type="button"
-                      size="sm"
-                      variant={status === s.valor ? "default" : "outline"}
-                      title={s.ajuda}
-                      onClick={() => setStatus(s.valor)}
-                    >
-                      {s.rotulo}
-                    </Button>
-                  ))}
+                <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
+                  <span className="rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-foreground">
+                    {rotuloStatus(status)}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {ORCAMENTO_STATUS.find((s) => s.valor === status)?.ajuda}
+                  </span>
                 </div>
+                <InlineNote>
+                  Para mudar a situação (enviado, aprovado, recusado ou cancelado), volte para a
+                  lista de orçamentos e use o botão “Situação” do orçamento desejado.
+                </InlineNote>
               </div>
+
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
