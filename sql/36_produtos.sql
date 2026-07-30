@@ -68,28 +68,21 @@ grant select, insert, update, delete on public.produtos to authenticated;
 grant all on public.produtos to service_role;
 
 -- Segurança por linha ---------------------------------------------------
+-- Usa pode_acessar_empresa(): libera a própria empresa do usuário e permite
+-- que o SA admin visualize/gerencie ao acessar o painel de uma empresa.
 alter table public.produtos enable row level security;
 
 drop policy if exists "produtos_select_empresa" on public.produtos;
-create policy "produtos_select_empresa" on public.produtos
-  for select to authenticated
-  using (empresa_id = public.minha_empresa_id(null));
-
 drop policy if exists "produtos_insert_empresa" on public.produtos;
-create policy "produtos_insert_empresa" on public.produtos
-  for insert to authenticated
-  with check (empresa_id = public.minha_empresa_id(null));
-
 drop policy if exists "produtos_update_empresa" on public.produtos;
-create policy "produtos_update_empresa" on public.produtos
-  for update to authenticated
-  using (empresa_id = public.minha_empresa_id(null))
-  with check (empresa_id = public.minha_empresa_id(null));
-
 drop policy if exists "produtos_delete_empresa" on public.produtos;
-create policy "produtos_delete_empresa" on public.produtos
-  for delete to authenticated
-  using (empresa_id = public.minha_empresa_id(null));
+
+drop policy if exists "produtos da própria empresa" on public.produtos;
+create policy "produtos da própria empresa" on public.produtos
+  for all to authenticated
+  using (public.pode_acessar_empresa(empresa_id))
+  with check (public.pode_acessar_empresa(empresa_id));
+
 
 -- Tempo real ------------------------------------------------------------
 alter table public.produtos replica identity full;
