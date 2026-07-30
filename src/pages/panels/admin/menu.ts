@@ -8,5 +8,10 @@ export const ADMIN_MENU = [
       { label: "Leads", to: "/admin/leads" },
     ],
   },
+  {
+    label: "Básico",
+    to: "/admin/produtos",
+    children: [{ label: "Produtos", to: "/admin/produtos" }],
+  },
   { label: "Configurações", to: "/admin/configuracoes", right: true },
 ];
