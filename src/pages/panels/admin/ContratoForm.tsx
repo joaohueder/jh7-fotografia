@@ -170,6 +170,22 @@ export default function ContratoForm() {
     setCarregado(true);
   }, [edicao, contratoSalvo, carregado]);
 
+  // Prazo informado (dias/meses/anos) -> data de fim da vigência.
+  const fimCalculado = useMemo(() => {
+    const qtd = Number(prazoQtd);
+    if (!prazoQtd || !Number.isFinite(qtd) || qtd <= 0) return "";
+    return calcularFim(inicio || dataContrato || hojeISO(), Math.floor(qtd), prazoUnidade);
+  }, [prazoQtd, prazoUnidade, inicio, dataContrato]);
+
+  // Sempre que houver prazo válido, a data de fim acompanha o cálculo.
+  useEffect(() => {
+    if (somenteLeitura) return;
+    if (!fimCalculado) return;
+    setFim((atual) => (atual === fimCalculado ? atual : fimCalculado));
+  }, [fimCalculado, somenteLeitura]);
+
+
+
   // Só entram na lista os clientes de verdade e ativos. Quem veio de um lead e
   // já completou o cadastro (documento preenchido) conta como cliente; quem
   // ainda é lead em aberto fica de fora. A regra é a mesma usada no módulo de
