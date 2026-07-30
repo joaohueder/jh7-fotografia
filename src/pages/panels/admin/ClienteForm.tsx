@@ -290,7 +290,7 @@ export default function ClienteForm() {
     setError("documento", null);
     setDuplicado(null);
     notifySuccess(
-      "Dados do cliente existente carregados. As notas do lead serão transferidas quando você salvar.",
+      "Dados do cliente existente carregados. As notas e os orçamentos do lead serão transferidos quando você salvar.",
     );
   }
 
@@ -425,7 +425,7 @@ export default function ClienteForm() {
         contatos,
       });
 
-      // Unificação: leva as notas do lead para o cliente existente e remove o lead.
+      // Unificação: leva notas e orçamentos ao cliente existente e remove o lead.
       if (mesclarId && leadId && mesclarId !== leadId) {
         await mesclarLeadEmCliente(leadId, mesclarId);
       }
@@ -434,7 +434,7 @@ export default function ClienteForm() {
         editando
           ? "Cliente atualizado com sucesso."
           : mesclarId
-            ? "Lead unificado ao cliente já cadastrado. As notas foram transferidas."
+            ? "Lead unificado ao cliente já cadastrado. Notas e orçamentos foram transferidos."
             : leadId
               ? "Lead convertido em cliente com sucesso."
               : "Cliente cadastrado com sucesso.",

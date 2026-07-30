@@ -268,7 +268,9 @@ export async function buscarClientePorDocumento(
 }
 
 /**
- * Move as notas do lead para o cliente já existente e remove o registro do lead.
+ * Move as notas e os orçamentos do lead para o cliente já existente e remove
+ * o registro do lead. Itens e ajustes acompanham o orçamento pelo mesmo id,
+ * preservando a proposta completa exatamente como foi criada.
  * Usado quando o CPF/CNPJ digitado na conversão já pertence a outro cadastro.
  */
 export async function mesclarLeadEmCliente(leadId: string, clienteId: string) {
@@ -298,6 +300,14 @@ export async function mesclarLeadEmCliente(leadId: string, clienteId: string) {
       .eq("cliente_id", leadId);
     if (error) throw error;
   }
+
+  // Reassocia as propostas antes de excluir o lead. Como itens e ajustes usam
+  // orcamento_id, toda a composição é preservada sem precisar regravá-la.
+  const { error: erroOrcamentos } = await db
+    .from("orcamentos")
+    .update({ cliente_id: clienteId })
+    .eq("cliente_id", leadId);
+  if (erroOrcamentos) throw erroOrcamentos;
 
   const del = await db.from("clientes").delete().eq("id", leadId);
   if (del.error) throw del.error;
