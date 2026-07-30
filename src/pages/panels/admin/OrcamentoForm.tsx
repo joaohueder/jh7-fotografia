@@ -732,20 +732,15 @@ export default function OrcamentoForm() {
                 <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-4 py-3">
                   <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                     Total da proposta
-                    <HelpTip text="Soma da quantidade multiplicada pelo valor de cada serviço incluído." />
+                    <HelpTip text="Soma dos valores dos serviços incluídos na proposta." />
                   </span>
                   <strong className="text-lg">
                     {total == null
                       ? "Sem valores informados"
                       : `R$ ${formatMoney(
-                          itens.reduce(
-                            (s, i) =>
-                              s +
-                              (parseMoney(i.valorTexto) ?? 0) *
-                                (Number(i.quantidadeTexto.replace(",", ".")) || 1),
-                            0,
-                          ),
+                          itens.reduce((s, i) => s + (parseMoney(i.valorTexto) ?? 0), 0),
                         )}`}
+
                   </strong>
                 </div>
               ) : null}
