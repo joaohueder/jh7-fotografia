@@ -282,6 +282,14 @@ export default function LeadsList() {
     await alterarSituacao(lead, "DESISTIU");
   }
 
+  // Exclusão bloqueada por dados críticos: o lead é apenas marcado como desistiu.
+  async function inativarBloqueado() {
+    if (!alvoExclusao) return;
+    const lead = alvoExclusao;
+    setAlvoExclusao(null);
+    await alterarSituacao(lead, "DESISTIU");
+  }
+
   async function confirmarExclusao() {
     if (!alvoExclusao) return;
     if (alvoExclusao.situacao === "CLIENTE") {
@@ -862,6 +870,8 @@ export default function LeadsList() {
         tipo="lead"
         onCancelar={() => setAlvoExclusao(null)}
         onConfirmar={confirmarExclusao}
+        onInativar={inativarBloqueado}
+        rotuloInativar="Marcar como desistiu"
       />
 
     </PanelLayout>

@@ -24,6 +24,8 @@ interface Props {
   onConfirmar: () => void;
   /** Ação alternativa quando a exclusão é bloqueada por dados críticos. */
   onInativar?: () => void;
+  /** Texto do botão alternativo, ex.: "Inativar cliente". */
+  rotuloInativar?: string;
 
 }
 
@@ -51,6 +53,7 @@ export function ConfirmarExclusaoCliente({
   onCancelar,
   onConfirmar,
   onInativar,
+  rotuloInativar,
 }: Props) {
   const { data: impacto, isLoading } = useImpactoExclusaoCliente(clienteId);
 
@@ -178,8 +181,8 @@ export function ConfirmarExclusaoCliente({
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                   <span>
                     Este cadastro tem informações importantes que não podem ser perdidas: existem
-                    orçamentos que já saíram do rascunho. Por isso a exclusão está bloqueada. Você
-                    pode inativar o {tipo}: ele sai do dia a dia, mas o histórico continua guardado.
+                    orçamentos que já saíram do rascunho. Por isso a exclusão está bloqueada. Use a
+                    opção abaixo para tirar o cadastro do dia a dia sem perder o histórico.
                   </span>
                 </p>
               )}
@@ -190,7 +193,9 @@ export function ConfirmarExclusaoCliente({
           <AlertDialogCancel>{bloqueado ? "Voltar" : "Cancelar"}</AlertDialogCancel>
           {bloqueado ? (
             onInativar && (
-              <AlertDialogAction onClick={onInativar}>Inativar {tipo}</AlertDialogAction>
+              <AlertDialogAction onClick={onInativar}>
+                {rotuloInativar ?? `Inativar ${tipo}`}
+              </AlertDialogAction>
             )
           ) : (
             <AlertDialogAction onClick={onConfirmar} disabled={isLoading}>

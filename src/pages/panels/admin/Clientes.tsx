@@ -141,6 +141,19 @@ export default function ClientesList() {
     }
   }
 
+  // Exclusão bloqueada por dados críticos: o cadastro é apenas inativado.
+  async function inativarBloqueado() {
+    if (!alvoExclusao) return;
+    try {
+      await setStatus.mutateAsync({ id: alvoExclusao.id, status: "INATIVO" });
+      notifySuccess("Cliente inativado. O histórico foi preservado.");
+    } catch (err) {
+      notifyError(err, { title: "Não foi possível inativar o cliente" });
+    } finally {
+      setAlvoExclusao(null);
+    }
+  }
+
   async function confirmarExclusao() {
     if (!alvoExclusao) return;
     try {
@@ -471,6 +484,8 @@ export default function ClientesList() {
         tipo="cliente"
         onCancelar={() => setAlvoExclusao(null)}
         onConfirmar={confirmarExclusao}
+        onInativar={inativarBloqueado}
+        rotuloInativar="Inativar cliente"
       />
 
     </PanelLayout>
