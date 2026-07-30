@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/selfhosted/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useRealtime } from "@/hooks/use-realtime";
 
 const db = supabase as unknown as SupabaseClient;
 
@@ -43,6 +44,15 @@ export async function buscarAcesso(): Promise<Acesso> {
 /** Situação de acesso do usuário logado (papel, empresa e assinatura). */
 export function useAcesso() {
   const { user, isLoading: authLoading } = useAuth();
+
+  // Tempo real: bloqueio/liberação por empresa, papel ou assinatura vale na hora.
+  useRealtime(
+    "meu-acesso",
+    ["empresas", "empresa_assinaturas", "user_roles", "profiles"],
+    [["meu-acesso", user?.id ?? null]],
+    Boolean(user),
+  );
+
   return useQuery({
     queryKey: ["meu-acesso", user?.id ?? null],
     enabled: Boolean(user) && !authLoading,

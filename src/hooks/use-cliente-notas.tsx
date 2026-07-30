@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/selfhosted/client";
+import { useRealtime } from "@/hooks/use-realtime";
 
 const db = supabase as unknown as SupabaseClient;
 
@@ -26,6 +27,13 @@ export const MODULO_LABEL: Record<NotaModulo, string> = {
 
 /** Notas internas do cliente/lead — mais recentes primeiro. */
 export function useClienteNotas(clienteId: string | undefined) {
+  useRealtime(
+    "cliente-notas",
+    ["cliente_notas"],
+    [["cliente-notas", clienteId], ["cliente-nota-inicial", clienteId]],
+    Boolean(clienteId),
+  );
+
   return useQuery({
     queryKey: ["cliente-notas", clienteId],
     enabled: Boolean(clienteId),
@@ -44,6 +52,13 @@ export function useClienteNotas(clienteId: string | undefined) {
 
 /** Primeira nota registrada (interesse inicial do lead). */
 export function useNotaInicial(clienteId: string | undefined) {
+  useRealtime(
+    "cliente-nota-inicial",
+    ["cliente_notas"],
+    [["cliente-nota-inicial", clienteId]],
+    Boolean(clienteId),
+  );
+
   return useQuery({
     queryKey: ["cliente-nota-inicial", clienteId],
     enabled: Boolean(clienteId),

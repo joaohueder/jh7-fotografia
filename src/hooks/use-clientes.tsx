@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/selfhosted/client";
 import { useImpersonacao } from "@/hooks/use-impersonacao";
+import { useRealtime } from "@/hooks/use-realtime";
 
 // Tabelas do Supabase autohospedado (fora dos tipos gerados).
 const db = supabase as unknown as SupabaseClient;
@@ -105,6 +106,14 @@ export function useClientes() {
 }
 
 export function useCliente(id: string | undefined) {
+  // Tempo real: o cadastro aberto reflete alterações feitas por outra pessoa.
+  useRealtime(
+    "cliente",
+    ["clientes", "cliente_contatos"],
+    [["cliente", id], ["clientes"]],
+    Boolean(id),
+  );
+
   return useQuery({
     queryKey: ["cliente", id],
     enabled: Boolean(id),
