@@ -22,6 +22,9 @@ interface Props {
   tipo?: "cliente" | "lead";
   onCancelar: () => void;
   onConfirmar: () => void;
+  /** Ação alternativa quando a exclusão é bloqueada por dados críticos. */
+  onInativar?: () => void;
+
 }
 
 function Linha({ valor, texto }: { valor: number; texto: string }) {
