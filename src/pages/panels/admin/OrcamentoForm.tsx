@@ -68,12 +68,6 @@ function dataISO(d: Date) {
   return `${d.getFullYear()}-${mes}-${dia}`;
 }
 
-function emDias(dias: number) {
-  const d = new Date();
-  d.setDate(d.getDate() + dias);
-  return dataISO(d);
-}
-
 function diasEntre(inicio: string, fim: string) {
   const a = new Date(`${inicio}T00:00:00`);
   const b = new Date(`${fim}T00:00:00`);
@@ -87,6 +81,7 @@ function calcularValidade(dataOrcamento: string, dias: number | "") {
   d.setDate(d.getDate() + Number(dias));
   return dataISO(d);
 }
+
 
 
 /** Item da proposta na tela: cópia editável + identificador só para arrastar. */
