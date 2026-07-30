@@ -492,33 +492,62 @@ export default function ContratoForm() {
             </div>
 
             <div className="space-y-1.5">
+              <Label htmlFor="prazo" className="flex items-center gap-1.5">
+                Prazo da vigência
+                <HelpTip text="Informe a quantidade e escolha se é em dias, meses ou anos. O sistema calcula automaticamente a data de fim a partir do início da vigência. Meses e anos seguem o calendário (ex.: 15/03 + 1 ano = 15/03 do ano seguinte)." />
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  id="prazo"
+                  type="number"
+                  min={1}
+                  inputMode="numeric"
+                  placeholder="Ex.: 12"
+                  value={prazoQtd}
+                  readOnly={somenteLeitura}
+                  onChange={(e) => setPrazoQtd(e.target.value)}
+                  className="w-28"
+                />
+                <select
+                  aria-label="Unidade do prazo"
+                  value={prazoUnidade}
+                  disabled={somenteLeitura}
+                  onChange={(e) => setPrazoUnidade(e.target.value as UnidadeVigencia)}
+                  className="h-10 flex-1 rounded-md border border-input bg-background px-3 text-sm disabled:opacity-60"
+                >
+                  {UNIDADES.map((u) => (
+                    <option key={u.valor} value={u.valor}>
+                      {u.rotulo}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {somenteLeitura ? null : (
+                <p className="text-xs text-muted-foreground">
+                  {fimCalculado
+                    ? `Fim da vigência calculado: ${fimCalculado.split("-").reverse().join("/")}`
+                    : "Informe a quantidade para o sistema calcular a data de fim."}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
               <Label htmlFor="fim" className="flex items-center gap-1.5">
                 Fim da vigência
-                <HelpTip text="Até quando o contrato vale. Depois dessa data, contratos ainda abertos aparecem marcados como “Vigência encerrada” na lista." />
+                <HelpTip text="Calculado automaticamente pelo prazo informado. Você também pode ajustar a data manualmente, se precisar." />
               </Label>
               <Input
                 id="fim"
                 type="date"
                 value={fim}
                 readOnly={somenteLeitura}
-                onChange={(e) => setFim(e.target.value)}
+                onChange={(e) => {
+                  setFim(e.target.value);
+                  setPrazoQtd(""); // data ajustada na mão: o prazo deixa de mandar
+                }}
               />
-              {somenteLeitura ? null : (
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {[30, 60, 90, 180, 365].map((dias) => (
-                    <Button
-                      key={dias}
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setFim(somarDias(inicio || dataContrato || hojeISO(), dias))}
-                    >
-                      {dias} dias
-                    </Button>
-                  ))}
-                </div>
-              )}
             </div>
+
           </div>
         </section>
 
