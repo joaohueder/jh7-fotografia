@@ -219,6 +219,11 @@ export function useContratos() {
 
       return ((data ?? []) as any[]).map((c) => {
         const itens = ((c.contrato_itens ?? []) as any[]).map(mapearItem);
+        const totalItens = somarItensContrato(itens);
+        const ajustes = ((c.contrato_ajustes ?? []) as any[])
+          .slice()
+          .sort((a, b) => Number(a.ordem ?? 0) - Number(b.ordem ?? 0))
+          .map(mapearAjuste);
         return {
           id: c.id,
           empresa_id: c.empresa_id,
@@ -235,7 +240,9 @@ export function useContratos() {
           orcamento_descricao: c.orcamentos?.descricao ?? null,
           vencido: estaVencido(c.fim_vigencia ?? null, c.status as ContratoStatus),
           total_itens: itens.length,
-          total_valor: somarItensContrato(itens),
+          total_valor: totalItens,
+          ajustes,
+          total_final: aplicarAjustesContrato(totalItens, ajustes),
         } as Contrato;
       });
     },
