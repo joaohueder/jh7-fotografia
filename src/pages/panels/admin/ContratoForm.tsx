@@ -141,6 +141,10 @@ export default function ContratoForm() {
   const [dataContrato, setDataContrato] = useState(hojeISO());
   const [inicio, setInicio] = useState(hojeISO());
   const [fim, setFim] = useState("");
+  /** Prazo informado pelo usuário (quantidade + unidade) que gera a data de fim. */
+  const [prazoQtd, setPrazoQtd] = useState("");
+  const [prazoUnidade, setPrazoUnidade] = useState<UnidadeVigencia>("MESES");
+
   const [observacoes, setObservacoes] = useState("");
   const [itens, setItens] = useState<ItemLinha[]>([]);
   const [servicoEscolhido, setServicoEscolhido] = useState("");
