@@ -274,6 +274,13 @@ export function useContrato(id?: string) {
         .order("ordem", { ascending: true });
       if (erroItens) throw erroItens;
 
+      const { data: ajustes, error: erroAjustes } = await db
+        .from("contrato_ajustes")
+        .select("tipo, valor, descricao")
+        .eq("contrato_id", id!)
+        .order("ordem", { ascending: true });
+      if (erroAjustes) throw erroAjustes;
+
       return {
         cliente_id: c.cliente_id,
         orcamento_id: c.orcamento_id ?? null,
@@ -284,6 +291,7 @@ export function useContrato(id?: string) {
         fim_vigencia: c.fim_vigencia ?? null,
         observacoes: c.observacoes ?? null,
         itens: ((itens ?? []) as any[]).map(mapearItem),
+        ajustes: ((ajustes ?? []) as any[]).map(mapearAjuste),
       };
     },
   });
