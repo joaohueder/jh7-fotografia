@@ -48,13 +48,44 @@ function hojeISO() {
   ).padStart(2, "0")}`;
 }
 
-function somarDias(base: string, dias: number) {
-  const d = new Date(`${base}T00:00:00`);
-  d.setDate(d.getDate() + dias);
+function paraISO(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
     d.getDate(),
   ).padStart(2, "0")}`;
 }
+
+/** Unidades aceitas para informar o prazo do contrato. */
+type UnidadeVigencia = "DIAS" | "MESES" | "ANOS";
+
+const UNIDADES: { valor: UnidadeVigencia; rotulo: string }[] = [
+  { valor: "DIAS", rotulo: "dia(s)" },
+  { valor: "MESES", rotulo: "mês(es)" },
+  { valor: "ANOS", rotulo: "ano(s)" },
+];
+
+/**
+ * Converte um prazo (quantidade + unidade) na data de fim da vigência.
+ * Meses e anos usam o calendário: quando o dia não existe no mês de destino
+ * (ex.: 31/01 + 1 mês), o sistema ajusta para o último dia daquele mês.
+ */
+function calcularFim(base: string, quantidade: number, unidade: UnidadeVigencia) {
+  const d = new Date(`${base}T00:00:00`);
+  if (Number.isNaN(d.getTime()) || quantidade <= 0) return "";
+
+  if (unidade === "DIAS") {
+    d.setDate(d.getDate() + quantidade);
+    return paraISO(d);
+  }
+
+  const meses = unidade === "ANOS" ? quantidade * 12 : quantidade;
+  const dia = d.getDate();
+  d.setDate(1);
+  d.setMonth(d.getMonth() + meses);
+  const ultimoDia = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(dia, ultimoDia));
+  return paraISO(d);
+}
+
 
 let contador = 0;
 function novaChave() {
@@ -110,6 +141,10 @@ export default function ContratoForm() {
   const [dataContrato, setDataContrato] = useState(hojeISO());
   const [inicio, setInicio] = useState(hojeISO());
   const [fim, setFim] = useState("");
+  /** Prazo informado pelo usuário (quantidade + unidade) que gera a data de fim. */
+  const [prazoQtd, setPrazoQtd] = useState("");
+  const [prazoUnidade, setPrazoUnidade] = useState<UnidadeVigencia>("MESES");
+
   const [observacoes, setObservacoes] = useState("");
   const [itens, setItens] = useState<ItemLinha[]>([]);
   const [servicoEscolhido, setServicoEscolhido] = useState("");
@@ -134,6 +169,22 @@ export default function ContratoForm() {
     setItens(contratoSalvo.itens.map(paraLinha));
     setCarregado(true);
   }, [edicao, contratoSalvo, carregado]);
+
+  // Prazo informado (dias/meses/anos) -> data de fim da vigência.
+  const fimCalculado = useMemo(() => {
+    const qtd = Number(prazoQtd);
+    if (!prazoQtd || !Number.isFinite(qtd) || qtd <= 0) return "";
+    return calcularFim(inicio || dataContrato || hojeISO(), Math.floor(qtd), prazoUnidade);
+  }, [prazoQtd, prazoUnidade, inicio, dataContrato]);
+
+  // Sempre que houver prazo válido, a data de fim acompanha o cálculo.
+  useEffect(() => {
+    if (somenteLeitura) return;
+    if (!fimCalculado) return;
+    setFim((atual) => (atual === fimCalculado ? atual : fimCalculado));
+  }, [fimCalculado, somenteLeitura]);
+
+
 
   // Só entram na lista os clientes de verdade e ativos. Quem veio de um lead e
   // já completou o cadastro (documento preenchido) conta como cliente; quem
@@ -461,33 +512,62 @@ export default function ContratoForm() {
             </div>
 
             <div className="space-y-1.5">
+              <Label htmlFor="prazo" className="flex items-center gap-1.5">
+                Prazo da vigência
+                <HelpTip text="Informe a quantidade e escolha se é em dias, meses ou anos. O sistema calcula automaticamente a data de fim a partir do início da vigência. Meses e anos seguem o calendário (ex.: 15/03 + 1 ano = 15/03 do ano seguinte)." />
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  id="prazo"
+                  type="number"
+                  min={1}
+                  inputMode="numeric"
+                  placeholder="Ex.: 12"
+                  value={prazoQtd}
+                  readOnly={somenteLeitura}
+                  onChange={(e) => setPrazoQtd(e.target.value)}
+                  className="w-28"
+                />
+                <select
+                  aria-label="Unidade do prazo"
+                  value={prazoUnidade}
+                  disabled={somenteLeitura}
+                  onChange={(e) => setPrazoUnidade(e.target.value as UnidadeVigencia)}
+                  className="h-10 flex-1 rounded-md border border-input bg-background px-3 text-sm disabled:opacity-60"
+                >
+                  {UNIDADES.map((u) => (
+                    <option key={u.valor} value={u.valor}>
+                      {u.rotulo}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {somenteLeitura ? null : (
+                <p className="text-xs text-muted-foreground">
+                  {fimCalculado
+                    ? `Fim da vigência calculado: ${fimCalculado.split("-").reverse().join("/")}`
+                    : "Informe a quantidade para o sistema calcular a data de fim."}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
               <Label htmlFor="fim" className="flex items-center gap-1.5">
                 Fim da vigência
-                <HelpTip text="Até quando o contrato vale. Depois dessa data, contratos ainda abertos aparecem marcados como “Vigência encerrada” na lista." />
+                <HelpTip text="Calculado automaticamente pelo prazo informado. Você também pode ajustar a data manualmente, se precisar." />
               </Label>
               <Input
                 id="fim"
                 type="date"
                 value={fim}
                 readOnly={somenteLeitura}
-                onChange={(e) => setFim(e.target.value)}
+                onChange={(e) => {
+                  setFim(e.target.value);
+                  setPrazoQtd(""); // data ajustada na mão: o prazo deixa de mandar
+                }}
               />
-              {somenteLeitura ? null : (
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {[30, 60, 90, 180, 365].map((dias) => (
-                    <Button
-                      key={dias}
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setFim(somarDias(inicio || dataContrato || hojeISO(), dias))}
-                    >
-                      {dias} dias
-                    </Button>
-                  ))}
-                </div>
-              )}
             </div>
+
           </div>
         </section>
 
