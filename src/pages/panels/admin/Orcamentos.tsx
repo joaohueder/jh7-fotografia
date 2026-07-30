@@ -64,24 +64,52 @@ function formatarData(valor: string | null) {
   return `${dia}/${mes}/${ano}`;
 }
 
+function corStatus(status: OrcamentoStatus) {
+  switch (status) {
+    case "RASCUNHO":
+      return {
+        cor: "text-muted-foreground",
+        bg: "bg-muted/50",
+        borda: "border-border",
+      };
+    case "ENVIADO":
+      return {
+        cor: "text-blue-600",
+        bg: "bg-blue-500/10",
+        borda: "border-blue-500/30",
+      };
+    case "APROVADO":
+      return {
+        cor: "text-green-600",
+        bg: "bg-green-500/10",
+        borda: "border-green-500/30",
+      };
+    case "RECUSADO":
+      return {
+        cor: "text-destructive",
+        bg: "bg-destructive/10",
+        borda: "border-destructive/30",
+      };
+    case "CANCELADO":
+      return {
+        cor: "text-amber-600",
+        bg: "bg-amber-500/10",
+        borda: "border-amber-500/30",
+      };
+  }
+}
+
 function StatusBadge({ status, vencido }: { status: OrcamentoStatus; vencido: boolean }) {
-  const destaque = status === "APROVADO";
-  const negativo = status === "RECUSADO" || status === "CANCELADO";
+  const estilo = corStatus(status);
   return (
     <span className="inline-flex items-center gap-1">
       <span
-        className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold"
-        style={{
-          borderColor: destaque ? "var(--panel-accent)" : "hsl(var(--border))",
-          color: destaque
-            ? "var(--panel-accent)"
-            : negativo
-              ? "hsl(var(--destructive))"
-              : "hsl(var(--muted-foreground))",
-          background: destaque
-            ? "color-mix(in oklab, var(--panel-accent) 12%, transparent)"
-            : undefined,
-        }}
+        className={cn(
+          "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold",
+          estilo.cor,
+          estilo.bg,
+          estilo.borda,
+        )}
       >
         {rotuloStatus(status)}
       </span>
