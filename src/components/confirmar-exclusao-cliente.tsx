@@ -50,6 +50,7 @@ export function ConfirmarExclusaoCliente({
   tipo = "cliente",
   onCancelar,
   onConfirmar,
+  onInativar,
 }: Props) {
   const { data: impacto, isLoading } = useImpactoExclusaoCliente(clienteId);
 
@@ -58,6 +59,10 @@ export function ConfirmarExclusaoCliente({
     impacto.contatos === 0 &&
     impacto.notas === 0 &&
     impacto.orcamentos === 0;
+
+  // Dados críticos: orçamentos que já saíram do rascunho não podem ser apagados.
+  const bloqueado = Boolean(impacto?.temOrcamentoEmAndamento);
+
 
   return (
     <AlertDialog open={!!clienteId} onOpenChange={(o) => !o && onCancelar()}>
