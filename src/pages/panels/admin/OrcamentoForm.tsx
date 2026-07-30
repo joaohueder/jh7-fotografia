@@ -82,8 +82,6 @@ function calcularValidade(dataOrcamento: string, dias: number | "") {
   return dataISO(d);
 }
 
-
-
 /** Item da proposta na tela: cópia editável + identificador só para arrastar. */
 interface ItemLinha extends OrcamentoItem {
   chave: string;
