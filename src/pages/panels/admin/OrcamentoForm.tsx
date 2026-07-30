@@ -163,10 +163,15 @@ export default function OrcamentoForm() {
   const [dataOrcamento, setDataOrcamento] = useState(hojeISO());
   const [diasValidade, setDiasValidade] = useState<number | "">(15);
   const [itens, setItens] = useState<ItemLinha[]>([]);
+  const [ajusteTipo, setAjusteTipo] = useState<OrcamentoAjusteTipo>("NENHUM");
+  const [ajusteValorTexto, setAjusteValorTexto] = useState("");
+  const [ajusteDescricao, setAjusteDescricao] = useState("");
+  const [observacoes, setObservacoes] = useState("");
   const [escolhido, setEscolhido] = useState("");
   // Produto selecionado no combo de cada item (chave do item -> id do produto).
   const [produtoEscolhido, setProdutoEscolhido] = useState<Record<string, string>>({});
   const [carregado, setCarregado] = useState(false);
+
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
