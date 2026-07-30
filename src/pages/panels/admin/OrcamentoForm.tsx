@@ -97,6 +97,16 @@ interface ItemLinha extends OrcamentoItem {
   quantidadeTexto: string;
 }
 
+/** Linha de desconto ou acréscimo na tela (podem ser várias). */
+interface AjusteLinha {
+  chave: string;
+  tipo: OrcamentoAjusteTipo;
+  /** Texto mascarado do valor (R$). */
+  valorTexto: string;
+  descricao: string;
+}
+
+
 let contadorChave = 0;
 function novaChave() {
   contadorChave += 1;
