@@ -1045,7 +1045,14 @@ export default function ClienteForm() {
           className="space-y-[clamp(1rem,3vw,1.5rem)]"
         >
           {editando ? (
-            <Tabs defaultValue="dados" className="space-y-5">
+            <Tabs
+              defaultValue={
+                secoes.some((s) => s.value === searchParams.get("aba"))
+                  ? (searchParams.get("aba") as string)
+                  : "dados"
+              }
+              className="space-y-5"
+            >
               <TabsList className="flex-wrap">
                 {secoes.map((s) => (
                   <TabsTrigger key={s.value} value={s.value}>
