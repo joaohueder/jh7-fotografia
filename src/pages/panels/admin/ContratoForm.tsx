@@ -714,7 +714,7 @@ export default function ContratoForm() {
               <HelpTip text="Os serviços aqui são cópias: o que você alterar não muda o cadastro de serviços nem o orçamento de origem. Assim o contrato guarda exatamente o que foi combinado com o cliente." />
             </h2>
             <span className="text-sm">
-              Valor do contrato:{" "}
+              Total dos serviços:{" "}
               <strong>
                 {totalItens == null ? "sem valores informados" : formatMoney(totalItens)}
               </strong>
