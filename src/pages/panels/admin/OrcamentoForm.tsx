@@ -618,18 +618,6 @@ export default function OrcamentoForm() {
 
                               <div className="grid gap-3 pl-8 sm:grid-cols-3">
                                 <div className="space-y-1">
-                                  <Label className="text-xs">Quantidade</Label>
-                                  <Input
-                                    inputMode="decimal"
-                                    value={item.quantidadeTexto}
-                                    onChange={(e) =>
-                                      atualizarItem(item.chave, {
-                                        quantidadeTexto: e.target.value.replace(/[^\d,.]/g, ""),
-                                      })
-                                    }
-                                  />
-                                </div>
-                                <div className="space-y-1">
                                   <Label className="text-xs">Valor unitário (R$)</Label>
                                   <Input
                                     inputMode="numeric"
@@ -642,18 +630,8 @@ export default function OrcamentoForm() {
                                     }
                                   />
                                 </div>
-                                <div className="space-y-1">
-                                  <Label className="text-xs">Subtotal</Label>
-                                  <div className="flex h-10 items-center rounded-md border border-border bg-muted/40 px-3 text-sm">
-                                    {parseMoney(item.valorTexto) == null
-                                      ? "Não informado"
-                                      : `R$ ${formatMoney(
-                                          (parseMoney(item.valorTexto) ?? 0) *
-                                            (Number(item.quantidadeTexto.replace(",", ".")) || 1),
-                                        )}`}
-                                  </div>
-                                </div>
                               </div>
+
 
                               {/* Produtos deste serviço — cópia editável */}
                               <div className="space-y-2 rounded-lg border border-dashed border-border p-3 pl-3 sm:ml-8">
