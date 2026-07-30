@@ -99,14 +99,16 @@ export function useGruposServicos() {
       const { data, error } = await db
         .from("servico_grupos")
         .select(
-          "id, empresa_id, nome, descricao, status, created_at, servico_grupo_itens ( id, servicos ( valor_venda ) )",
+          "id, empresa_id, nome, descricao, status, created_at, servico_grupo_itens ( id, ordem, servico_id, servicos ( nome, status, valor_venda, servico_produtos ( quantidade, ordem, produtos ( nome ) ) ) )",
         )
         .eq("empresa_id", empresaId!)
         .order("nome", { ascending: true });
       if (error) throw error;
 
       return ((data ?? []) as any[]).map((g) => {
-        const itens = (g.servico_grupo_itens ?? []) as any[];
+        const itens = [...((g.servico_grupo_itens ?? []) as any[])].sort(
+          (a, b) => Number(a.ordem ?? 0) - Number(b.ordem ?? 0),
+        );
         const valores = itens
           .map((i) => (i.servicos?.valor_venda == null ? null : Number(i.servicos.valor_venda)))
           .filter((v): v is number => v != null);
@@ -119,11 +121,29 @@ export function useGruposServicos() {
           created_at: g.created_at,
           total_servicos: itens.length,
           total_venda: valores.length === 0 ? null : valores.reduce((s, v) => s + v, 0),
+          servicos: itens.map((i) => ({
+            servico_id: i.servico_id,
+            nome: i.servicos?.nome ?? "Serviço removido",
+            status: (i.servicos?.status ?? "INATIVO") as GrupoServicoStatus,
+            valor_venda: i.servicos?.valor_venda == null ? null : Number(i.servicos.valor_venda),
+            produtos: mapearProdutos(i.servicos?.servico_produtos),
+          })),
         } as GrupoServico;
       });
     },
   });
 }
+
+/** Normaliza a composição de produtos de um serviço, na ordem salva. */
+function mapearProdutos(bruto: unknown): ProdutoDoServico[] {
+  return [...((bruto ?? []) as any[])]
+    .sort((a, b) => Number(a.ordem ?? 0) - Number(b.ordem ?? 0))
+    .map((p) => ({
+      nome: p.produtos?.nome ?? "Produto removido",
+      quantidade: Number(p.quantidade ?? 0),
+    }));
+}
+
 
 /** Busca um agrupamento específico (tela de edição). */
 export function useGrupoServico(id?: string) {
