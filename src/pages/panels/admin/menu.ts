@@ -17,6 +17,8 @@ export const ADMIN_MENU = [
       { label: "Agrupamento de serviços", to: "/admin/agrupamento-servicos" },
     ],
   },
+  { label: "Orçamentos", to: "/admin/orcamentos" },
 
   { label: "Configurações", to: "/admin/configuracoes", right: true },
+
 ];

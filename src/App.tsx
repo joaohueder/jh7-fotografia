@@ -26,6 +26,9 @@ import ServicosList from "@/pages/panels/admin/Servicos";
 import ServicoForm from "@/pages/panels/admin/ServicoForm";
 import GruposServicosList from "@/pages/panels/admin/GruposServicos";
 import GrupoServicoForm from "@/pages/panels/admin/GrupoServicoForm";
+import OrcamentosList from "@/pages/panels/admin/Orcamentos";
+import OrcamentoForm from "@/pages/panels/admin/OrcamentoForm";
+
 
 
 
@@ -371,6 +374,39 @@ export default function App() {
                 </RequireAuth>
               }
             />
+
+            <Route
+              path="/admin/orcamentos"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <OrcamentosList />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/orcamentos/novo"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <OrcamentoForm />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/orcamentos/:id"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <OrcamentoForm />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+
+
 
 
 
