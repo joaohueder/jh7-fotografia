@@ -143,11 +143,12 @@ export default function Produtos() {
     setEditando(p);
     setNome(p.nome);
     setStatusForm(p.status);
-    setCusto(formatMoney(p.valor_custo));
-    setVenda(formatMoney(p.valor_venda));
+    setCusto(p.valor_custo != null ? formatMoney(p.valor_custo) : "");
+    setVenda(p.valor_venda != null ? formatMoney(p.valor_venda) : "");
     setErros({});
     setAberto(true);
   }
+
 
   function validar() {
     const novos: typeof erros = {};
@@ -156,14 +157,13 @@ export default function Produtos() {
 
     const c = parseMoney(custo);
     const v = parseMoney(venda);
-    if (c === null) novos.custo = "Informe o valor de custo (use 0,00 se não houver).";
-    else if (c > LIMITE_VALOR) novos.custo = "O valor de custo deve ser no máximo R$ 999.999,99.";
-    if (v === null) novos.venda = "Informe o valor de venda.";
-    else if (v > LIMITE_VALOR) novos.venda = "O valor de venda deve ser no máximo R$ 999.999,99.";
+    if (c !== null && c > LIMITE_VALOR) novos.custo = "O valor de custo deve ser no máximo R$ 999.999,99.";
+    if (v !== null && v > LIMITE_VALOR) novos.venda = "O valor de venda deve ser no máximo R$ 999.999,99.";
 
     setErros(novos);
     return Object.keys(novos).length === 0;
   }
+
 
   async function submeter() {
     if (!validar()) {
@@ -176,10 +176,11 @@ export default function Produtos() {
         dados: {
           nome: nome.trim(),
           status,
-          valor_custo: parseMoney(custo) ?? 0,
-          valor_venda: parseMoney(venda) ?? 0,
+          valor_custo: parseMoney(custo),
+          valor_venda: parseMoney(venda),
         },
       });
+
       notifySuccess(editando ? "Produto atualizado." : "Produto cadastrado com sucesso.");
       setAberto(false);
     } catch (err) {
@@ -214,7 +215,9 @@ export default function Produtos() {
     }
   }
 
-  const margem = (p: Produto) => p.valor_venda - p.valor_custo;
+  const margem = (p: Produto) =>
+    p.valor_custo != null && p.valor_venda != null ? p.valor_venda - p.valor_custo : null;
+
 
   return (
     <PanelLayout accent="admin" menu={ADMIN_MENU}>
