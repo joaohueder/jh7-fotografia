@@ -84,6 +84,8 @@ export default function GruposServicos() {
   const [filtro, setFiltro] = useState<Filtro>("todos");
   const [alvoStatus, setAlvoStatus] = useState<GrupoServico | null>(null);
   const [alvoExclusao, setAlvoExclusao] = useState<GrupoServico | null>(null);
+  const [expandidos, setExpandidos] = useState<string[]>([]);
+
 
   const lista = useMemo(() => {
     const termo = busca.trim().toLowerCase();
