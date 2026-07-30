@@ -380,8 +380,8 @@ export default function OrcamentoForm() {
       notifyValidation("Informe a data do orçamento.");
       return;
     }
-    if (validade && validade < dataOrcamento) {
-      notifyValidation("A validade não pode ser anterior à data do orçamento.");
+    if (diasValidade !== "" && diasValidade < 0) {
+      notifyValidation("A validade deve ter um número de dias positivo.");
       return;
     }
     if (itens.length === 0) {
@@ -397,7 +397,7 @@ export default function OrcamentoForm() {
           descricao,
           status,
           data_orcamento: dataOrcamento,
-          validade: validade || null,
+          validade: calcularValidade(dataOrcamento, diasValidade),
           itens: itens.map((i) => ({
             nome: i.nome,
             origem_tipo: i.origem_tipo,
