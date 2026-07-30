@@ -232,7 +232,9 @@ export function useOrcamento(id?: string) {
     queryFn: async (): Promise<OrcamentoPayload | null> => {
       const { data, error } = await db
         .from("orcamentos")
-        .select("cliente_id, descricao, status, data_orcamento, validade")
+        .select(
+          "cliente_id, descricao, status, data_orcamento, validade, ajuste_tipo, ajuste_valor, ajuste_descricao, observacoes",
+        )
         .eq("id", id!)
         .maybeSingle();
       if (error) throw error;
@@ -252,8 +254,13 @@ export function useOrcamento(id?: string) {
         status: o.status as OrcamentoStatus,
         data_orcamento: o.data_orcamento,
         validade: o.validade ?? null,
+        ajuste_tipo: (o.ajuste_tipo ?? "NENHUM") as OrcamentoAjusteTipo,
+        ajuste_valor: o.ajuste_valor == null ? null : Number(o.ajuste_valor),
+        ajuste_descricao: o.ajuste_descricao ?? null,
+        observacoes: o.observacoes ?? null,
         itens: ((itens ?? []) as any[]).map(mapearItem),
       };
+
     },
   });
 }
