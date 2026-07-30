@@ -17,6 +17,8 @@ import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { IconAction } from "@/components/icon-action";
 import { HelpTip } from "@/components/page-help";
+import { ConfirmarExclusaoCliente } from "@/components/confirmar-exclusao-cliente";
+
 
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
