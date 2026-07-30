@@ -577,6 +577,93 @@ export default function OrcamentoForm() {
                                   </div>
                                 </div>
                               </div>
+
+                              {/* Produtos deste serviço — cópia editável */}
+                              <div className="space-y-2 rounded-lg border border-dashed border-border p-3 pl-3 sm:ml-8">
+                                <div className="flex items-center gap-1.5">
+                                  <Package className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                    Produtos deste serviço
+                                  </span>
+                                  <HelpTip text="Estes produtos foram copiados do cadastro do serviço. Você pode incluir, remover ou mudar a quantidade só neste orçamento — o cadastro do serviço não muda." />
+                                </div>
+
+                                {item.produtos.length === 0 ? (
+                                  <p className="text-xs text-muted-foreground">
+                                    Nenhum produto incluído. Use o campo abaixo para adicionar.
+                                  </p>
+                                ) : (
+                                  <ul className="space-y-2">
+                                    {item.produtos.map((p, indice) => (
+                                      <li
+                                        key={`${item.chave}-p-${indice}`}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <Input
+                                          className="h-9 flex-1"
+                                          value={p.nome}
+                                          aria-label={`Nome do produto ${indice + 1}`}
+                                          onChange={(e) =>
+                                            atualizarProduto(item.chave, indice, {
+                                              nome: e.target.value,
+                                            })
+                                          }
+                                        />
+                                        <Input
+                                          className="h-9 w-20"
+                                          inputMode="decimal"
+                                          aria-label={`Quantidade de ${p.nome}`}
+                                          value={String(p.quantidade)}
+                                          onChange={(e) =>
+                                            atualizarProduto(item.chave, indice, {
+                                              quantidade:
+                                                Number(
+                                                  e.target.value.replace(/[^\d,.]/g, "").replace(",", "."),
+                                                ) || 0,
+                                            })
+                                          }
+                                        />
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-9 w-9"
+                                          aria-label={`Remover o produto ${p.nome} deste serviço`}
+                                          onClick={() => removerProduto(item.chave, indice)}
+                                        >
+                                          <Trash2 className="h-4 w-4 text-destructive" />
+                                        </Button>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+
+                                <div className="flex flex-col gap-2 sm:flex-row">
+                                  <SearchableSelect
+                                    className="sm:flex-1"
+                                    value={produtoEscolhido[item.chave] ?? ""}
+                                    onChange={(v) =>
+                                      setProdutoEscolhido((atual) => ({ ...atual, [item.chave]: v }))
+                                    }
+                                    opcoes={opcoesProdutos}
+                                    placeholder="Escolha um produto para incluir"
+                                    placeholderBusca="Pesquisar produto…"
+                                    vazio="Nenhum produto ativo encontrado."
+                                    ariaLabel={`Produto para incluir em ${item.nome}`}
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-2"
+                                    onClick={() => adicionarProduto(item.chave)}
+                                  >
+                                    <Plus className="h-4 w-4" />
+                                    Incluir produto
+                                  </Button>
+                                </div>
+                              </div>
+
                             </div>
                           )}
                         </LinhaItem>
