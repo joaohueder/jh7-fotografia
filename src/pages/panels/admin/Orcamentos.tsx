@@ -160,7 +160,7 @@ export default function Orcamentos() {
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Orçamentos</h1>
-              <HelpTip text="Um orçamento é a proposta que você envia para um cliente ou lead. Clique em “Novo orçamento” para informar a descrição, a situação, a data e até quando a proposta vale. Use os filtros para ver só os que estão aguardando resposta, os aprovados ou os recusados. Quando a data de validade passa, o orçamento aparece marcado como “Validade vencida”. Esta tela se atualiza sozinha quando alguém da sua equipe altera algo." />
+              <HelpTip text="Um orçamento é a proposta que você envia para um cliente ou lead. Clique em “Novo orçamento” para informar a descrição, os serviços, um desconto ou acréscimo, a observação geral, a data e até quando a proposta vale. Aqui na lista aparece o valor final (já com desconto ou acréscimo). Use os filtros para ver só os que estão aguardando resposta, os aprovados ou os recusados. Quando a data de validade passa, o orçamento aparece marcado como “Validade vencida”. Esta tela se atualiza sozinha quando alguém da sua equipe altera algo." />
             </div>
             <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
               Acompanhe as propostas enviadas para clientes e leads.
@@ -244,7 +244,7 @@ export default function Orcamentos() {
               </p>
               <p className="text-sm text-muted-foreground">
                 {tabelaAusente
-                  ? "Peça para o responsável técnico rodar o arquivo sql/44_orcamentos.sql no banco de dados e recarregue esta página."
+                  ? "Peça para o responsável técnico rodar os arquivos sql/44_orcamentos.sql, sql/45_orcamento_itens.sql e sql/46_orcamento_ajuste_observacoes.sql no banco de dados e recarregue esta página."
                   : "Verifique sua conexão e tente novamente em instantes."}
               </p>
             </div>
@@ -288,7 +288,30 @@ export default function Orcamentos() {
                       {" · "}
                       Validade: {formatarData(o.validade)}
                     </p>
+                    <p className="text-xs text-muted-foreground">
+                      Valor final:{" "}
+                      <strong className="text-foreground">
+                        {o.total_final == null
+                          ? "sem valores informados"
+                          : `R$ ${o.total_final.toLocaleString("pt-BR", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}`}
+                      </strong>
+                      {o.ajuste_tipo !== "NENHUM" && o.ajuste_valor != null
+                        ? ` · ${o.ajuste_tipo === "DESCONTO" ? "Desconto" : "Acréscimo"} de R$ ${o.ajuste_valor.toLocaleString(
+                            "pt-BR",
+                            { minimumFractionDigits: 2, maximumFractionDigits: 2 },
+                          )}${o.ajuste_descricao ? ` (${o.ajuste_descricao})` : ""}`
+                        : ""}
+                    </p>
+                    {o.observacoes ? (
+                      <p className="line-clamp-2 text-xs text-muted-foreground">
+                        Observação: {o.observacoes}
+                      </p>
+                    ) : null}
                   </div>
+
                   <div className="flex items-center gap-1">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
