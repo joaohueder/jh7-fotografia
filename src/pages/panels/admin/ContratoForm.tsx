@@ -24,6 +24,8 @@ import { useClientes } from "@/hooks/use-clientes";
 import { useServicos } from "@/hooks/use-servicos";
 import { useComposicaoDosServicos } from "@/hooks/use-grupos-servicos";
 import { useOrcamento, useOrcamentos } from "@/hooks/use-orcamentos";
+import { ehClienteAtivoConvertido } from "@/lib/clientes";
+
 import {
   CONTRATO_STATUS,
   rotuloContratoStatus,
