@@ -158,11 +158,15 @@ export default function Orcamentos() {
 
   const totais = useMemo(() => {
     const todos = orcamentos ?? [];
+    const contagemPorStatus = Object.fromEntries(
+      ORCAMENTO_STATUS.map((s) => [s.valor, todos.filter((o) => o.status === s.valor).length]),
+    ) as Record<OrcamentoStatus, number>;
     return {
       total: todos.length,
       abertos: todos.filter((o) => o.status === "RASCUNHO" || o.status === "ENVIADO").length,
       aprovados: todos.filter((o) => o.status === "APROVADO").length,
       vencidos: todos.filter((o) => o.vencido).length,
+      contagemPorStatus,
     };
   }, [orcamentos]);
 
