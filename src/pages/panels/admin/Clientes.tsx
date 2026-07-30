@@ -17,6 +17,8 @@ import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
 import { IconAction } from "@/components/icon-action";
 import { HelpTip } from "@/components/page-help";
+import { ConfirmarExclusaoCliente } from "@/components/confirmar-exclusao-cliente";
+
 
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
@@ -158,7 +160,7 @@ export default function ClientesList() {
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Clientes</h1>
-              <HelpTip text="Aqui ficam as pessoas e empresas que você atende. Clique em “Novo cliente” para cadastrar, use a busca para encontrar alguém e os botões de cada linha para editar, ativar/inativar ou excluir. O seu plano define quantos clientes podem ser cadastrados: quando o limite é atingido, o botão “Novo cliente” some e aparece um aviso — consulte o consumo em Configurações › Limites. Esta tela se atualiza sozinha: se alguém da sua equipe cadastrar ou alterar um cliente, a lista e o gráfico mudam automaticamente." />
+              <HelpTip text="Aqui ficam as pessoas e empresas que você atende. Clique em “Novo cliente” para cadastrar, use a busca para encontrar alguém e os botões de cada linha para editar, ativar/inativar ou excluir. Antes de excluir, o sistema mostra tudo que será apagado junto (contatos adicionais, anotações e orçamentos com seus serviços e descontos) — se quiser guardar o histórico, prefira inativar. O seu plano define quantos clientes podem ser cadastrados: quando o limite é atingido, o botão “Novo cliente” some e aparece um aviso — consulte o consumo em Configurações › Limites. Esta tela se atualiza sozinha: se alguém da sua equipe cadastrar ou alterar um cliente, a lista e o gráfico mudam automaticamente." />
             </div>
             <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
               Cadastro dos clientes atendidos pelo estúdio.
@@ -463,21 +465,14 @@ export default function ClientesList() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!alvoExclusao} onOpenChange={(o) => !o && setAlvoExclusao(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Excluir cliente</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação não pode ser desfeita. O cliente <strong>{alvoExclusao?.nome}</strong> e seus
-              contatos serão removidos.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmarExclusao}>Excluir</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmarExclusaoCliente
+        clienteId={alvoExclusao?.id ?? null}
+        nome={alvoExclusao?.nome ?? null}
+        tipo="cliente"
+        onCancelar={() => setAlvoExclusao(null)}
+        onConfirmar={confirmarExclusao}
+      />
+
     </PanelLayout>
   );
 }

@@ -68,6 +68,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ConfirmarExclusaoCliente } from "@/components/confirmar-exclusao-cliente";
+
 
 /** Etiqueta colorida com a situação do lead no funil. */
 function SituacaoBadge({ situacao }: { situacao: LeadSituacao }) {
@@ -306,7 +308,7 @@ export default function LeadsList() {
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Leads</h1>
-              <HelpTip text="Leads são pessoas interessadas que ainda não viraram clientes. Aqui você guarda o nome, o WhatsApp e o interesse para retornar o contato depois. Ao transformar um lead em cliente, as notas e todos os orçamentos já criados para ele são mantidos no cadastro do cliente. Esta tela se atualiza sozinha: se alguém da sua equipe cadastrar ou alterar um lead, a lista muda automaticamente, sem precisar recarregar a página. Use os filtros para separar quem está aguardando retorno, quem desistiu e quem já virou cliente. O seu plano define quantos leads podem ser cadastrados: quando o limite é atingido, o botão “Novo lead” some e aparece um aviso — o consumo completo fica em Configurações › Limites. O limite de clientes também vale aqui: se ele acabar, o botão “Transformar em cliente” fica desabilitado e o motivo aparece ao passar o mouse sobre ele." />
+              <HelpTip text="Leads são pessoas interessadas que ainda não viraram clientes. Aqui você guarda o nome, o WhatsApp e o interesse para retornar o contato depois. Ao transformar um lead em cliente, as notas e todos os orçamentos já criados para ele são mantidos no cadastro do cliente. Antes de excluir um lead, o sistema mostra tudo que será apagado junto (contatos adicionais, anotações e orçamentos com seus serviços e descontos). Esta tela se atualiza sozinha: se alguém da sua equipe cadastrar ou alterar um lead, a lista muda automaticamente, sem precisar recarregar a página. Use os filtros para separar quem está aguardando retorno, quem desistiu e quem já virou cliente. O seu plano define quantos leads podem ser cadastrados: quando o limite é atingido, o botão “Novo lead” some e aparece um aviso — o consumo completo fica em Configurações › Limites. O limite de clientes também vale aqui: se ele acabar, o botão “Transformar em cliente” fica desabilitado e o motivo aparece ao passar o mouse sobre ele." />
             </div>
             <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
               Contatos captados por formulários ou cadastrados manualmente.
@@ -854,21 +856,14 @@ export default function LeadsList() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!alvoExclusao} onOpenChange={(o) => !o && setAlvoExclusao(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Excluir lead</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação não pode ser desfeita. O lead <strong>{alvoExclusao?.nome}</strong> será
-              removido da lista.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmarExclusao}>Excluir</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmarExclusaoCliente
+        clienteId={alvoExclusao?.id ?? null}
+        nome={alvoExclusao?.nome ?? null}
+        tipo="lead"
+        onCancelar={() => setAlvoExclusao(null)}
+        onConfirmar={confirmarExclusao}
+      />
+
     </PanelLayout>
   );
 }
