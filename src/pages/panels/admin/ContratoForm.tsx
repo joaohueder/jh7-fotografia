@@ -143,6 +143,7 @@ export default function ContratoForm() {
   const { data: clientes } = useClientes();
   const { data: orcamentos } = useOrcamentos();
   const { data: servicos } = useServicos();
+  const { data: produtos } = useProdutos();
   const { data: composicao } = useComposicaoDosServicos();
   const { data: contratoSalvo, isLoading } = useContrato(edicao ? id : undefined);
   const salvar = useSalvarContrato();
@@ -160,7 +161,10 @@ export default function ContratoForm() {
 
   const [observacoes, setObservacoes] = useState("");
   const [itens, setItens] = useState<ItemLinha[]>([]);
+  const [ajustes, setAjustes] = useState<AjusteLinha[]>([]);
   const [servicoEscolhido, setServicoEscolhido] = useState("");
+  /** Produto selecionado no combo de cada serviço (chave do item -> id do produto). */
+  const [produtoEscolhido, setProdutoEscolhido] = useState<Record<string, string>>({});
   const [carregado, setCarregado] = useState(false);
   /** Orçamento cujos itens já foram copiados, para não copiar duas vezes. */
   const [copiadoDe, setCopiadoDe] = useState("");
@@ -180,6 +184,14 @@ export default function ContratoForm() {
     setFim(contratoSalvo.fim_vigencia ?? "");
     setObservacoes(contratoSalvo.observacoes ?? "");
     setItens(contratoSalvo.itens.map(paraLinha));
+    setAjustes(
+      (contratoSalvo.ajustes ?? []).map((a) => ({
+        chave: novaChave(),
+        tipo: a.tipo,
+        valorTexto: formatMoney(Number(a.valor ?? 0)),
+        descricao: a.descricao ?? "",
+      })),
+    );
     setCarregado(true);
   }, [edicao, contratoSalvo, carregado]);
 
