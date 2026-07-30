@@ -534,13 +534,11 @@ export default function OrcamentoForm() {
                       setDiasValidade(v === "" ? "" : Math.max(0, Number(v)));
                     }}
                   />
-                  {calcularValidade(dataOrcamento, diasValidade) ? (
+                  {dataValidadeCalculada ? (
                     <p className="text-xs text-muted-foreground">
                       Validade até{" "}
                       <strong>
-                        {new Date(
-                          `${calcularValidade(dataOrcamento, diasValidade)}T00:00:00`,
-                        ).toLocaleDateString("pt-BR")}
+                        {new Date(`${dataValidadeCalculada}T00:00:00`).toLocaleDateString("pt-BR")}
                       </strong>
                     </p>
                   ) : null}
