@@ -85,6 +85,9 @@ export interface Orcamento {
   cliente_nome: string;
   /** CLIENTE ou LEAD, para mostrar de onde veio o contato. */
   cliente_origem: "CLIENTE" | "LEAD";
+  /** Verdadeiro só enquanto o contato ainda é lead em aberto (sem documento). */
+  cliente_lead_aberto: boolean;
+
   /** Verdadeiro quando a validade já passou. */
   vencido: boolean;
   /** Quantidade de serviços incluídos na proposta. */
