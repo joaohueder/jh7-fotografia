@@ -70,8 +70,8 @@ export default function ServicoForm() {
     if (!servico || carregandoItens) return;
     setNome(servico.nome);
     setStatus(servico.status);
-    setCustoAdicional(formatMoney(servico.custo_adicional));
-    setVenda(formatMoney(servico.valor_venda));
+    setCustoAdicional(servico.custo_adicional == null ? "" : formatMoney(servico.custo_adicional));
+    setVenda(servico.valor_venda == null ? "" : formatMoney(servico.valor_venda));
     setItens((itensSalvos ?? []).map((i) => ({ produto_id: i.produto_id, quantidade: i.quantidade })));
     setCarregado(true);
   }, [editando, carregado, servico, itensSalvos, carregandoItens]);
@@ -94,8 +94,13 @@ export default function ServicoForm() {
     (soma, item) => soma + (produtoPorId.get(item.produto_id)?.valor_custo ?? 0) * item.quantidade,
     0,
   );
-  const custoTotal = (parseMoney(custoAdicional) ?? 0) + custoProdutos;
-  const margem = (parseMoney(venda) ?? 0) - custoTotal;
+  const custoAdicionalNum = parseMoney(custoAdicional);
+  const vendaNum = parseMoney(venda);
+  // Sem custo adicional e sem produtos, o custo total fica "não informado".
+  const custoTotal: number | null =
+    custoAdicionalNum === null && itens.length === 0 ? null : (custoAdicionalNum ?? 0) + custoProdutos;
+  const margem: number | null =
+    vendaNum === null || custoTotal === null ? null : vendaNum - custoTotal;
 
   function adicionarProduto() {
     if (!produtoEscolhido) {
@@ -131,13 +136,13 @@ export default function ServicoForm() {
     const novos: typeof erros = {};
     if (nome.trim().length < 2) novos.nome = "Informe o nome do serviço (mínimo 2 caracteres).";
 
-    const c = parseMoney(custoAdicional);
-    const v = parseMoney(venda);
-    if (c === null) novos.custo = "Informe o custo adicional (use 0,00 se não houver).";
-    else if (c > LIMITE_VALOR) novos.custo = "O custo adicional deve ser no máximo R$ 999.999,99.";
-    if (v === null) novos.venda = "Informe o valor de venda.";
-    else if (v > LIMITE_VALOR) novos.venda = "O valor de venda deve ser no máximo R$ 999.999,99.";
-    if (custoTotal > LIMITE_VALOR) novos.custo = "O custo total do serviço passou de R$ 999.999,99.";
+    // Custo adicional e valor de venda são opcionais: só validamos o limite.
+    if (custoAdicionalNum !== null && custoAdicionalNum > LIMITE_VALOR)
+      novos.custo = "O custo adicional deve ser no máximo R$ 999.999,99.";
+    if (vendaNum !== null && vendaNum > LIMITE_VALOR)
+      novos.venda = "O valor de venda deve ser no máximo R$ 999.999,99.";
+    if (custoTotal !== null && custoTotal > LIMITE_VALOR)
+      novos.custo = "O custo total do serviço passou de R$ 999.999,99.";
 
     setErros(novos);
     return Object.keys(novos).length === 0;
@@ -154,9 +159,9 @@ export default function ServicoForm() {
         dados: {
           nome: nome.trim(),
           status,
-          custo_adicional: parseMoney(custoAdicional) ?? 0,
-          valor_custo: Number(custoTotal.toFixed(2)),
-          valor_venda: parseMoney(venda) ?? 0,
+          custo_adicional: custoAdicionalNum,
+          valor_custo: custoTotal === null ? null : Number(custoTotal.toFixed(2)),
+          valor_venda: vendaNum,
           produtos: itens,
         },
       });
@@ -188,7 +193,7 @@ export default function ServicoForm() {
               <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">
                 {editando ? "Editar serviço" : "Novo serviço"}
               </h1>
-              <HelpTip text="Cadastre o serviço prestado pelo estúdio e, se quiser, monte a composição dele com os produtos utilizados (ex.: álbum, caixa, pen drive). O custo dos produtos é somado automaticamente ao custo total do serviço. Os campos marcados com * são obrigatórios." />
+              <HelpTip text="Cadastre o serviço prestado pelo estúdio e, se quiser, monte a composição dele com os produtos utilizados (ex.: álbum, caixa, pen drive). O custo dos produtos é somado automaticamente ao custo total do serviço. Os campos marcados com * são obrigatórios — o custo adicional e o valor de venda podem ficar em branco." />
             </div>
             <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
               Preencha os dados do serviço e escolha os produtos que fazem parte dele.
@@ -249,8 +254,8 @@ export default function ServicoForm() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="servico-custo" className="flex items-center gap-1.5">
-                    Custo adicional <span className="text-destructive">*</span>
-                    <HelpTip text="Custos que NÃO vêm de produtos: equipe, deslocamento, fornecedor, edição. O custo dos produtos da composição é somado automaticamente. Se não houver custo adicional, deixe 0,00." />
+                    Custo adicional <span className="text-xs text-muted-foreground">(opcional)</span>
+                    <HelpTip text="Custos que NÃO vêm de produtos: equipe, deslocamento, fornecedor, edição. O custo dos produtos da composição é somado automaticamente. Pode ficar em branco e ser preenchido depois." />
                   </Label>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">R$</span>
@@ -259,7 +264,7 @@ export default function ServicoForm() {
                       inputMode="numeric"
                       value={custoAdicional}
                       onChange={(e) => setCustoAdicional(maskMoney(e.target.value))}
-                      placeholder="0,00"
+                      placeholder="Deixe em branco se não houver"
                     />
                   </div>
                   {erros.custo ? <p className="text-xs text-destructive">{erros.custo}</p> : null}
@@ -267,8 +272,8 @@ export default function ServicoForm() {
 
                 <div className="space-y-1.5">
                   <Label htmlFor="servico-venda" className="flex items-center gap-1.5">
-                    Valor de venda <span className="text-destructive">*</span>
-                    <HelpTip text="Preço cobrado do cliente por este serviço." />
+                    Valor de venda <span className="text-xs text-muted-foreground">(opcional)</span>
+                    <HelpTip text="Preço cobrado do cliente por este serviço. Pode ficar em branco enquanto você ainda não definiu o preço." />
                   </Label>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">R$</span>
@@ -277,7 +282,7 @@ export default function ServicoForm() {
                       inputMode="numeric"
                       value={venda}
                       onChange={(e) => setVenda(maskMoney(e.target.value))}
-                      placeholder="0,00"
+                      placeholder="Deixe em branco se ainda não definiu"
                     />
                   </div>
                   {erros.venda ? <p className="text-xs text-destructive">{erros.venda}</p> : null}
@@ -389,19 +394,19 @@ export default function ServicoForm() {
               {[
                 {
                   rotulo: "Custo dos produtos",
-                  valor: custoProdutos,
+                  valor: custoProdutos as number | null,
                   ajuda: "Soma do custo de todos os produtos incluídos na composição.",
                 },
                 {
                   rotulo: "Custo total do serviço",
                   valor: custoTotal,
-                  ajuda: "Custo adicional + custo dos produtos. É este valor que aparece na lista de serviços.",
+                  ajuda: "Custo adicional + custo dos produtos. É este valor que aparece na lista de serviços. Fica em branco enquanto nenhum custo for informado.",
                 },
                 {
                   rotulo: "Margem estimada",
                   valor: margem,
-                  ajuda: "Valor de venda menos o custo total. Se ficar negativo, você está vendendo abaixo do custo.",
-                  negativo: margem < 0,
+                  ajuda: "Valor de venda menos o custo total. Só aparece quando os dois estão preenchidos. Se ficar negativo, você está vendendo abaixo do custo.",
+                  negativo: margem !== null && margem < 0,
                 },
               ].map((card) => (
                 <div key={card.rotulo} className="rounded-xl border border-border bg-card p-4">
@@ -412,7 +417,13 @@ export default function ServicoForm() {
                   <p
                     className={`mt-1 text-xl font-bold ${card.negativo ? "text-destructive" : ""}`}
                   >
-                    R$ {formatMoney(card.valor)}
+                    {card.valor === null ? (
+                      <span className="text-base font-medium text-muted-foreground">
+                        não informado
+                      </span>
+                    ) : (
+                      <>R$ {formatMoney(card.valor)}</>
+                    )}
                   </p>
                 </div>
               ))}
