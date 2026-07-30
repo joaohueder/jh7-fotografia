@@ -23,6 +23,7 @@ import ClienteForm from "@/pages/panels/admin/ClienteForm";
 import LeadsList from "@/pages/panels/admin/Leads";
 import ProdutosList from "@/pages/panels/admin/Produtos";
 import ServicosList from "@/pages/panels/admin/Servicos";
+import ServicoForm from "@/pages/panels/admin/ServicoForm";
 
 
 
@@ -314,6 +315,26 @@ export default function App() {
                 <RequireAuth>
                   <RequireRole allow={["admin"]}>
                     <ServicosList />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/servicos/novo"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <ServicoForm />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/servicos/:id"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <ServicoForm />
                   </RequireRole>
                 </RequireAuth>
               }
