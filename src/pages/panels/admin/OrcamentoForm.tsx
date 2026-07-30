@@ -191,6 +191,8 @@ export default function OrcamentoForm() {
     setCarregado(true);
   }, [editando, carregado, orcamento]);
 
+  const dataValidadeCalculada = calcularValidade(dataOrcamento, diasValidade);
+
   const opcoesContato = useMemo(() => {
     const doCliente = (clientes ?? []).map((c) => ({
       value: c.id,
