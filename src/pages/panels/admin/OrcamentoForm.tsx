@@ -153,6 +153,11 @@ export default function OrcamentoForm() {
   const { id } = useParams<{ id: string }>();
   const editando = Boolean(id);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Quando o orçamento é aberto pela ficha do cliente, o contato já vem definido
+  // e não pode ser trocado; ao salvar, o usuário volta para a aba de origem.
+  const clienteFixo = editando ? null : searchParams.get("cliente");
+  const voltarPara = searchParams.get("voltar") || "/admin/orcamentos";
 
   usePageMeta(
     editando ? "Editar orçamento — JH7 Gestão de Estúdios Fotográficos" : "Novo orçamento — JH7 Gestão de Estúdios Fotográficos",
