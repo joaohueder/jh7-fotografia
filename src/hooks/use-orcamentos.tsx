@@ -208,7 +208,7 @@ export function useOrcamentos() {
       const { data, error } = await db
         .from("orcamentos")
         .select(
-          "id, empresa_id, cliente_id, descricao, status, data_orcamento, validade, observacoes, created_at, clientes ( nome, origem ), orcamento_itens ( nome, origem_tipo, origem_nome, quantidade, valor_unitario, valor_custo, produtos ), orcamento_ajustes ( tipo, valor, descricao, ordem )",
+          "id, empresa_id, cliente_id, descricao, status, data_orcamento, validade, observacoes, created_at, clientes ( nome, origem, documento, status ), orcamento_itens ( nome, origem_tipo, origem_nome, quantidade, valor_unitario, valor_custo, produtos ), orcamento_ajustes ( tipo, valor, descricao, ordem )",
         )
         .eq("empresa_id", empresaId!)
         .order("data_orcamento", { ascending: false })
