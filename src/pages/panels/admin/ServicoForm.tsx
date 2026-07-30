@@ -86,7 +86,7 @@ export default function ServicoForm() {
   const navigate = useNavigate();
 
   usePageMeta(
-    editando ? "Editar serviço — JH7 Gestão Fotográfica" : "Novo serviço — JH7 Gestão Fotográfica",
+    editando ? "Editar serviço — JH7 Gestão de Estúdios Fotográficos" : "Novo serviço — JH7 Gestão de Estúdios Fotográficos",
     "Cadastro do serviço e dos produtos que o compõem.",
   );
 

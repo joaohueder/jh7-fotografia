@@ -13,7 +13,7 @@ function formatarData(value?: string | null) {
 }
 
 export default function Seguranca() {
-  usePageMeta("Segurança — JH7 Gestão Fotográfica", "Sessão e proteção da sua conta.");
+  usePageMeta("Segurança — JH7 Gestão de Estúdios Fotográficos", "Sessão e proteção da sua conta.");
   const { user, session, signOut } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();

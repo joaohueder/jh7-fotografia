@@ -10,7 +10,7 @@ import { DadosEmpresaTab } from "@/pages/panels/admin/DadosEmpresa";
 import { LimitesTab } from "@/pages/panels/admin/LimitesTab";
 
 export default function AdminConfiguracoes() {
-  usePageMeta("Configurações — JH7 Gestão Fotográfica", "Dados cadastrais da empresa.");
+  usePageMeta("Configurações — JH7 Gestão de Estúdios Fotográficos", "Dados cadastrais da empresa.");
 
   return (
     <PanelLayout accent="admin" menu={ADMIN_MENU}>

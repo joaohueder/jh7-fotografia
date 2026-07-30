@@ -83,7 +83,7 @@ function VencimentoTexto({ a }: { a: AssinaturaComEmpresa }) {
 }
 
 export default function AssinaturasList() {
-  usePageMeta("Assinaturas — JH7 Gestão Fotográfica", "Assinaturas das empresas do SaaS.");
+  usePageMeta("Assinaturas — JH7 Gestão de Estúdios Fotográficos", "Assinaturas das empresas do SaaS.");
 
   const { data, isLoading, error, refetch } = useTodasAssinaturas();
   const expirar = useEncerrarAssinatura();

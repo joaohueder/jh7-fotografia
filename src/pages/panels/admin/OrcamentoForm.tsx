@@ -144,7 +144,7 @@ export default function OrcamentoForm() {
   const navigate = useNavigate();
 
   usePageMeta(
-    editando ? "Editar orçamento — JH7 Gestão Fotográfica" : "Novo orçamento — JH7 Gestão Fotográfica",
+    editando ? "Editar orçamento — JH7 Gestão de Estúdios Fotográficos" : "Novo orçamento — JH7 Gestão de Estúdios Fotográficos",
     "Monte a proposta para um cliente ou lead da sua empresa.",
   );
 

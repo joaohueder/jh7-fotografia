@@ -232,7 +232,7 @@ function PlanoCard({ plano, uso, arrastavel, onEditar, onExcluir, onToggleStatus
 }
 
 export default function PlanosList() {
-  usePageMeta("Planos — JH7 Gestão Fotográfica", "Planos comerciais do SaaS.");
+  usePageMeta("Planos — JH7 Gestão de Estúdios Fotográficos", "Planos comerciais do SaaS.");
 
   const navigate = useNavigate();
   const { data, isLoading, error } = usePlanos();

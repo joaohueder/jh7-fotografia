@@ -202,7 +202,7 @@ export default function ClienteForm() {
   const navigate = useNavigate();
 
   usePageMeta(
-    `${editando ? "Editar" : "Novo"} cliente — JH7 Gestão Fotográfica`,
+    `${editando ? "Editar" : "Novo"} cliente — JH7 Gestão de Estúdios Fotográficos`,
     "Cadastro de clientes do estúdio.",
   );
 

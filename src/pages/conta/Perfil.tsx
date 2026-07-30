@@ -236,7 +236,7 @@ function TemplatesCard() {
 
 
 export default function MeuPerfil() {
-  usePageMeta("Meu perfil — JH7 Gestão Fotográfica", "Dados da sua conta.");
+  usePageMeta("Meu perfil — JH7 Gestão de Estúdios Fotográficos", "Dados da sua conta.");
   const { user } = useAuth();
   const { role } = usePrimaryRole();
   const queryClient = useQueryClient();

@@ -273,7 +273,7 @@ function UsuarioCard({
 }
 
 export default function UsuariosList() {
-  usePageMeta("Usuários — JH7 Gestão Fotográfica", "Usuários do SaaS, administradores e equipes.");
+  usePageMeta("Usuários — JH7 Gestão de Estúdios Fotográficos", "Usuários do SaaS, administradores e equipes.");
 
   const { data, isLoading, error } = useUsuarios();
   const toggle = useToggleUsuarioAtivo();
@@ -358,7 +358,7 @@ export default function UsuariosList() {
         >
           <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight font-display">Gestão de Usuários</h1>
           <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
-            Controle de acessos e permissões do JH7 Gestão Fotográfica.
+            Controle de acessos e permissões do JH7 Gestão de Estúdios Fotográficos.
           </p>
         </motion.header>
 

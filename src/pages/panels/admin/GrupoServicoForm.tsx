@@ -86,8 +86,8 @@ export default function GrupoServicoForm() {
 
   usePageMeta(
     editando
-      ? "Editar agrupamento — JH7 Gestão Fotográfica"
-      : "Novo agrupamento — JH7 Gestão Fotográfica",
+      ? "Editar agrupamento — JH7 Gestão de Estúdios Fotográficos"
+      : "Novo agrupamento — JH7 Gestão de Estúdios Fotográficos",
     "Junte vários serviços em um agrupamento e defina a ordem deles.",
   );
 

@@ -76,7 +76,7 @@ function StatusBadge({ status }: { status: ProdutoStatus }) {
 /** Módulo Produtos do painel do administrador da empresa. */
 export default function Produtos() {
   usePageMeta(
-    "Produtos — JH7 Gestão Fotográfica",
+    "Produtos — JH7 Gestão de Estúdios Fotográficos",
     "Cadastro dos produtos e serviços vendidos pelo estúdio.",
   );
 

@@ -14,8 +14,8 @@ import { Button } from "@/components/ui/button";
  */
 function LandingPage() {
   usePageMeta(
-    "JH7 Gestão Fotográfica — Gestão para Estúdios Fotográficos",
-    "JH7 Gestão Fotográfica é o SaaS completo para gestão de estúdios fotográficos e fotógrafos independentes.",
+    "JH7 Gestão de Estúdios Fotográficos — Gestão para Estúdios Fotográficos",
+    "JH7 Gestão de Estúdios Fotográficos é o SaaS completo para gestão de estúdios fotográficos e fotógrafos independentes.",
   );
 
   return (
@@ -27,7 +27,7 @@ function LandingPage() {
               <Camera className="h-4 w-4" />
             </div>
             <span className="truncate text-[clamp(0.875rem,2.8vw,1rem)] font-semibold">
-              JH7 Gestão Fotográfica
+              JH7 Gestão de Estúdios Fotográficos
             </span>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -73,7 +73,7 @@ function LandingPage() {
       </main>
 
       <footer className="container-page border-t py-6 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} JH7 Gestão Fotográfica. Todos os direitos reservados.
+        © {new Date().getFullYear()} JH7 Gestão de Estúdios Fotográficos. Todos os direitos reservados.
       </footer>
     </div>
   );

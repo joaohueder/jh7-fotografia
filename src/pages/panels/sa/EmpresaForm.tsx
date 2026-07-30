@@ -208,7 +208,7 @@ export default function EmpresaForm() {
   const { id } = useParams<{ id: string }>();
   const editing = Boolean(id);
   usePageMeta(
-    `${editing ? "Editar" : "Nova"} empresa — JH7 Gestão Fotográfica`,
+    `${editing ? "Editar" : "Nova"} empresa — JH7 Gestão de Estúdios Fotográficos`,
     "Cadastro de empresas do SaaS.",
   );
 

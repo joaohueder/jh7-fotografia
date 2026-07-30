@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { usePageMeta } from "@/hooks/use-page-meta";
 
 export default function NotFoundPage() {
-  usePageMeta("Página não encontrada — JH7 Gestão Fotográfica");
+  usePageMeta("Página não encontrada — JH7 Gestão de Estúdios Fotográficos");
 
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background px-[var(--gutter)]">
