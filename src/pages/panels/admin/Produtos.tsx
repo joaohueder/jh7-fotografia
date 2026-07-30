@@ -331,47 +331,52 @@ export default function Produtos() {
             </div>
           ) : (
             <ul className="divide-y divide-border">
-              {lista.map((p) => (
-                <li key={p.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
-                  <div className="min-w-[12rem] flex-1 space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-semibold text-foreground">{p.nome}</span>
-                      <StatusBadge status={p.status} />
+              {lista.map((p) => {
+                const m = margem(p);
+                return (
+                  <li key={p.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+                    <div className="min-w-[12rem] flex-1 space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-semibold text-foreground">{p.nome}</span>
+                        <StatusBadge status={p.status} />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Custo: {p.valor_custo != null ? `R$ ${formatMoney(p.valor_custo)}` : "não informado"} ·{" "}
+                        Venda: {p.valor_venda != null ? `R$ ${formatMoney(p.valor_venda)}` : "não informada"} ·{" "}
+                        <span className={m != null && m < 0 ? "font-semibold text-destructive" : "font-semibold"}>
+                          Margem: {m != null ? `R$ ${formatMoney(m)}` : "—"}
+                        </span>
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      Custo: R$ {formatMoney(p.valor_custo)} · Venda: R$ {formatMoney(p.valor_venda)} ·{" "}
-                      <span className={margem(p) < 0 ? "font-semibold text-destructive" : "font-semibold"}>
-                        Margem: R$ {formatMoney(margem(p))}
-                      </span>
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <IconAction
-                      label="Editar produto"
-                      ariaLabel={`Editar ${p.nome}`}
-                      onClick={() => abrirEdicao(p)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </IconAction>
-                    <IconAction
-                      label={p.status === "ATIVO" ? "Inativar produto" : "Ativar produto"}
-                      ariaLabel={`${p.status === "ATIVO" ? "Inativar" : "Ativar"} ${p.nome}`}
-                      onClick={() => setAlvoStatus(p)}
-                    >
-                      <Power className="h-4 w-4" />
-                    </IconAction>
-                    <IconAction
-                      label="Excluir produto"
-                      ariaLabel={`Excluir ${p.nome}`}
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => setAlvoExclusao(p)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </IconAction>
-                  </div>
-                </li>
-              ))}
+                    <div className="flex items-center gap-1">
+                      <IconAction
+                        label="Editar produto"
+                        ariaLabel={`Editar ${p.nome}`}
+                        onClick={() => abrirEdicao(p)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </IconAction>
+                      <IconAction
+                        label={p.status === "ATIVO" ? "Inativar produto" : "Ativar produto"}
+                        ariaLabel={`${p.status === "ATIVO" ? "Inativar" : "Ativar"} ${p.nome}`}
+                        onClick={() => setAlvoStatus(p)}
+                      >
+                        <Power className="h-4 w-4" />
+                      </IconAction>
+                      <IconAction
+                        label="Excluir produto"
+                        ariaLabel={`Excluir ${p.nome}`}
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => setAlvoExclusao(p)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </IconAction>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
+
           )}
         </div>
       </div>

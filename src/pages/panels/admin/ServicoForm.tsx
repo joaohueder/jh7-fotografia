@@ -83,9 +83,10 @@ export default function ServicoForm() {
 
   const produtoPorId = useMemo(() => {
     const mapa = new Map<string, { nome: string; valor_custo: number }>();
-    (produtos ?? []).forEach((p) => mapa.set(p.id, { nome: p.nome, valor_custo: p.valor_custo }));
+    (produtos ?? []).forEach((p) => mapa.set(p.id, { nome: p.nome, valor_custo: p.valor_custo ?? 0 }));
     return mapa;
   }, [produtos]);
+
 
   const disponiveis = produtosAtivos.filter((p) => !itens.some((i) => i.produto_id === p.id));
 
@@ -308,9 +309,10 @@ export default function ServicoForm() {
                       ) : (
                         disponiveis.map((p) => (
                           <SelectItem key={p.id} value={p.id}>
-                            {p.nome} — R$ {formatMoney(p.valor_custo)}
+                            {p.nome} {p.valor_custo != null ? `— R$ ${formatMoney(p.valor_custo)}` : "— custo não informado"}
                           </SelectItem>
                         ))
+
                       )}
                     </SelectContent>
                   </Select>
