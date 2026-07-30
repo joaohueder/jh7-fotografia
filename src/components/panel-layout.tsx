@@ -213,7 +213,7 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
               </span>
               <span className="min-w-0">
                 <span className="block truncate text-[clamp(0.8125rem,2.6vw,0.875rem)] font-bold">
-                  JH7 Gestão Fotográfica
+                  JH7 Gestão de Estúdios Fotográficos
                 </span>
                 <span
                   className="block truncate text-[0.6875rem] font-semibold uppercase tracking-[0.16em]"
@@ -316,7 +316,7 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
                   <AlertDialogTitle>Sair do sistema?</AlertDialogTitle>
                   <AlertDialogDescription>
                     Você será desconectado e precisará fazer login novamente para acessar o JH7 Gestão
-                    Fotográfica.
+                    de Estúdios Fotográficos.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -415,7 +415,7 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
       {/* Rodapé fixo — a etiqueta do painel some em telas muito estreitas */}
       <footer className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/90 backdrop-blur">
         <div className="container-page flex h-[var(--app-footer-h)] items-center justify-between gap-3 text-xs text-muted-foreground">
-          <span className="truncate">© {new Date().getFullYear()} JH7 Gestão Fotográfica</span>
+          <span className="truncate">© {new Date().getFullYear()} JH7 Gestão de Estúdios Fotográficos</span>
           <span className="hidden truncate sm:inline" style={{ color: "var(--panel-accent)" }}>
             {theme.label}
           </span>

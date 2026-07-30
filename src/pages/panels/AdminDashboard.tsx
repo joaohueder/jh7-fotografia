@@ -22,7 +22,7 @@ const CARDS = [
 ];
 
 export default function AdminDashboard() {
-  usePageMeta("Painel Administrativo — JH7 Gestão Fotográfica", "Visão geral do seu estúdio.");
+  usePageMeta("Painel Administrativo — JH7 Gestão de Estúdios Fotográficos", "Visão geral do seu estúdio.");
 
   return (
     <PanelLayout accent="admin" menu={ADMIN_MENU}>

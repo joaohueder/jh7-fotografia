@@ -17,7 +17,7 @@ const db = supabase as unknown as SupabaseClient;
 
 export default function NovaAssinaturaPage() {
   usePageMeta(
-    "Assinatura — JH7 Gestão Fotográfica",
+    "Assinatura — JH7 Gestão de Estúdios Fotográficos",
     "Contrate um plano para liberar o acesso ao sistema.",
   );
   const { signOut } = useAuth();

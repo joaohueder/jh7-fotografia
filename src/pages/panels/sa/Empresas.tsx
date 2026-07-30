@@ -87,7 +87,7 @@ type FiltroAssinatura = "TODAS" | "COM" | "SEM";
 
 
 export default function EmpresasList() {
-  usePageMeta("Empresas — JH7 Gestão Fotográfica", "Gestão das empresas do SaaS.");
+  usePageMeta("Empresas — JH7 Gestão de Estúdios Fotográficos", "Gestão das empresas do SaaS.");
 
   const navigate = useNavigate();
   const { data, isLoading, error } = useEmpresas();

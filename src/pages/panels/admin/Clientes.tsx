@@ -81,7 +81,7 @@ function OrigemBadge({ origem }: { origem: Cliente["origem"] }) {
 
 /** Listagem de clientes da empresa do administrador logado. */
 export default function ClientesList() {
-  usePageMeta("Clientes — JH7 Gestão Fotográfica", "Gestão dos clientes do estúdio.");
+  usePageMeta("Clientes — JH7 Gestão de Estúdios Fotográficos", "Gestão dos clientes do estúdio.");
 
   const navigate = useNavigate();
   const { data: clientes, isLoading, error } = useClientes();

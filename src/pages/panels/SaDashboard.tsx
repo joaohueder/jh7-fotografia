@@ -10,7 +10,7 @@ const CARDS = [
 ];
 
 export default function SaDashboard() {
-  usePageMeta("Painel SaaS — JH7 Gestão Fotográfica", "Visão geral da operação do SaaS.");
+  usePageMeta("Painel SaaS — JH7 Gestão de Estúdios Fotográficos", "Visão geral da operação do SaaS.");
 
   return (
     <PanelLayout accent="sa" menu={SA_MENU}>

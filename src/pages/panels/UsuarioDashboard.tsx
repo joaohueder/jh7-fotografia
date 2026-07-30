@@ -21,7 +21,7 @@ const CARDS = [
 ];
 
 export default function UsuarioDashboard() {
-  usePageMeta("Painel do Usuário — JH7 Gestão Fotográfica", "Suas sessões e tarefas do dia.");
+  usePageMeta("Painel do Usuário — JH7 Gestão de Estúdios Fotográficos", "Suas sessões e tarefas do dia.");
 
   return (
     <PanelLayout accent="usuario" menu={[{ label: "Dashboard", to: "/usuario/dashboard" }]}>

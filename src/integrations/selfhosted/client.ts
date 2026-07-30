@@ -3,7 +3,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { authStorage, AUTH_STORAGE_KEY } from "./auth-storage";
 
 
-// Supabase autohospedado (JH7 Gestão Fotográfica)
+// Supabase autohospedado (JH7 Gestão de Estúdios Fotográficos)
 export const SELF_HOSTED_SUPABASE_URL =
   "https://JH7GestaoEstudioFotografico.vps10189.panel.icontainer.cloud";
 

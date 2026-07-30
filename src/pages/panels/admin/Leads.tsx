@@ -101,7 +101,7 @@ function SituacaoBadge({ situacao }: { situacao: LeadSituacao }) {
 
 /** Leads: contatos interessados, com nome e WhatsApp apenas. */
 export default function LeadsList() {
-  usePageMeta("Leads — JH7 Gestão Fotográfica", "Contatos interessados no seu estúdio.");
+  usePageMeta("Leads — JH7 Gestão de Estúdios Fotográficos", "Contatos interessados no seu estúdio.");
 
   const navigate = useNavigate();
   const { data: empresaId } = useEmpresaAtual();

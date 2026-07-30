@@ -60,7 +60,7 @@ function StatusBadge({ status }: { status: ServicoStatus }) {
 /** Módulo Serviços do painel do administrador da empresa. */
 export default function Servicos() {
   usePageMeta(
-    "Serviços — JH7 Gestão Fotográfica",
+    "Serviços — JH7 Gestão de Estúdios Fotográficos",
     "Cadastro dos serviços prestados pelo estúdio.",
   );
 

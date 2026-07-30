@@ -92,7 +92,7 @@ function StatusBadge({ status, vencido }: { status: OrcamentoStatus; vencido: bo
 /** Módulo Orçamentos do painel do administrador da empresa. */
 export default function Orcamentos() {
   usePageMeta(
-    "Orçamentos — JH7 Gestão Fotográfica",
+    "Orçamentos — JH7 Gestão de Estúdios Fotográficos",
     "Monte e acompanhe os orçamentos enviados para clientes e leads.",
   );
 

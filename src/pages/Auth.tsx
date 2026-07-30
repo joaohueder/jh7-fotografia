@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 function AuthPage() {
-  usePageMeta("Entrar — JH7 Gestão Fotográfica", "Acesse sua conta do JH7 Gestão Fotográfica.");
+  usePageMeta("Entrar — JH7 Gestão de Estúdios Fotográficos", "Acesse sua conta do JH7 Gestão de Estúdios Fotográficos.");
   const { user, isLoading, signIn, signOut } = useAuth();
   const navigate = useNavigate();
   // A tela de login é sempre escura, independente da preferência do usuário.
@@ -168,7 +168,7 @@ function AuthPage() {
               <Camera className="h-[1.125rem] w-[1.125rem] text-gold" />
             </span>
             <span className="truncate text-[0.8125rem] font-bold tracking-[0.16em] uppercase text-muted-foreground">
-              JH7 <span className="text-foreground">Gestão Fotográfica</span>
+              JH7 <span className="text-foreground">Gestão de Estúdios Fotográficos</span>
             </span>
           </header>
 
@@ -193,7 +193,7 @@ function AuthPage() {
           <div className="flex items-center gap-3 animate-fade-in">
             <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand-green" />
             <p className="text-xs tracking-wide text-muted-foreground/70">
-              © {new Date().getFullYear()} JH7 Gestão Fotográfica
+              © {new Date().getFullYear()} JH7 Gestão de Estúdios Fotográficos
             </p>
           </div>
         </section>
@@ -206,7 +206,7 @@ function AuthPage() {
                 <Camera className="h-[1.125rem] w-[1.125rem] text-gold" />
               </span>
               <span className="truncate text-[0.8125rem] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                JH7 <span className="text-foreground">Gestão Fotográfica</span>
+                JH7 <span className="text-foreground">Gestão de Estúdios Fotográficos</span>
               </span>
             </div>
 

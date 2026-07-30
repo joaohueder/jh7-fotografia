@@ -63,7 +63,7 @@ function StatusBadge({ status }: { status: GrupoServicoStatus }) {
 /** Módulo Agrupamento de Serviços do painel do administrador da empresa. */
 export default function GruposServicos() {
   usePageMeta(
-    "Agrupamento de serviços — JH7 Gestão Fotográfica",
+    "Agrupamento de serviços — JH7 Gestão de Estúdios Fotográficos",
     "Junte vários serviços em um agrupamento (pacote) e defina a ordem deles.",
   );
 

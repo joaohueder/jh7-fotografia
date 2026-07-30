@@ -146,7 +146,7 @@ function PlanoFormInner() {
   const { id } = useParams<{ id: string }>();
   const editing = Boolean(id);
   usePageMeta(
-    `${editing ? "Editar" : "Novo"} plano — JH7 Gestão Fotográfica`,
+    `${editing ? "Editar" : "Novo"} plano — JH7 Gestão de Estúdios Fotográficos`,
     "Cadastro de planos comerciais do SaaS.",
   );
 

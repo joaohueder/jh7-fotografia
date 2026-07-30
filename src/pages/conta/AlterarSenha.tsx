@@ -11,7 +11,7 @@ import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-messa
 import { Eye, EyeOff } from "lucide-react";
 
 export default function AlterarSenha() {
-  usePageMeta("Alterar senha — JH7 Gestão Fotográfica", "Defina uma nova senha de acesso.");
+  usePageMeta("Alterar senha — JH7 Gestão de Estúdios Fotográficos", "Defina uma nova senha de acesso.");
   const { user } = useAuth();
 
   const [atual, setAtual] = useState("");

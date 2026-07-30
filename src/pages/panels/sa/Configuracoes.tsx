@@ -155,7 +155,7 @@ function LayoutTab() {
 }
 
 export default function SaConfiguracoes() {
-  usePageMeta("Configurações do sistema — JH7 Gestão Fotográfica", "Padrões globais do SaaS.");
+  usePageMeta("Configurações do sistema — JH7 Gestão de Estúdios Fotográficos", "Padrões globais do SaaS.");
 
   return (
     <PanelLayout accent="sa" menu={SA_MENU}>
