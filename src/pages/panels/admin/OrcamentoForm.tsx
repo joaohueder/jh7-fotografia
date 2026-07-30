@@ -1,6 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, GripVertical, Layers, Loader2, Plus, Save, Trash2, Wrench } from "lucide-react";
+import {
+  ArrowLeft,
+  GripVertical,
+  Layers,
+  Loader2,
+  Package,
+  Plus,
+  Save,
+  Trash2,
+  Wrench,
+} from "lucide-react";
 import {
   DndContext,
   KeyboardSensor,
