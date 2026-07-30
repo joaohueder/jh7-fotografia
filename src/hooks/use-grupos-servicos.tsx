@@ -179,7 +179,9 @@ export function useGrupoServicoItens(grupoId?: string) {
     queryFn: async (): Promise<GrupoServicoItem[]> => {
       const { data, error } = await db
         .from("servico_grupo_itens")
-        .select("id, servico_id, ordem, servicos ( nome, status, valor_venda )")
+        .select(
+          "id, servico_id, ordem, servicos ( nome, status, valor_venda, servico_produtos ( quantidade, ordem, produtos ( nome ) ) )",
+        )
         .eq("grupo_id", grupoId!)
         .order("ordem", { ascending: true })
         .order("created_at", { ascending: true });
@@ -191,7 +193,9 @@ export function useGrupoServicoItens(grupoId?: string) {
         nome: item.servicos?.nome ?? "Serviço removido",
         status: (item.servicos?.status ?? "INATIVO") as GrupoServicoStatus,
         valor_venda: item.servicos?.valor_venda == null ? null : Number(item.servicos.valor_venda),
+        produtos: mapearProdutos(item.servicos?.servico_produtos),
       }));
+
     },
   });
 }
