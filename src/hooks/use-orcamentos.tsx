@@ -236,6 +236,8 @@ export function useOrcamentos() {
           created_at: o.created_at,
           cliente_nome: o.clientes?.nome ?? "Contato removido",
           cliente_origem: (o.clientes?.origem ?? "CLIENTE") as "CLIENTE" | "LEAD",
+          cliente_lead_aberto: ehLeadEmAberto(o.clientes ?? null),
+
           vencido: estaVencido(o.validade ?? null, o.status as OrcamentoStatus),
           total_itens: itens.length,
           total_valor: totalItens,
