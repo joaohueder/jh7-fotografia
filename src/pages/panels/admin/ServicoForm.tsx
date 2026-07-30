@@ -1,6 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Loader2, Package, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, GripVertical, Loader2, Package, Plus, Trash2 } from "lucide-react";
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { PanelLayout } from "@/components/panel-layout";
@@ -32,6 +50,34 @@ const LIMITE_VALOR = 999999.99;
 interface ItemComposicao {
   produto_id: string;
   quantidade: number;
+}
+
+/** Linha arrastável de um produto da composição do serviço. */
+function LinhaComposicao({
+  id,
+  children,
+}: {
+  id: string;
+  children: (alcaProps: {
+    setActivatorNodeRef: (node: HTMLElement | null) => void;
+    listeners: Record<string, any> | undefined;
+    attributes: Record<string, any>;
+  }) => React.ReactNode;
+}) {
+  const { setNodeRef, setActivatorNodeRef, listeners, attributes, transform, transition, isDragging } =
+    useSortable({ id });
+
+  return (
+    <li
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={`flex flex-wrap items-center gap-3 bg-card px-3 py-2.5 ${
+        isDragging ? "relative z-10 rounded-lg shadow-lg ring-1 ring-primary/40" : ""
+      }`}
+    >
+      {children({ setActivatorNodeRef, listeners, attributes })}
+    </li>
+  );
 }
 
 /**
@@ -130,6 +176,23 @@ export default function ServicoForm() {
 
   function removerItem(produtoId: string) {
     setItens((atuais) => atuais.filter((i) => i.produto_id !== produtoId));
+  }
+
+  // Arrastar e soltar para definir a ordem dos produtos da composição.
+  const sensores = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  function aoSoltar(evento: DragEndEvent) {
+    const { active, over } = evento;
+    if (!over || active.id === over.id) return;
+    setItens((atuais) => {
+      const de = atuais.findIndex((i) => i.produto_id === active.id);
+      const para = atuais.findIndex((i) => i.produto_id === over.id);
+      if (de < 0 || para < 0) return atuais;
+      return arrayMove(atuais, de, para);
+    });
   }
 
   function validar() {
@@ -296,7 +359,7 @@ export default function ServicoForm() {
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                   Produtos que compõem o serviço
                 </h2>
-                <HelpTip text="Inclua aqui os produtos entregues junto com o serviço (álbum, caixa, pen drive, quadro). Informe quantas unidades de cada produto são usadas. O custo de cada produto vem do cadastro de Produtos e entra no custo total do serviço." />
+                <HelpTip text="Inclua aqui os produtos entregues junto com o serviço (álbum, caixa, pen drive, quadro). Informe quantas unidades de cada produto são usadas. Arraste pelo ícone de alça (⠿) para mudar a ordem em que os produtos aparecem. O custo de cada produto vem do cadastro de Produtos e entra no custo total do serviço." />
               </div>
 
               <div className="grid gap-3 sm:grid-cols-[1fr_8rem_auto] sm:items-end">
@@ -349,16 +412,39 @@ export default function ServicoForm() {
                   </p>
                 </div>
               ) : (
+                <DndContext
+                  sensors={sensores}
+                  collisionDetection={closestCenter}
+                  modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+                  onDragEnd={aoSoltar}
+                >
+                  <SortableContext
+                    items={itens.map((i) => i.produto_id)}
+                    strategy={verticalListSortingStrategy}
+                  >
                 <ul className="divide-y divide-border rounded-lg border border-border">
-                  {itens.map((item) => {
+                  {itens.map((item, indice) => {
                     const p = produtoPorId.get(item.produto_id);
                     const subtotal = (p?.valor_custo ?? 0) * item.quantidade;
                     return (
-                      <li
-                        key={item.produto_id}
-                        className="flex flex-wrap items-center gap-3 px-3 py-2.5"
-                      >
+                      <LinhaComposicao key={item.produto_id} id={item.produto_id}>
+                        {({ setActivatorNodeRef, listeners, attributes }) => (
+                          <>
+                        <button
+                          type="button"
+                          ref={setActivatorNodeRef}
+                          {...attributes}
+                          {...listeners}
+                          className="cursor-grab touch-none rounded-md p-1 text-muted-foreground transition hover:bg-muted hover:text-foreground active:cursor-grabbing"
+                          aria-label={`Arrastar ${p?.nome ?? "produto"} para reordenar`}
+                          title="Arraste para mudar a ordem"
+                        >
+                          <GripVertical className="h-4 w-4" />
+                        </button>
                         <div className="min-w-[10rem] flex-1">
+                          <p className="text-xs font-medium text-muted-foreground">
+                            {indice + 1}º
+                          </p>
                           <p className="text-sm font-semibold">{p?.nome ?? "Produto removido"}</p>
                           <p className="text-xs text-muted-foreground">
                             Custo unitário: R$ {formatMoney(p?.valor_custo ?? 0)} · Subtotal: R${" "}
@@ -382,10 +468,14 @@ export default function ServicoForm() {
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
-                      </li>
+                          </>
+                        )}
+                      </LinhaComposicao>
                     );
                   })}
                 </ul>
+                  </SortableContext>
+                </DndContext>
               )}
             </section>
 
