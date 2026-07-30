@@ -1,6 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, GripVertical, Layers, Loader2, Plus, Save, Trash2, Wrench } from "lucide-react";
+import {
+  ArrowLeft,
+  GripVertical,
+  Layers,
+  Loader2,
+  Package,
+  Plus,
+  Save,
+  Trash2,
+  Wrench,
+} from "lucide-react";
 import {
   DndContext,
   KeyboardSensor,
@@ -30,6 +40,7 @@ import { useClientes } from "@/hooks/use-clientes";
 import { useLeads } from "@/hooks/use-leads";
 import { useServicos } from "@/hooks/use-servicos";
 import { useComposicaoDosServicos, useGruposServicos } from "@/hooks/use-grupos-servicos";
+import { useProdutos } from "@/hooks/use-produtos";
 import {
   ORCAMENTO_STATUS,
   somarItens,
@@ -125,6 +136,7 @@ export default function OrcamentoForm() {
   const { data: leads } = useLeads();
   const { data: servicos } = useServicos();
   const { data: grupos } = useGruposServicos();
+  const { data: produtos } = useProdutos();
   const { data: composicao } = useComposicaoDosServicos();
   const salvar = useSalvarOrcamento();
 
@@ -135,6 +147,8 @@ export default function OrcamentoForm() {
   const [validade, setValidade] = useState(emDias(15));
   const [itens, setItens] = useState<ItemLinha[]>([]);
   const [escolhido, setEscolhido] = useState("");
+  // Produto selecionado no combo de cada item (chave do item -> id do produto).
+  const [produtoEscolhido, setProdutoEscolhido] = useState<Record<string, string>>({});
   const [carregado, setCarregado] = useState(false);
 
   const sensors = useSensors(
@@ -255,6 +269,64 @@ export default function OrcamentoForm() {
     setItens((atual) => atual.map((i) => (i.chave === chave ? { ...i, ...mudanca } : i)));
   }
 
+  // Produtos ativos do cadastro, usados apenas como referência para copiar.
+  const opcoesProdutos = useMemo(
+    () =>
+      (produtos ?? [])
+        .filter((p) => p.status === "ATIVO")
+        .map((p) => ({
+          value: p.id,
+          label: p.nome,
+          descricao: p.valor_custo == null ? "Sem custo cadastrado" : `Custo R$ ${formatMoney(p.valor_custo)}`,
+        })),
+    [produtos],
+  );
+
+  /** Inclui no serviço do orçamento uma cópia do produto escolhido. */
+  function adicionarProduto(chave: string) {
+    const produtoId = produtoEscolhido[chave];
+    if (!produtoId) {
+      notifyValidation("Escolha um produto para incluir neste serviço.");
+      return;
+    }
+    const produto = (produtos ?? []).find((p) => p.id === produtoId);
+    if (!produto) return;
+
+    setItens((atual) =>
+      atual.map((i) =>
+        i.chave === chave
+          ? { ...i, produtos: [...i.produtos, { nome: produto.nome, quantidade: 1 }] }
+          : i,
+      ),
+    );
+    setProdutoEscolhido((atual) => ({ ...atual, [chave]: "" }));
+  }
+
+  function atualizarProduto(
+    chave: string,
+    indice: number,
+    mudanca: Partial<{ nome: string; quantidade: number }>,
+  ) {
+    setItens((atual) =>
+      atual.map((i) =>
+        i.chave === chave
+          ? {
+              ...i,
+              produtos: i.produtos.map((p, pos) => (pos === indice ? { ...p, ...mudanca } : p)),
+            }
+          : i,
+      ),
+    );
+  }
+
+  function removerProduto(chave: string, indice: number) {
+    setItens((atual) =>
+      atual.map((i) =>
+        i.chave === chave ? { ...i, produtos: i.produtos.filter((_, pos) => pos !== indice) } : i,
+      ),
+    );
+  }
+
   function removerItem(chave: string) {
     setItens((atual) => atual.filter((i) => i.chave !== chave));
   }
@@ -312,7 +384,12 @@ export default function OrcamentoForm() {
             quantidade: Number(i.quantidadeTexto.replace(",", ".")) || 1,
             valor_unitario: parseMoney(i.valorTexto),
             valor_custo: i.valor_custo,
-            produtos: i.produtos,
+            produtos: i.produtos
+              .filter((p) => p.nome.trim().length > 0)
+              .map((p) => ({
+                nome: p.nome.trim(),
+                quantidade: p.quantidade > 0 ? p.quantidade : 1,
+              })),
           })),
         },
       });
@@ -520,14 +597,12 @@ export default function OrcamentoForm() {
                                       Copiado do agrupamento “{item.origem_nome}”
                                     </p>
                                   ) : null}
-                                  {item.produtos.length > 0 ? (
-                                    <p className="text-xs text-muted-foreground">
-                                      Inclui:{" "}
-                                      {item.produtos
-                                        .map((p) => `${p.quantidade}x ${p.nome}`)
-                                        .join(" · ")}
-                                    </p>
-                                  ) : null}
+                                  <p className="text-xs text-muted-foreground">
+                                    {item.produtos.length === 0
+                                      ? "Sem produtos incluídos neste serviço."
+                                      : `${item.produtos.length} produto(s) incluído(s)`}
+                                  </p>
+
                                 </div>
 
                                 <Button
@@ -579,6 +654,93 @@ export default function OrcamentoForm() {
                                   </div>
                                 </div>
                               </div>
+
+                              {/* Produtos deste serviço — cópia editável */}
+                              <div className="space-y-2 rounded-lg border border-dashed border-border p-3 pl-3 sm:ml-8">
+                                <div className="flex items-center gap-1.5">
+                                  <Package className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                    Produtos deste serviço
+                                  </span>
+                                  <HelpTip text="Estes produtos foram copiados do cadastro do serviço. Você pode incluir, remover ou mudar a quantidade só neste orçamento — o cadastro do serviço não muda." />
+                                </div>
+
+                                {item.produtos.length === 0 ? (
+                                  <p className="text-xs text-muted-foreground">
+                                    Nenhum produto incluído. Use o campo abaixo para adicionar.
+                                  </p>
+                                ) : (
+                                  <ul className="space-y-2">
+                                    {item.produtos.map((p, indice) => (
+                                      <li
+                                        key={`${item.chave}-p-${indice}`}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <Input
+                                          className="h-9 flex-1"
+                                          value={p.nome}
+                                          aria-label={`Nome do produto ${indice + 1}`}
+                                          onChange={(e) =>
+                                            atualizarProduto(item.chave, indice, {
+                                              nome: e.target.value,
+                                            })
+                                          }
+                                        />
+                                        <Input
+                                          className="h-9 w-20"
+                                          inputMode="decimal"
+                                          aria-label={`Quantidade de ${p.nome}`}
+                                          value={String(p.quantidade)}
+                                          onChange={(e) =>
+                                            atualizarProduto(item.chave, indice, {
+                                              quantidade:
+                                                Number(
+                                                  e.target.value.replace(/[^\d,.]/g, "").replace(",", "."),
+                                                ) || 0,
+                                            })
+                                          }
+                                        />
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-9 w-9"
+                                          aria-label={`Remover o produto ${p.nome} deste serviço`}
+                                          onClick={() => removerProduto(item.chave, indice)}
+                                        >
+                                          <Trash2 className="h-4 w-4 text-destructive" />
+                                        </Button>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+
+                                <div className="flex flex-col gap-2 sm:flex-row">
+                                  <SearchableSelect
+                                    className="sm:flex-1"
+                                    value={produtoEscolhido[item.chave] ?? ""}
+                                    onChange={(v) =>
+                                      setProdutoEscolhido((atual) => ({ ...atual, [item.chave]: v }))
+                                    }
+                                    opcoes={opcoesProdutos}
+                                    placeholder="Escolha um produto para incluir"
+                                    placeholderBusca="Pesquisar produto…"
+                                    vazio="Nenhum produto ativo encontrado."
+                                    ariaLabel={`Produto para incluir em ${item.nome}`}
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-2"
+                                    onClick={() => adicionarProduto(item.chave)}
+                                  >
+                                    <Plus className="h-4 w-4" />
+                                    Incluir produto
+                                  </Button>
+                                </div>
+                              </div>
+
                             </div>
                           )}
                         </LinhaItem>
