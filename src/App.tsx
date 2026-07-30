@@ -21,6 +21,7 @@ import AdminConfiguracoes from "@/pages/panels/admin/Configuracoes";
 import ClientesList from "@/pages/panels/admin/Clientes";
 import ClienteForm from "@/pages/panels/admin/ClienteForm";
 import LeadsList from "@/pages/panels/admin/Leads";
+import ProdutosList from "@/pages/panels/admin/Produtos";
 
 
 import UsuarioDashboard from "@/pages/panels/UsuarioDashboard";
