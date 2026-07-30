@@ -43,11 +43,12 @@ import { useComposicaoDosServicos, useGruposServicos } from "@/hooks/use-grupos-
 import { useProdutos } from "@/hooks/use-produtos";
 import {
   ORCAMENTO_STATUS,
-  aplicarAjuste,
+  aplicarAjustes,
   rotuloStatus,
   somarItens,
   useOrcamento,
   useSalvarOrcamento,
+  type OrcamentoAjuste,
   type OrcamentoAjusteTipo,
   type OrcamentoItem,
   type OrcamentoStatus,
@@ -163,9 +164,7 @@ export default function OrcamentoForm() {
   const [dataOrcamento, setDataOrcamento] = useState(hojeISO());
   const [diasValidade, setDiasValidade] = useState<number | "">(15);
   const [itens, setItens] = useState<ItemLinha[]>([]);
-  const [ajusteTipo, setAjusteTipo] = useState<OrcamentoAjusteTipo>("NENHUM");
-  const [ajusteValorTexto, setAjusteValorTexto] = useState("");
-  const [ajusteDescricao, setAjusteDescricao] = useState("");
+  const [ajustes, setAjustes] = useState<AjusteLinha[]>([]);
   const [observacoes, setObservacoes] = useState("");
   const [escolhido, setEscolhido] = useState("");
   // Produto selecionado no combo de cada item (chave do item -> id do produto).
@@ -196,11 +195,14 @@ export default function OrcamentoForm() {
         quantidadeTexto: String(i.quantidade ?? 1),
       })),
     );
-    setAjusteTipo(orcamento.ajuste_tipo ?? "NENHUM");
-    setAjusteValorTexto(
-      orcamento.ajuste_valor == null ? "" : formatMoney(Number(orcamento.ajuste_valor)),
+    setAjustes(
+      (orcamento.ajustes ?? []).map((a) => ({
+        chave: novaChave(),
+        tipo: a.tipo,
+        valorTexto: formatMoney(Number(a.valor ?? 0)),
+        descricao: a.descricao ?? "",
+      })),
     );
-    setAjusteDescricao(orcamento.ajuste_descricao ?? "");
     setObservacoes(orcamento.observacoes ?? "");
     setCarregado(true);
 
@@ -376,8 +378,31 @@ export default function OrcamentoForm() {
   }
 
   const total = useMemo(() => somarItens(itens), [itens]);
-  const ajusteValor = parseMoney(ajusteValorTexto);
-  const totalFinal = aplicarAjuste(total, ajusteTipo, ajusteValor);
+  const ajustesAplicados: OrcamentoAjuste[] = useMemo(
+    () =>
+      ajustes.map((a) => ({
+        tipo: a.tipo,
+        valor: parseMoney(a.valorTexto) ?? 0,
+        descricao: a.descricao,
+      })),
+    [ajustes],
+  );
+  const totalFinal = aplicarAjustes(total, ajustesAplicados);
+
+  function adicionarAjuste(tipo: OrcamentoAjusteTipo) {
+    setAjustes((atual) => [
+      ...atual,
+      { chave: novaChave(), tipo, valorTexto: "", descricao: "" },
+    ]);
+  }
+
+  function atualizarAjuste(chave: string, campos: Partial<AjusteLinha>) {
+    setAjustes((atual) => atual.map((a) => (a.chave === chave ? { ...a, ...campos } : a)));
+  }
+
+  function removerAjuste(chave: string) {
+    setAjustes((atual) => atual.filter((a) => a.chave !== chave));
+  }
 
 
   async function enviar(e: React.FormEvent) {
@@ -403,16 +428,14 @@ export default function OrcamentoForm() {
       notifyValidation("Inclua pelo menos um serviço ou agrupamento na proposta.");
       return;
     }
-    if (ajusteTipo !== "NENHUM" && (ajusteValor == null || ajusteValor <= 0)) {
+    if (ajustesAplicados.some((a) => a.valor <= 0)) {
       notifyValidation(
-        ajusteTipo === "DESCONTO"
-          ? "Informe o valor do desconto ou escolha “Sem desconto/acréscimo”."
-          : "Informe o valor do acréscimo ou escolha “Sem desconto/acréscimo”.",
+        "Informe um valor maior que zero em cada desconto ou acréscimo, ou remova a linha.",
       );
       return;
     }
-    if (ajusteTipo !== "NENHUM" && ajusteDescricao.trim().length < 2) {
-      notifyValidation("Escreva o motivo do desconto ou acréscimo.");
+    if (ajustesAplicados.some((a) => a.descricao.trim().length < 2)) {
+      notifyValidation("Escreva o motivo de cada desconto ou acréscimo.");
       return;
     }
 
@@ -425,9 +448,7 @@ export default function OrcamentoForm() {
           status,
           data_orcamento: dataOrcamento,
           validade: calcularValidade(dataOrcamento, diasValidade),
-          ajuste_tipo: ajusteTipo,
-          ajuste_valor: ajusteTipo === "NENHUM" ? null : ajusteValor,
-          ajuste_descricao: ajusteTipo === "NENHUM" ? null : ajusteDescricao,
+          ajustes: ajustesAplicados.map((a) => ({ ...a, descricao: a.descricao.trim() })),
           observacoes,
 
           itens: itens.map((i) => ({
