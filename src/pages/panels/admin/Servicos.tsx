@@ -130,7 +130,10 @@ export default function Servicos() {
     }
   }
 
-  const margem = (s: Servico) => s.valor_venda - s.valor_custo;
+  const margem = (s: Servico) =>
+    s.valor_venda == null || s.valor_custo == null ? null : s.valor_venda - s.valor_custo;
+  const dinheiro = (v: number | null, vazio = "não informado") =>
+    v == null ? vazio : `R$ ${formatMoney(v)}`;
 
   return (
     <PanelLayout accent="admin" menu={ADMIN_MENU}>
@@ -139,7 +142,7 @@ export default function Servicos() {
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Serviços</h1>
-              <HelpTip text="Aqui ficam os serviços prestados pelo seu estúdio (ensaios, cobertura de eventos, edição, hora extra etc.). Clique em “Novo serviço” para cadastrar informando o nome, se ele está disponível para venda (status), quanto ele custa para você (valor de custo) e por quanto você vende (valor de venda). A diferença entre os dois é a sua margem, calculada automaticamente. Use os botões de cada linha para editar, ativar/inativar ou excluir. Esta tela se atualiza sozinha quando alguém da sua equipe altera algo." />
+              <HelpTip text="Aqui ficam os serviços prestados pelo seu estúdio (ensaios, cobertura de eventos, edição, hora extra etc.). Clique em “Novo serviço” para cadastrar informando o nome, se ele está disponível para venda (status), quanto ele custa para você (valor de custo) e por quanto você vende (valor de venda) — esses dois valores são opcionais e podem ficar em branco. Quando os dois estão preenchidos, a margem é calculada automaticamente. Use os botões de cada linha para editar, ativar/inativar ou excluir. Esta tela se atualiza sozinha quando alguém da sua equipe altera algo." />
             </div>
             <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
               Cadastro dos serviços prestados pelo estúdio.
@@ -248,9 +251,13 @@ export default function Servicos() {
                       <StatusBadge status={s.status} />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Custo: R$ {formatMoney(s.valor_custo)} · Venda: R$ {formatMoney(s.valor_venda)} ·{" "}
-                      <span className={margem(s) < 0 ? "font-semibold text-destructive" : "font-semibold"}>
-                        Margem: R$ {formatMoney(margem(s))}
+                      Custo: {dinheiro(s.valor_custo)} · Venda: {dinheiro(s.valor_venda)} ·{" "}
+                      <span
+                        className={
+                          (margem(s) ?? 0) < 0 ? "font-semibold text-destructive" : "font-semibold"
+                        }
+                      >
+                        Margem: {dinheiro(margem(s), "—")}
                       </span>
                     </p>
                   </div>
