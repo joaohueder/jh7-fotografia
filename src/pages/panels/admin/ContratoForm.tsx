@@ -949,9 +949,12 @@ export default function ContratoForm() {
             </ul>
           )}
         </section>
+          </TabsContent>
 
+          <TabsContent value="valores" className="mt-0">
         {/* Descontos e acréscimos (vários por contrato) */}
         <section className="space-y-4 rounded-xl border border-border bg-card p-4">
+
           <div className="space-y-1">
             <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               <Wrench className="h-4 w-4" /> Descontos e acréscimos
