@@ -68,13 +68,24 @@ export function ConfirmarExclusaoCliente({
     <AlertDialog open={!!clienteId} onOpenChange={(o) => !o && onCancelar()}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Excluir {tipo}</AlertDialogTitle>
+          <AlertDialogTitle>
+            {bloqueado ? `Não é possível excluir este ${tipo}` : `Excluir ${tipo}`}
+          </AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-3 text-left">
               <p>
-                Esta ação não pode ser desfeita. Confira o que será apagado junto com{" "}
-                <strong>{nome}</strong>:
+                {bloqueado ? (
+                  <>
+                    Veja o que está ligado ao cadastro de <strong>{nome}</strong>:
+                  </>
+                ) : (
+                  <>
+                    Esta ação não pode ser desfeita. Confira o que será apagado junto com{" "}
+                    <strong>{nome}</strong>:
+                  </>
+                )}
               </p>
+
 
               {isLoading && (
                 <p className="flex items-center gap-2 text-sm">
