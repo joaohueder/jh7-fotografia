@@ -376,6 +376,9 @@ export default function OrcamentoForm() {
   }
 
   const total = useMemo(() => somarItens(itens), [itens]);
+  const ajusteValor = parseMoney(ajusteValorTexto);
+  const totalFinal = aplicarAjuste(total, ajusteTipo, ajusteValor);
+
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
