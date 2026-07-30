@@ -403,6 +403,18 @@ export default function OrcamentoForm() {
       notifyValidation("Inclua pelo menos um serviço ou agrupamento na proposta.");
       return;
     }
+    if (ajusteTipo !== "NENHUM" && (ajusteValor == null || ajusteValor <= 0)) {
+      notifyValidation(
+        ajusteTipo === "DESCONTO"
+          ? "Informe o valor do desconto ou escolha “Sem desconto/acréscimo”."
+          : "Informe o valor do acréscimo ou escolha “Sem desconto/acréscimo”.",
+      );
+      return;
+    }
+    if (ajusteTipo !== "NENHUM" && ajusteDescricao.trim().length < 2) {
+      notifyValidation("Escreva o motivo do desconto ou acréscimo.");
+      return;
+    }
 
     try {
       await salvar.mutateAsync({
@@ -413,6 +425,11 @@ export default function OrcamentoForm() {
           status,
           data_orcamento: dataOrcamento,
           validade: calcularValidade(dataOrcamento, diasValidade),
+          ajuste_tipo: ajusteTipo,
+          ajuste_valor: ajusteTipo === "NENHUM" ? null : ajusteValor,
+          ajuste_descricao: ajusteTipo === "NENHUM" ? null : ajusteDescricao,
+          observacoes,
+
           itens: itens.map((i) => ({
             nome: i.nome,
             origem_tipo: i.origem_tipo,
