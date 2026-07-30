@@ -296,6 +296,16 @@ export default function App() {
                 </RequireAuth>
               }
             />
+            <Route
+              path="/admin/produtos"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <ProdutosList />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
 
 
 
