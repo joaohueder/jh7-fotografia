@@ -87,6 +87,10 @@ export default function Produtos() {
   const tabelaAusente = /produtos/i.test(detalheErro)
     ? /does not exist|schema cache|relation|not find the table|404/i.test(detalheErro)
     : /schema cache|does not exist/i.test(detalheErro);
+  // Permissões antigas do módulo (política que exigia empresa no perfil).
+  const permissaoDesatualizada =
+    /não está vinculado a uma empresa|P0001|permission denied/i.test(detalheErro);
+
   const salvar = useSalvarProduto();
   const setStatus = useSetProdutoStatus();
   const remover = useDeleteProduto();
