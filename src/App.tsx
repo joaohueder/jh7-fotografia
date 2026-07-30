@@ -409,6 +409,38 @@ export default function App() {
               }
             />
 
+            <Route
+              path="/admin/contratos"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <ContratosList />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/contratos/novo"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <ContratoForm />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/contratos/:id"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <ContratoForm />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+
+
 
 
 
