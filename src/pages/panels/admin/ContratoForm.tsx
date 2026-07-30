@@ -134,17 +134,18 @@ export default function ContratoForm() {
   }, [edicao, contratoSalvo, carregado]);
 
   // Só entram na lista os clientes de verdade e ativos. Quem veio de um lead e
-  // já foi convertido conta como cliente; quem ainda é lead fica de fora.
+  // já completou o cadastro (documento preenchido) conta como cliente; quem
+  // ainda é lead em aberto fica de fora. A regra é a mesma usada no módulo de
+  // Leads (ver src/lib/clientes.ts) para não haver divergência entre as telas.
   const clientesAtivos = useMemo(
     () =>
       (clientes ?? []).filter((c) => {
         if (c.id === clienteId) return true; // mantém o cliente já vinculado ao contrato
-        if (c.status !== "ATIVO") return false;
-        const convertido = (c as { lead_status?: string | null }).lead_status === "CLIENTE";
-        return c.origem === "CLIENTE" || convertido;
+        return ehClienteAtivoConvertido(c);
       }),
     [clientes, clienteId],
   );
+
 
 
   // Somente orçamentos aprovados do cliente escolhido podem virar contrato.
