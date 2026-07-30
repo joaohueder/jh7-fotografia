@@ -618,9 +618,9 @@ export default function LeadsList() {
                       >
                         <FileText className="h-4 w-4" />
                         Novo orçamento
-                        {(orcamentosPorLead.get(l.id) ?? 0) > 0 && (
+                        {(orcamentosPorLead.get(l.id)?.length ?? 0) > 0 && (
                           <span className="rounded-full bg-muted px-2 text-xs text-muted-foreground">
-                            {orcamentosPorLead.get(l.id)}
+                            {orcamentosPorLead.get(l.id)?.length}
                           </span>
                         )}
                       </Button>
