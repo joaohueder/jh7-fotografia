@@ -110,6 +110,15 @@ function paraLinha(item: ContratoItem): ItemLinha {
   };
 }
 
+/** Linha de desconto ou acréscimo na tela (podem ser várias). */
+interface AjusteLinha {
+  chave: string;
+  tipo: ContratoAjusteTipo;
+  /** Texto mascarado do valor (R$). */
+  valorTexto: string;
+  descricao: string;
+}
+
 /** Cadastro de contrato em tela cheia: criação, edição e visualização. */
 export default function ContratoForm() {
   const { id } = useParams<{ id: string }>();
