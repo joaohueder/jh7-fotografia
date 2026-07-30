@@ -24,6 +24,8 @@ import LeadsList from "@/pages/panels/admin/Leads";
 import ProdutosList from "@/pages/panels/admin/Produtos";
 import ServicosList from "@/pages/panels/admin/Servicos";
 import ServicoForm from "@/pages/panels/admin/ServicoForm";
+import GruposServicosList from "@/pages/panels/admin/GruposServicos";
+import GrupoServicoForm from "@/pages/panels/admin/GrupoServicoForm";
 
 
 
@@ -335,6 +337,36 @@ export default function App() {
                 <RequireAuth>
                   <RequireRole allow={["admin"]}>
                     <ServicoForm />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/agrupamento-servicos"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <GruposServicosList />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/agrupamento-servicos/novo"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <GrupoServicoForm />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/agrupamento-servicos/:id"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <GrupoServicoForm />
                   </RequireRole>
                 </RequireAuth>
               }
