@@ -8,6 +8,7 @@ import {
   Plus,
   Clock,
   Eye,
+  FileText,
   Heart,
   StickyNote,
   Trash2,
@@ -42,6 +43,7 @@ import {
 } from "@/hooks/use-leads";
 import { isValidPhone, maskPhone } from "@/lib/br-masks";
 import { salvarNotaInicial, useNotaInicial } from "@/hooks/use-cliente-notas";
+import { useOrcamentos } from "@/hooks/use-orcamentos";
 import { useLimitesEmpresa } from "@/hooks/use-limites";
 import { ClienteNotas } from "@/components/cliente-notas";
 
@@ -113,6 +115,17 @@ export default function LeadsList() {
   const remover = useDeleteLead();
   const situacaoLead = useSituacaoLead();
   const { data: limites, refetch: recarregarLimites } = useLimitesEmpresa();
+  const { data: orcamentos } = useOrcamentos();
+
+  // Quantos orçamentos já existem para cada lead (um lead pode ter vários).
+  const orcamentosPorLead = useMemo(() => {
+    const mapa = new Map<string, number>();
+    (orcamentos ?? []).forEach((o) => {
+      if (!o.cliente_id) return;
+      mapa.set(o.cliente_id, (mapa.get(o.cliente_id) ?? 0) + 1);
+    });
+    return mapa;
+  }, [orcamentos]);
 
   // Regra de limite: o plano da empresa define quantos leads podem existir.
   const limiteLeads = limites?.limite_leads ?? null;
@@ -316,7 +329,7 @@ export default function LeadsList() {
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Leads</h1>
-              <HelpTip text="Leads são pessoas interessadas que ainda não viraram clientes. Aqui você guarda o nome, o WhatsApp e o interesse para retornar o contato depois. Ao transformar um lead em cliente, as notas e todos os orçamentos já criados para ele são mantidos no cadastro do cliente. Antes de excluir um lead, o sistema mostra tudo que será apagado junto (contatos adicionais, anotações e orçamentos com seus serviços e descontos). Se houver orçamentos que já saíram do rascunho, a exclusão fica bloqueada e o sistema oferece marcar o lead como desistiu, preservando o histórico. Esta tela se atualiza sozinha: se alguém da sua equipe cadastrar ou alterar um lead, a lista muda automaticamente, sem precisar recarregar a página. Use os filtros para separar quem está aguardando retorno, quem desistiu e quem já virou cliente. O seu plano define quantos leads podem ser cadastrados: quando o limite é atingido, o botão “Novo lead” some e aparece um aviso — o consumo completo fica em Configurações › Limites. O limite de clientes também vale aqui: se ele acabar, o botão “Transformar em cliente” fica desabilitado e o motivo aparece ao passar o mouse sobre ele." />
+              <HelpTip text="Leads são pessoas interessadas que ainda não viraram clientes. Aqui você guarda o nome, o WhatsApp e o interesse para retornar o contato depois. Ao transformar um lead em cliente, as notas e todos os orçamentos já criados para ele são mantidos no cadastro do cliente. Antes de excluir um lead, o sistema mostra tudo que será apagado junto (contatos adicionais, anotações e orçamentos com seus serviços e descontos). Se houver orçamentos que já saíram do rascunho, a exclusão fica bloqueada e o sistema oferece marcar o lead como desistiu, preservando o histórico. Esta tela se atualiza sozinha: se alguém da sua equipe cadastrar ou alterar um lead, a lista muda automaticamente, sem precisar recarregar a página. Cada lead pode ter vários orçamentos: use o botão “Novo orçamento” na lista para criar uma proposta já vinculada a ele (o número ao lado mostra quantas propostas ele já tem) e, ao salvar ou cancelar, você volta para esta tela. Use os filtros para separar quem está aguardando retorno, quem desistiu e quem já virou cliente. O seu plano define quantos leads podem ser cadastrados: quando o limite é atingido, o botão “Novo lead” some e aparece um aviso — o consumo completo fica em Configurações › Limites. O limite de clientes também vale aqui: se ele acabar, o botão “Transformar em cliente” fica desabilitado e o motivo aparece ao passar o mouse sobre ele." />
             </div>
             <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
               Contatos captados por formulários ou cadastrados manualmente.
@@ -588,6 +601,26 @@ export default function LeadsList() {
                       >
                         <StickyNote className="h-4 w-4" />
                         Notas do lead
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="tap-target gap-2"
+                        title="Criar uma nova proposta para este lead. Um mesmo lead pode ter vários orçamentos."
+                        aria-label={`Adicionar orçamento para o lead ${l.nome}`}
+                        onClick={() =>
+                          navigate(
+                            `/admin/orcamentos/novo?cliente=${l.id}&voltar=${encodeURIComponent("/admin/leads")}`,
+                          )
+                        }
+                      >
+                        <FileText className="h-4 w-4" />
+                        Novo orçamento
+                        {(orcamentosPorLead.get(l.id) ?? 0) > 0 && (
+                          <span className="rounded-full bg-muted px-2 text-xs text-muted-foreground">
+                            {orcamentosPorLead.get(l.id)}
+                          </span>
+                        )}
                       </Button>
                       {l.situacao === "AGUARDANDO" ? (
                         <Button
