@@ -22,6 +22,8 @@ import ClientesList from "@/pages/panels/admin/Clientes";
 import ClienteForm from "@/pages/panels/admin/ClienteForm";
 import LeadsList from "@/pages/panels/admin/Leads";
 import ProdutosList from "@/pages/panels/admin/Produtos";
+import ServicosList from "@/pages/panels/admin/Servicos";
+
 
 
 import UsuarioDashboard from "@/pages/panels/UsuarioDashboard";
@@ -306,6 +308,17 @@ export default function App() {
                 </RequireAuth>
               }
             />
+            <Route
+              path="/admin/servicos"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <ServicosList />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+
 
 
 
