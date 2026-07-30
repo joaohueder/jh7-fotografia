@@ -483,7 +483,7 @@ export default function OrcamentoForm() {
         },
       });
       notifySuccess(editando ? "Orçamento atualizado." : "Orçamento criado.");
-      navigate("/admin/orcamentos");
+      navigate(voltarPara);
     } catch (err) {
       notifyError(err, { title: "Não foi possível salvar o orçamento" });
     }
