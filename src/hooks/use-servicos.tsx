@@ -15,11 +15,11 @@ export interface Servico {
   empresa_id: string;
   nome: string;
   status: ServicoStatus;
-  /** Custos que não vêm de produtos (mão de obra, deslocamento etc.). */
-  custo_adicional: number;
-  /** Custo total = custo adicional + produtos da composição. */
-  valor_custo: number;
-  valor_venda: number;
+  /** Custos que não vêm de produtos (mão de obra, deslocamento etc.). Opcional. */
+  custo_adicional: number | null;
+  /** Custo total = custo adicional + produtos da composição. Opcional. */
+  valor_custo: number | null;
+  valor_venda: number | null;
   created_at: string;
 }
 
@@ -38,9 +38,9 @@ export interface ServicoProdutoDetalhe extends ServicoProdutoItem {
 export interface ServicoPayload {
   nome: string;
   status: ServicoStatus;
-  custo_adicional: number;
-  valor_custo: number;
-  valor_venda: number;
+  custo_adicional: number | null;
+  valor_custo: number | null;
+  valor_venda: number | null;
   produtos: ServicoProdutoItem[];
 }
 
@@ -86,9 +86,9 @@ export function useServicos() {
 
       return ((data ?? []) as any[]).map((s) => ({
         ...s,
-        custo_adicional: Number(s.custo_adicional ?? 0),
-        valor_custo: Number(s.valor_custo ?? 0),
-        valor_venda: Number(s.valor_venda ?? 0),
+        custo_adicional: s.custo_adicional == null ? null : Number(s.custo_adicional),
+        valor_custo: s.valor_custo == null ? null : Number(s.valor_custo),
+        valor_venda: s.valor_venda == null ? null : Number(s.valor_venda),
       })) as Servico[];
     },
   });
@@ -113,9 +113,9 @@ export function useServico(id?: string) {
       const s = data as any;
       return {
         ...s,
-        custo_adicional: Number(s.custo_adicional ?? 0),
-        valor_custo: Number(s.valor_custo ?? 0),
-        valor_venda: Number(s.valor_venda ?? 0),
+        custo_adicional: s.custo_adicional == null ? null : Number(s.custo_adicional),
+        valor_custo: s.valor_custo == null ? null : Number(s.valor_custo),
+        valor_venda: s.valor_venda == null ? null : Number(s.valor_venda),
       } as Servico;
     },
   });
