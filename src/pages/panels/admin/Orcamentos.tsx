@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { usePageMeta } from "@/hooks/use-page-meta";
+import { cn } from "@/lib/utils";
 import { PanelLayout } from "@/components/panel-layout";
 import { IconAction } from "@/components/icon-action";
 import { HelpTip } from "@/components/page-help";
@@ -64,24 +65,52 @@ function formatarData(valor: string | null) {
   return `${dia}/${mes}/${ano}`;
 }
 
+function corStatus(status: OrcamentoStatus) {
+  switch (status) {
+    case "RASCUNHO":
+      return {
+        cor: "text-muted-foreground",
+        bg: "bg-muted/50",
+        borda: "border-border",
+      };
+    case "ENVIADO":
+      return {
+        cor: "text-blue-600",
+        bg: "bg-blue-500/10",
+        borda: "border-blue-500/30",
+      };
+    case "APROVADO":
+      return {
+        cor: "text-green-600",
+        bg: "bg-green-500/10",
+        borda: "border-green-500/30",
+      };
+    case "RECUSADO":
+      return {
+        cor: "text-destructive",
+        bg: "bg-destructive/10",
+        borda: "border-destructive/30",
+      };
+    case "CANCELADO":
+      return {
+        cor: "text-amber-600",
+        bg: "bg-amber-500/10",
+        borda: "border-amber-500/30",
+      };
+  }
+}
+
 function StatusBadge({ status, vencido }: { status: OrcamentoStatus; vencido: boolean }) {
-  const destaque = status === "APROVADO";
-  const negativo = status === "RECUSADO" || status === "CANCELADO";
+  const estilo = corStatus(status);
   return (
     <span className="inline-flex items-center gap-1">
       <span
-        className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold"
-        style={{
-          borderColor: destaque ? "var(--panel-accent)" : "hsl(var(--border))",
-          color: destaque
-            ? "var(--panel-accent)"
-            : negativo
-              ? "hsl(var(--destructive))"
-              : "hsl(var(--muted-foreground))",
-          background: destaque
-            ? "color-mix(in oklab, var(--panel-accent) 12%, transparent)"
-            : undefined,
-        }}
+        className={cn(
+          "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold",
+          estilo.cor,
+          estilo.bg,
+          estilo.borda,
+        )}
       >
         {rotuloStatus(status)}
       </span>
@@ -129,11 +158,15 @@ export default function Orcamentos() {
 
   const totais = useMemo(() => {
     const todos = orcamentos ?? [];
+    const contagemPorStatus = Object.fromEntries(
+      ORCAMENTO_STATUS.map((s) => [s.valor, todos.filter((o) => o.status === s.valor).length]),
+    ) as Record<OrcamentoStatus, number>;
     return {
       total: todos.length,
       abertos: todos.filter((o) => o.status === "RASCUNHO" || o.status === "ENVIADO").length,
       aprovados: todos.filter((o) => o.status === "APROVADO").length,
       vencidos: todos.filter((o) => o.vencido).length,
+      contagemPorStatus,
     };
   }, [orcamentos]);
 
@@ -231,19 +264,34 @@ export default function Orcamentos() {
             />
           </div>
           <div className="flex flex-wrap gap-2">
-            {([["todos", "Todos"]] as [Filtro, string][])
-              .concat(ORCAMENTO_STATUS.map((s) => [s.valor, s.rotulo] as [Filtro, string]))
-              .map(([valor, rotulo]) => (
-                <Button
-                  key={valor}
-                  type="button"
-                  size="sm"
-                  variant={filtro === valor ? "default" : "outline"}
-                  onClick={() => setFiltro(valor)}
+            {([
+              ["todos", "Todos", totais.total] as [Filtro, string, number],
+            ] as [Filtro, string, number][]).concat(
+              ORCAMENTO_STATUS.map(
+                (s) => [s.valor, s.rotulo, totais.contagemPorStatus[s.valor]] as [Filtro, string, number],
+              ),
+            ).map(([valor, rotulo, contagem]) => (
+              <Button
+                key={valor}
+                type="button"
+                size="sm"
+                variant={filtro === valor ? "default" : "outline"}
+                onClick={() => setFiltro(valor)}
+                className="gap-1.5"
+              >
+                {rotulo}
+                <span
+                  className={cn(
+                    "inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1.5 text-[10px] font-bold",
+                    filtro === valor
+                      ? "bg-primary-foreground text-primary"
+                      : "bg-muted text-muted-foreground",
+                  )}
                 >
-                  {rotulo}
-                </Button>
-              ))}
+                  {contagem}
+                </span>
+              </Button>
+            ))}
           </div>
         </div>
 
