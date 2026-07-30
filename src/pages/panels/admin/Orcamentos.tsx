@@ -17,7 +17,13 @@ import { PanelLayout } from "@/components/panel-layout";
 import { IconAction } from "@/components/icon-action";
 import { HelpTip } from "@/components/page-help";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
-import { notifyError, notifySuccess, rawErrorMessage } from "@/lib/system-message";
+import {
+  notifyError,
+  notifySuccess,
+  notifyValidation,
+  rawErrorMessage,
+} from "@/lib/system-message";
+
 import {
   ORCAMENTO_STATUS,
   rotuloStatus,
@@ -133,6 +139,13 @@ export default function Orcamentos() {
 
   async function alterarSituacao(o: Orcamento, status: OrcamentoStatus) {
     if (o.status === status) return;
+    if (o.cliente_origem === "LEAD") {
+      notifyValidation(
+        "Este orçamento é de um lead. Converta o lead em cliente para poder mudar a situação da proposta.",
+      );
+      return;
+    }
+
     try {
       await mudarStatus.mutateAsync({ id: o.id, status });
       notifySuccess(`Situação alterada para “${rotuloStatus(status)}”.`);
@@ -140,6 +153,7 @@ export default function Orcamentos() {
       notifyError(err, { title: "Não foi possível alterar a situação" });
     }
   }
+
 
   async function confirmarExclusao() {
     if (!alvoExclusao) return;
@@ -160,7 +174,7 @@ export default function Orcamentos() {
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">Orçamentos</h1>
-              <HelpTip text="Um orçamento é a proposta que você envia para um cliente ou lead. Clique em “Novo orçamento” para informar a descrição, os serviços, quantos descontos e acréscimos precisar, a observação geral, a data e até quando a proposta vale. Aqui na lista aparece o valor final (já com desconto ou acréscimo). Use os filtros para ver só os que estão aguardando resposta, os aprovados ou os recusados. Quando a data de validade passa, o orçamento aparece marcado como “Validade vencida”. Esta tela se atualiza sozinha quando alguém da sua equipe altera algo." />
+              <HelpTip text="Um orçamento é a proposta que você envia para um cliente ou lead. Clique em “Novo orçamento” para informar a descrição, os serviços, quantos descontos e acréscimos precisar, a observação geral, a data e até quando a proposta vale. Aqui na lista aparece o valor final (já com desconto ou acréscimo). Importante: propostas de leads ficam com a situação bloqueada — só é possível mudar a situação depois que o lead virar cliente. Use os filtros para ver só os que estão aguardando resposta, os aprovados ou os recusados. Quando a data de validade passa, o orçamento aparece marcado como “Validade vencida”. Esta tela se atualiza sozinha quando alguém da sua equipe altera algo." />
             </div>
             <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
               Acompanhe as propostas enviadas para clientes e leads.
@@ -318,6 +332,12 @@ export default function Orcamentos() {
                   </div>
 
                   <div className="flex items-center gap-1">
+                    {o.cliente_origem === "LEAD" ? (
+                      <div className="flex items-center gap-1.5 rounded-md border border-dashed border-border px-2.5 py-1.5 text-xs text-muted-foreground">
+                        Situação bloqueada
+                        <HelpTip text="Este orçamento pertence a um lead. A situação só pode ser alterada depois que o lead virar cliente." />
+                      </div>
+                    ) : (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -332,6 +352,7 @@ export default function Orcamentos() {
                           Situação
                         </Button>
                       </DropdownMenuTrigger>
+
                       <DropdownMenuContent align="end" className="w-64">
                         <DropdownMenuLabel>Mudar situação do orçamento</DropdownMenuLabel>
                         <DropdownMenuSeparator />
@@ -351,6 +372,8 @@ export default function Orcamentos() {
                         ))}
                       </DropdownMenuContent>
                     </DropdownMenu>
+                    )}
+
                     <IconAction
                       label="Editar orçamento"
                       ariaLabel={`Editar ${o.descricao}`}
