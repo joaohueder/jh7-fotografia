@@ -144,7 +144,7 @@ export default function GruposServicos() {
               <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight">
                 Agrupamento de serviços
               </h1>
-              <HelpTip text="Um agrupamento junta vários serviços em um só conjunto (por exemplo: “Pacote Casamento” com cobertura, edição e álbum). Clique em “Novo agrupamento” para criar, escolher os serviços e arrastar pela alça (⠿) para definir a ordem em que eles aparecem. Use os botões de cada linha para editar, ativar/inativar ou excluir. Esta tela se atualiza sozinha quando alguém da sua equipe altera algo." />
+              <HelpTip text="Um agrupamento junta vários serviços em um só conjunto (por exemplo: “Pacote Casamento” com cobertura, edição e álbum). Clique em “Novo agrupamento” para criar, escolher os serviços e arrastar pela alça (⠿) para definir a ordem em que eles aparecem. Use “Ver serviços e produtos incluídos” para abrir o detalhamento: aparece cada serviço na ordem salva e os produtos que compõem esse serviço, com a quantidade usada. Use os botões de cada linha para editar, ativar/inativar ou excluir. Esta tela se atualiza sozinha quando alguém da sua equipe altera algo." />
             </div>
             <p className="text-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground">
               Junte vários serviços em um agrupamento e organize a ordem deles.
