@@ -42,6 +42,7 @@ import {
 } from "@/hooks/use-leads";
 import { isValidPhone, maskPhone } from "@/lib/br-masks";
 import { salvarNotaInicial, useNotaInicial } from "@/hooks/use-cliente-notas";
+import { useOrcamentos } from "@/hooks/use-orcamentos";
 import { useLimitesEmpresa } from "@/hooks/use-limites";
 import { ClienteNotas } from "@/components/cliente-notas";
 
