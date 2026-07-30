@@ -15,7 +15,12 @@ import { PanelLayout } from "@/components/panel-layout";
 import { IconAction } from "@/components/icon-action";
 import { HelpTip } from "@/components/page-help";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
-import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
+import {
+  notifyError,
+  notifySuccess,
+  notifyValidation,
+  rawErrorMessage,
+} from "@/lib/system-message";
 import { formatMoney, maskMoney, parseMoney } from "@/lib/br-masks";
 import {
   useDeleteProduto,
