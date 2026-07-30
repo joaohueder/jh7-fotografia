@@ -21,6 +21,7 @@ import AdminConfiguracoes from "@/pages/panels/admin/Configuracoes";
 import ClientesList from "@/pages/panels/admin/Clientes";
 import ClienteForm from "@/pages/panels/admin/ClienteForm";
 import LeadsList from "@/pages/panels/admin/Leads";
+import ProdutosList from "@/pages/panels/admin/Produtos";
 
 
 import UsuarioDashboard from "@/pages/panels/UsuarioDashboard";
@@ -291,6 +292,16 @@ export default function App() {
                 <RequireAuth>
                   <RequireRole allow={["admin"]}>
                     <LeadsList />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/produtos"
+              element={
+                <RequireAuth>
+                  <RequireRole allow={["admin"]}>
+                    <ProdutosList />
                   </RequireRole>
                 </RequireAuth>
               }
