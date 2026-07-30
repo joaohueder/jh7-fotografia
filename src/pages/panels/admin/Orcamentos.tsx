@@ -134,13 +134,12 @@ export default function Orcamentos() {
   async function alterarSituacao(o: Orcamento, status: OrcamentoStatus) {
     if (o.status === status) return;
     if (o.cliente_origem === "LEAD") {
-      notifyError(null, {
-        title: "Situação bloqueada",
-        description:
-          "Este orçamento é de um lead. Converta o lead em cliente para poder mudar a situação da proposta.",
-      });
+      notifyValidation(
+        "Este orçamento é de um lead. Converta o lead em cliente para poder mudar a situação da proposta.",
+      );
       return;
     }
+
     try {
       await mudarStatus.mutateAsync({ id: o.id, status });
       notifySuccess(`Situação alterada para “${rotuloStatus(status)}”.`);
