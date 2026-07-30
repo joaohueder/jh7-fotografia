@@ -68,6 +68,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ConfirmarExclusaoCliente } from "@/components/confirmar-exclusao-cliente";
+
 
 /** Etiqueta colorida com a situação do lead no funil. */
 function SituacaoBadge({ situacao }: { situacao: LeadSituacao }) {
