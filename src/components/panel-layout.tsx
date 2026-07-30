@@ -316,7 +316,7 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
                   <AlertDialogTitle>Sair do sistema?</AlertDialogTitle>
                   <AlertDialogDescription>
                     Você será desconectado e precisará fazer login novamente para acessar o JH7 Gestão
-                    Fotográfica.
+                    de Estúdios Fotográficos.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
