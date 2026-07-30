@@ -307,28 +307,29 @@ export default function GrupoServicoForm() {
               <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
                 <div className="space-y-1.5">
                   <Label className="text-sm">Serviço</Label>
-                  <Select value={servicoEscolhido} onValueChange={setServicoEscolhido}>
-                    <SelectTrigger aria-label="Escolher serviço">
-                      <SelectValue placeholder="Escolha um serviço" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {disponiveis.length === 0 ? (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">
-                          Nenhum serviço ativo disponível para incluir.
-                        </div>
-                      ) : (
-                        disponiveis.map((s) => (
-                          <SelectItem key={s.id} value={s.id}>
-                            {s.nome}{" "}
-                            {s.valor_venda != null
-                              ? `— R$ ${formatMoney(s.valor_venda)}`
-                              : "— venda não informada"}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
+                  <SearchableSelect
+                    value={servicoEscolhido}
+                    onChange={setServicoEscolhido}
+                    ariaLabel="Escolher serviço"
+                    placeholder={
+                      disponiveis.length === 0
+                        ? "Nenhum serviço ativo disponível para incluir"
+                        : "Escolha um serviço"
+                    }
+                    placeholderBusca="Pesquisar serviço pelo nome…"
+                    vazio="Nenhum serviço encontrado com esse nome."
+                    disabled={disponiveis.length === 0}
+                    opcoes={disponiveis.map((s) => ({
+                      value: s.id,
+                      label: s.nome,
+                      descricao:
+                        s.valor_venda != null
+                          ? `— R$ ${formatMoney(s.valor_venda)}`
+                          : "— venda não informada",
+                    }))}
+                  />
                 </div>
+
                 <Button type="button" variant="outline" className="gap-2" onClick={adicionarServico}>
                   <Plus className="h-4 w-4" />
                   Incluir
