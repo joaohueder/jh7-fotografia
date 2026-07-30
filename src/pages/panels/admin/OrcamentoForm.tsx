@@ -163,7 +163,7 @@ export default function OrcamentoForm() {
   const [descricao, setDescricao] = useState("");
   const [status, setStatus] = useState<OrcamentoStatus>("RASCUNHO");
   const [dataOrcamento, setDataOrcamento] = useState(hojeISO());
-  const [validade, setValidade] = useState(emDias(15));
+  const [diasValidade, setDiasValidade] = useState<number | "">(15);
   const [itens, setItens] = useState<ItemLinha[]>([]);
   const [escolhido, setEscolhido] = useState("");
   // Produto selecionado no combo de cada item (chave do item -> id do produto).
