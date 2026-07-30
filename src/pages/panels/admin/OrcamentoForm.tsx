@@ -173,7 +173,7 @@ export default function OrcamentoForm() {
   const { data: composicao } = useComposicaoDosServicos();
   const salvar = useSalvarOrcamento();
 
-  const [clienteId, setClienteId] = useState("");
+  const [clienteId, setClienteId] = useState(clienteFixo ?? "");
   const [descricao, setDescricao] = useState("");
   const [status, setStatus] = useState<OrcamentoStatus>("RASCUNHO");
   const [dataOrcamento, setDataOrcamento] = useState(hojeISO());
