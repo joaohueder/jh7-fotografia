@@ -17,7 +17,13 @@ import { PanelLayout } from "@/components/panel-layout";
 import { IconAction } from "@/components/icon-action";
 import { HelpTip } from "@/components/page-help";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
-import { notifyError, notifySuccess, rawErrorMessage } from "@/lib/system-message";
+import {
+  notifyError,
+  notifySuccess,
+  notifyValidation,
+  rawErrorMessage,
+} from "@/lib/system-message";
+
 import {
   ORCAMENTO_STATUS,
   rotuloStatus,
