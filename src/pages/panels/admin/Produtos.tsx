@@ -143,11 +143,12 @@ export default function Produtos() {
     setEditando(p);
     setNome(p.nome);
     setStatusForm(p.status);
-    setCusto(formatMoney(p.valor_custo));
-    setVenda(formatMoney(p.valor_venda));
+    setCusto(p.valor_custo != null ? formatMoney(p.valor_custo) : "");
+    setVenda(p.valor_venda != null ? formatMoney(p.valor_venda) : "");
     setErros({});
     setAberto(true);
   }
+
 
   function validar() {
     const novos: typeof erros = {};
@@ -156,14 +157,13 @@ export default function Produtos() {
 
     const c = parseMoney(custo);
     const v = parseMoney(venda);
-    if (c === null) novos.custo = "Informe o valor de custo (use 0,00 se não houver).";
-    else if (c > LIMITE_VALOR) novos.custo = "O valor de custo deve ser no máximo R$ 999.999,99.";
-    if (v === null) novos.venda = "Informe o valor de venda.";
-    else if (v > LIMITE_VALOR) novos.venda = "O valor de venda deve ser no máximo R$ 999.999,99.";
+    if (c !== null && c > LIMITE_VALOR) novos.custo = "O valor de custo deve ser no máximo R$ 999.999,99.";
+    if (v !== null && v > LIMITE_VALOR) novos.venda = "O valor de venda deve ser no máximo R$ 999.999,99.";
 
     setErros(novos);
     return Object.keys(novos).length === 0;
   }
+
 
   async function submeter() {
     if (!validar()) {
@@ -176,10 +176,11 @@ export default function Produtos() {
         dados: {
           nome: nome.trim(),
           status,
-          valor_custo: parseMoney(custo) ?? 0,
-          valor_venda: parseMoney(venda) ?? 0,
+          valor_custo: parseMoney(custo),
+          valor_venda: parseMoney(venda),
         },
       });
+
       notifySuccess(editando ? "Produto atualizado." : "Produto cadastrado com sucesso.");
       setAberto(false);
     } catch (err) {
@@ -214,7 +215,9 @@ export default function Produtos() {
     }
   }
 
-  const margem = (p: Produto) => p.valor_venda - p.valor_custo;
+  const margem = (p: Produto) =>
+    p.valor_custo != null && p.valor_venda != null ? p.valor_venda - p.valor_custo : null;
+
 
   return (
     <PanelLayout accent="admin" menu={ADMIN_MENU}>
@@ -328,47 +331,52 @@ export default function Produtos() {
             </div>
           ) : (
             <ul className="divide-y divide-border">
-              {lista.map((p) => (
-                <li key={p.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
-                  <div className="min-w-[12rem] flex-1 space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-semibold text-foreground">{p.nome}</span>
-                      <StatusBadge status={p.status} />
+              {lista.map((p) => {
+                const m = margem(p);
+                return (
+                  <li key={p.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+                    <div className="min-w-[12rem] flex-1 space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-semibold text-foreground">{p.nome}</span>
+                        <StatusBadge status={p.status} />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Custo: {p.valor_custo != null ? `R$ ${formatMoney(p.valor_custo)}` : "não informado"} ·{" "}
+                        Venda: {p.valor_venda != null ? `R$ ${formatMoney(p.valor_venda)}` : "não informada"} ·{" "}
+                        <span className={m != null && m < 0 ? "font-semibold text-destructive" : "font-semibold"}>
+                          Margem: {m != null ? `R$ ${formatMoney(m)}` : "—"}
+                        </span>
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      Custo: R$ {formatMoney(p.valor_custo)} · Venda: R$ {formatMoney(p.valor_venda)} ·{" "}
-                      <span className={margem(p) < 0 ? "font-semibold text-destructive" : "font-semibold"}>
-                        Margem: R$ {formatMoney(margem(p))}
-                      </span>
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <IconAction
-                      label="Editar produto"
-                      ariaLabel={`Editar ${p.nome}`}
-                      onClick={() => abrirEdicao(p)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </IconAction>
-                    <IconAction
-                      label={p.status === "ATIVO" ? "Inativar produto" : "Ativar produto"}
-                      ariaLabel={`${p.status === "ATIVO" ? "Inativar" : "Ativar"} ${p.nome}`}
-                      onClick={() => setAlvoStatus(p)}
-                    >
-                      <Power className="h-4 w-4" />
-                    </IconAction>
-                    <IconAction
-                      label="Excluir produto"
-                      ariaLabel={`Excluir ${p.nome}`}
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => setAlvoExclusao(p)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </IconAction>
-                  </div>
-                </li>
-              ))}
+                    <div className="flex items-center gap-1">
+                      <IconAction
+                        label="Editar produto"
+                        ariaLabel={`Editar ${p.nome}`}
+                        onClick={() => abrirEdicao(p)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </IconAction>
+                      <IconAction
+                        label={p.status === "ATIVO" ? "Inativar produto" : "Ativar produto"}
+                        ariaLabel={`${p.status === "ATIVO" ? "Inativar" : "Ativar"} ${p.nome}`}
+                        onClick={() => setAlvoStatus(p)}
+                      >
+                        <Power className="h-4 w-4" />
+                      </IconAction>
+                      <IconAction
+                        label="Excluir produto"
+                        ariaLabel={`Excluir ${p.nome}`}
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => setAlvoExclusao(p)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </IconAction>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
+
           )}
         </div>
       </div>
@@ -379,10 +387,11 @@ export default function Produtos() {
           <DialogHeader>
             <DialogTitle>{editando ? "Editar produto" : "Novo produto"}</DialogTitle>
             <DialogDescription>
-              Os campos marcados com <span className="text-destructive">*</span> são obrigatórios.
-              Informe quanto o item custa para o estúdio e por quanto ele é vendido.
+              Preencha o nome e o status. Os valores de custo e venda são opcionais e podem ser
+              informados depois, quando você souber os preços exatos.
             </DialogDescription>
           </DialogHeader>
+
 
           <div className="space-y-4">
             <div className="space-y-1.5">
@@ -425,8 +434,8 @@ export default function Produtos() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="produto-custo" className="flex items-center gap-1.5">
-                  Valor de custo <span className="text-destructive">*</span>
-                  <HelpTip text="Quanto este item custa para o seu estúdio (material, laboratório, fornecedor). Se não houver custo, deixe 0,00." />
+                  Valor de custo
+                  <HelpTip text="Quanto este item custa para o seu estúdio (material, laboratório, fornecedor). Deixe em branco se ainda não souber." />
                 </Label>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">R$</span>
@@ -435,16 +444,17 @@ export default function Produtos() {
                     inputMode="numeric"
                     value={custo}
                     onChange={(e) => setCusto(maskMoney(e.target.value))}
-                    placeholder="0,00"
+                    placeholder="Deixe em branco se não souber"
                   />
                 </div>
                 {erros.custo ? <p className="text-xs text-destructive">{erros.custo}</p> : null}
               </div>
 
+
               <div className="space-y-1.5">
                 <Label htmlFor="produto-venda" className="flex items-center gap-1.5">
-                  Valor de venda <span className="text-destructive">*</span>
-                  <HelpTip text="Preço cobrado do cliente por este produto ou serviço." />
+                  Valor de venda
+                  <HelpTip text="Preço cobrado do cliente por este produto ou serviço. Deixe em branco se ainda não foi definido." />
                 </Label>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">R$</span>
@@ -453,17 +463,21 @@ export default function Produtos() {
                     inputMode="numeric"
                     value={venda}
                     onChange={(e) => setVenda(maskMoney(e.target.value))}
-                    placeholder="0,00"
+                    placeholder="Deixe em branco se não souber"
                   />
                 </div>
                 {erros.venda ? <p className="text-xs text-destructive">{erros.venda}</p> : null}
               </div>
+
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Margem estimada: R${" "}
-              {formatMoney(Math.max((parseMoney(venda) ?? 0) - (parseMoney(custo) ?? 0), -LIMITE_VALOR))}
+              Margem estimada:{" "}
+              {custo.trim() || venda.trim()
+                ? `R$ ${formatMoney(Math.max((parseMoney(venda) ?? 0) - (parseMoney(custo) ?? 0), -LIMITE_VALOR))}`
+                : "—"}
             </p>
+
           </div>
 
           <DialogFooter>

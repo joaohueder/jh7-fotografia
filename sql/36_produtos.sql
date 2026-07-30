@@ -5,7 +5,7 @@
 -- Cria public.produtos com isolamento total por empresa:
 --   * cada produto pertence a uma empresa (empresa_id obrigatório);
 --   * o usuário só enxerga/edita produtos da própria empresa;
---   * valores de custo e venda validados no banco (>= 0).
+--   * valores de custo e venda são opcionais (null quando não informados).
 -- =====================================================================
 
 create table if not exists public.produtos (
@@ -13,8 +13,8 @@ create table if not exists public.produtos (
   empresa_id uuid not null references public.empresas (id) on delete cascade,
   nome text not null,
   status text not null default 'ATIVO',
-  valor_custo numeric(12, 2) not null default 0,
-  valor_venda numeric(12, 2) not null default 0,
+  valor_custo numeric(12, 2),
+  valor_venda numeric(12, 2),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -29,7 +29,10 @@ end $$;
 do $$
 begin
   alter table public.produtos
-    add constraint produtos_valores_check check (valor_custo >= 0 and valor_venda >= 0);
+    add constraint produtos_valores_check check (
+      (valor_custo is null or valor_custo >= 0)
+      and (valor_venda is null or valor_venda >= 0)
+    );
 exception when duplicate_object then null;
 end $$;
 
