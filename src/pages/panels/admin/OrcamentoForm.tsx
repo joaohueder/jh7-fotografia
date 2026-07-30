@@ -837,88 +837,137 @@ export default function OrcamentoForm() {
               ) : null}
             </section>
 
-            {/* Desconto ou acréscimo no valor final */}
+            {/* Descontos e acréscimos (vários por orçamento) */}
             <section className="space-y-4 rounded-xl border border-border bg-card p-4 sm:p-6">
               <div className="space-y-1">
                 <div className="flex items-center gap-1.5">
-                  <h2 className="text-lg font-semibold">Desconto ou acréscimo</h2>
-                  <HelpTip text="Use quando o valor final combinado for diferente da soma dos serviços. O desconto diminui o total e o acréscimo aumenta o total da proposta." />
+                  <h2 className="text-lg font-semibold">Descontos e acréscimos</h2>
+                  <HelpTip text="São itens adicionais da proposta. Você pode lançar quantos quiser: cada desconto diminui e cada acréscimo aumenta o valor final." />
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Opcional. Escolha se vai dar um desconto ou cobrar um valor a mais e explique o
+                  Opcional. Lance quantos descontos e acréscimos precisar, cada um com valor e
                   motivo — assim o cliente entende como chegou no valor final.
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-2">
-                {(
-                  [
-                    ["NENHUM", "Sem desconto/acréscimo"],
-                    ["DESCONTO", "Desconto (diminui)"],
-                    ["ACRESCIMO", "Acréscimo (aumenta)"],
-                  ] as [OrcamentoAjusteTipo, string][]
-                ).map(([valor, rotulo]) => (
-                  <Button
-                    key={valor}
-                    type="button"
-                    size="sm"
-                    variant={ajusteTipo === valor ? "default" : "outline"}
-                    onClick={() => {
-                      setAjusteTipo(valor);
-                      if (valor === "NENHUM") {
-                        setAjusteValorTexto("");
-                        setAjusteDescricao("");
-                      }
-                    }}
-                  >
-                    {rotulo}
-                  </Button>
-                ))}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() => adicionarAjuste("DESCONTO")}
+                >
+                  <Plus className="h-4 w-4" />
+                  Adicionar desconto
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() => adicionarAjuste("ACRESCIMO")}
+                >
+                  <Plus className="h-4 w-4" />
+                  Adicionar acréscimo
+                </Button>
               </div>
 
-              {ajusteTipo !== "NENHUM" ? (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="ajuste-valor" className="flex items-center gap-1.5">
-                      {ajusteTipo === "DESCONTO" ? "Valor do desconto (R$) *" : "Valor do acréscimo (R$) *"}
-                      <HelpTip
-                        text={
-                          ajusteTipo === "DESCONTO"
-                            ? "Quanto será abatido do total dos serviços."
-                            : "Quanto será somado ao total dos serviços (por exemplo, deslocamento ou hora extra)."
-                        }
-                      />
-                    </Label>
-                    <Input
-                      id="ajuste-valor"
-                      inputMode="numeric"
-                      placeholder="0,00"
-                      value={ajusteValorTexto}
-                      onChange={(e) => setAjusteValorTexto(maskMoney(e.target.value))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="ajuste-descricao" className="flex items-center gap-1.5">
-                      Motivo *
-                      <HelpTip text="Explique em poucas palavras, por exemplo: “Desconto para pagamento à vista” ou “Acréscimo por deslocamento”." />
-                    </Label>
-                    <Input
-                      id="ajuste-descricao"
-                      maxLength={200}
-                      value={ajusteDescricao}
-                      onChange={(e) => setAjusteDescricao(e.target.value)}
-                      placeholder={
-                        ajusteTipo === "DESCONTO"
-                          ? "Ex.: Desconto para pagamento à vista"
-                          : "Ex.: Acréscimo por deslocamento"
-                      }
-                    />
-                  </div>
-                </div>
-              ) : (
+              {ajustes.length === 0 ? (
                 <InlineNote>
-                  Nenhum desconto ou acréscimo aplicado: o valor final é a soma dos serviços.
+                  Nenhum desconto ou acréscimo lançado: o valor final é a soma dos serviços.
                 </InlineNote>
+              ) : (
+                <div className="space-y-3">
+                  {ajustes.map((a) => (
+                    <div
+                      key={a.chave}
+                      className="space-y-3 rounded-lg border border-border bg-muted/30 p-3 sm:p-4"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant={a.tipo === "DESCONTO" ? "default" : "outline"}
+                            onClick={() => atualizarAjuste(a.chave, { tipo: "DESCONTO" })}
+                          >
+                            Desconto (diminui)
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant={a.tipo === "ACRESCIMO" ? "default" : "outline"}
+                            onClick={() => atualizarAjuste(a.chave, { tipo: "ACRESCIMO" })}
+                          >
+                            Acréscimo (aumenta)
+                          </Button>
+                        </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="gap-2 text-destructive"
+                          onClick={() => removerAjuste(a.chave)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Remover
+                        </Button>
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor={`ajuste-valor-${a.chave}`}
+                            className="flex items-center gap-1.5"
+                          >
+                            {a.tipo === "DESCONTO"
+                              ? "Valor do desconto (R$) *"
+                              : "Valor do acréscimo (R$) *"}
+                            <HelpTip
+                              text={
+                                a.tipo === "DESCONTO"
+                                  ? "Quanto será abatido do total dos serviços."
+                                  : "Quanto será somado ao total dos serviços (por exemplo, deslocamento ou hora extra)."
+                              }
+                            />
+                          </Label>
+                          <Input
+                            id={`ajuste-valor-${a.chave}`}
+                            inputMode="numeric"
+                            placeholder="0,00"
+                            value={a.valorTexto}
+                            onChange={(e) =>
+                              atualizarAjuste(a.chave, { valorTexto: maskMoney(e.target.value) })
+                            }
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor={`ajuste-descricao-${a.chave}`}
+                            className="flex items-center gap-1.5"
+                          >
+                            Motivo *
+                            <HelpTip text="Explique em poucas palavras, por exemplo: “Desconto para pagamento à vista” ou “Acréscimo por deslocamento”." />
+                          </Label>
+                          <Input
+                            id={`ajuste-descricao-${a.chave}`}
+                            maxLength={200}
+                            value={a.descricao}
+                            onChange={(e) =>
+                              atualizarAjuste(a.chave, { descricao: e.target.value })
+                            }
+                            placeholder={
+                              a.tipo === "DESCONTO"
+                                ? "Ex.: Desconto para pagamento à vista"
+                                : "Ex.: Acréscimo por deslocamento"
+                            }
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
 
               <div className="space-y-1 rounded-lg border border-border bg-muted/40 px-4 py-3">
@@ -926,19 +975,27 @@ export default function OrcamentoForm() {
                   <span>Total dos serviços</span>
                   <span>{total == null ? "—" : `R$ ${formatMoney(total)}`}</span>
                 </div>
-                {ajusteTipo !== "NENHUM" && ajusteValor != null ? (
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>{ajusteTipo === "DESCONTO" ? "Desconto" : "Acréscimo"}</span>
-                    <span>
-                      {ajusteTipo === "DESCONTO" ? "− " : "+ "}
-                      R$ {formatMoney(ajusteValor)}
-                    </span>
-                  </div>
-                ) : null}
+                {ajustesAplicados
+                  .filter((a) => a.valor > 0)
+                  .map((a, indice) => (
+                    <div
+                      key={`resumo-${indice}`}
+                      className="flex items-center justify-between gap-3 text-sm text-muted-foreground"
+                    >
+                      <span className="truncate">
+                        {a.tipo === "DESCONTO" ? "Desconto" : "Acréscimo"}
+                        {a.descricao.trim() ? ` · ${a.descricao.trim()}` : ""}
+                      </span>
+                      <span className="whitespace-nowrap">
+                        {a.tipo === "DESCONTO" ? "− " : "+ "}
+                        R$ {formatMoney(a.valor)}
+                      </span>
+                    </div>
+                  ))}
                 <div className="flex items-center justify-between border-t border-border pt-2">
                   <span className="flex items-center gap-1.5 text-sm font-medium">
                     Valor final da proposta
-                    <HelpTip text="É o total dos serviços já com o desconto abatido ou o acréscimo somado. Esse é o valor que o cliente vai pagar." />
+                    <HelpTip text="É o total dos serviços já com todos os descontos abatidos e os acréscimos somados. Esse é o valor que o cliente vai pagar." />
                   </span>
                   <strong className="text-lg">
                     {totalFinal == null ? "Sem valores informados" : `R$ ${formatMoney(totalFinal)}`}
@@ -946,6 +1003,7 @@ export default function OrcamentoForm() {
                 </div>
               </div>
             </section>
+
 
             {/* Observação geral */}
             <section className="space-y-3 rounded-xl border border-border bg-card p-4 sm:p-6">
