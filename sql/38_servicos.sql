@@ -13,8 +13,8 @@ create table if not exists public.servicos (
   empresa_id uuid not null references public.empresas (id) on delete cascade,
   nome text not null,
   status text not null default 'ATIVO',
-  valor_custo numeric(12, 2) not null default 0,
-  valor_venda numeric(12, 2) not null default 0,
+  valor_custo numeric(12, 2),
+  valor_venda numeric(12, 2),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -29,7 +29,10 @@ end $$;
 do $$
 begin
   alter table public.servicos
-    add constraint servicos_valores_check check (valor_custo >= 0 and valor_venda >= 0);
+    add constraint servicos_valores_check check (
+      (valor_custo is null or valor_custo >= 0)
+      and (valor_venda is null or valor_venda >= 0)
+    );
 exception when duplicate_object then null;
 end $$;
 
