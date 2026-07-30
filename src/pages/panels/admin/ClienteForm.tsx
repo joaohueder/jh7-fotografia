@@ -796,7 +796,20 @@ export default function ClienteForm() {
         </Section>
       ),
     });
+
+    secoes.push({
+      value: "contratos",
+      label: "Contratos",
+      node: (
+        <Section title="Contratos do cliente" icon={FileSignature}>
+          <div className="col-span-full">
+            <ClienteContratos clienteId={registroId} />
+          </div>
+        </Section>
+      ),
+    });
   }
+
 
   if (!editando) {
     secoes.push({
