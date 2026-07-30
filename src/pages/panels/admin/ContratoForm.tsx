@@ -433,6 +433,16 @@ export default function ContratoForm() {
       notifyValidation("Todo serviço do contrato precisa de um nome. Revise a lista.");
       return;
     }
+    if (ajustesAplicados.some((a) => a.valor <= 0)) {
+      notifyValidation(
+        "Informe um valor maior que zero em cada desconto ou acréscimo, ou remova a linha.",
+      );
+      return;
+    }
+    if (ajustesAplicados.some((a) => a.descricao.trim().length < 2)) {
+      notifyValidation("Escreva o motivo de cada desconto ou acréscimo.");
+      return;
+    }
 
     try {
       await salvar.mutateAsync({
@@ -453,8 +463,14 @@ export default function ContratoForm() {
             quantidade: 1,
             valor_unitario: parseMoney(i.valorTexto),
             valor_custo: i.valor_custo,
-            produtos: i.produtos,
+            produtos: i.produtos
+              .filter((p) => p.nome.trim().length > 0)
+              .map((p) => ({
+                nome: p.nome.trim(),
+                quantidade: p.quantidade > 0 ? p.quantidade : 1,
+              })),
           })),
+          ajustes: ajustesAplicados.map((a) => ({ ...a, descricao: a.descricao.trim() })),
         },
       });
       notifySuccess(edicao ? "Contrato atualizado." : "Contrato criado.");
