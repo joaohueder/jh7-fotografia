@@ -196,7 +196,14 @@ export default function OrcamentoForm() {
         quantidadeTexto: String(i.quantidade ?? 1),
       })),
     );
+    setAjusteTipo(orcamento.ajuste_tipo ?? "NENHUM");
+    setAjusteValorTexto(
+      orcamento.ajuste_valor == null ? "" : formatMoney(Number(orcamento.ajuste_valor)),
+    );
+    setAjusteDescricao(orcamento.ajuste_descricao ?? "");
+    setObservacoes(orcamento.observacoes ?? "");
     setCarregado(true);
+
   }, [editando, carregado, orcamento]);
 
   const dataValidadeCalculada = calcularValidade(dataOrcamento, diasValidade);
