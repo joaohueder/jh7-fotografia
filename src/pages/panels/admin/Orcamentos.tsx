@@ -172,7 +172,8 @@ export default function Orcamentos() {
 
   async function alterarSituacao(o: Orcamento, status: OrcamentoStatus) {
     if (o.status === status) return;
-    if (o.cliente_origem === "LEAD") {
+    // Regra única (src/lib/clientes.ts): só bloqueia enquanto for lead em aberto.
+    if (o.cliente_lead_aberto) {
       notifyValidation(
         "Este orçamento é de um lead. Converta o lead em cliente para poder mudar a situação da proposta.",
       );
@@ -344,7 +345,7 @@ export default function Orcamentos() {
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {o.cliente_nome}
-                      {o.cliente_origem === "LEAD" ? " (lead)" : ""}
+                      {o.cliente_lead_aberto ? " (lead)" : ""}
                       {" · "}
                       Data: {formatarData(o.data_orcamento)}
                       {" · "}
@@ -380,7 +381,7 @@ export default function Orcamentos() {
                   </div>
 
                   <div className="flex items-center gap-1">
-                    {o.cliente_origem === "LEAD" ? (
+                    {o.cliente_lead_aberto ? (
                       <div className="flex items-center gap-1.5 rounded-md border border-dashed border-border px-2.5 py-1.5 text-xs text-muted-foreground">
                         Situação bloqueada
                         <HelpTip text="Este orçamento pertence a um lead. A situação só pode ser alterada depois que o lead virar cliente." />

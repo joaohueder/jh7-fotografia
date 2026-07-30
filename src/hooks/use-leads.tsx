@@ -5,6 +5,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/selfhosted/client";
 import { useEmpresaAtual } from "@/hooks/use-clientes";
 import { type NotaModulo } from "@/hooks/use-cliente-notas";
+import { ehClienteConvertido } from "@/lib/clientes";
+
 
 const db = supabase as unknown as SupabaseClient;
 
@@ -112,12 +114,14 @@ export function useLeads() {
               !(interesse && n?.created_at === interesse.created_at && n?.descricao === interesse.descricao),
           ) ?? null;
         const { cliente_notas: _n, interesse: _i, documento, lead_status, ...rest } = l;
-        // Quem já preencheu o cadastro completo (documento) virou cliente.
-        const situacao: LeadSituacao = documento
+        // Regra única de conversão (src/lib/clientes.ts): quem já preencheu o
+        // cadastro completo (documento) virou cliente.
+        const situacao: LeadSituacao = ehClienteConvertido({ origem: l.origem, documento })
           ? "CLIENTE"
           : lead_status === "DESISTIU"
             ? "DESISTIU"
             : "AGUARDANDO";
+
         return {
           ...rest,
           situacao,

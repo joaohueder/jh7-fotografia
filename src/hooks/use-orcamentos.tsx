@@ -4,6 +4,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/selfhosted/client";
 import { useEmpresaAtual } from "@/hooks/use-clientes";
+import { ehLeadEmAberto } from "@/lib/clientes";
+
 
 // Tabelas do Supabase autohospedado (fora dos tipos gerados).
 const db = supabase as unknown as SupabaseClient;
@@ -85,6 +87,9 @@ export interface Orcamento {
   cliente_nome: string;
   /** CLIENTE ou LEAD, para mostrar de onde veio o contato. */
   cliente_origem: "CLIENTE" | "LEAD";
+  /** Verdadeiro só enquanto o contato ainda é lead em aberto (sem documento). */
+  cliente_lead_aberto: boolean;
+
   /** Verdadeiro quando a validade já passou. */
   vencido: boolean;
   /** Quantidade de serviços incluídos na proposta. */
@@ -208,7 +213,7 @@ export function useOrcamentos() {
       const { data, error } = await db
         .from("orcamentos")
         .select(
-          "id, empresa_id, cliente_id, descricao, status, data_orcamento, validade, observacoes, created_at, clientes ( nome, origem ), orcamento_itens ( nome, origem_tipo, origem_nome, quantidade, valor_unitario, valor_custo, produtos ), orcamento_ajustes ( tipo, valor, descricao, ordem )",
+          "id, empresa_id, cliente_id, descricao, status, data_orcamento, validade, observacoes, created_at, clientes ( nome, origem, documento, status ), orcamento_itens ( nome, origem_tipo, origem_nome, quantidade, valor_unitario, valor_custo, produtos ), orcamento_ajustes ( tipo, valor, descricao, ordem )",
         )
         .eq("empresa_id", empresaId!)
         .order("data_orcamento", { ascending: false })
@@ -233,6 +238,8 @@ export function useOrcamentos() {
           created_at: o.created_at,
           cliente_nome: o.clientes?.nome ?? "Contato removido",
           cliente_origem: (o.clientes?.origem ?? "CLIENTE") as "CLIENTE" | "LEAD",
+          cliente_lead_aberto: ehLeadEmAberto(o.clientes ?? null),
+
           vencido: estaVencido(o.validade ?? null, o.status as OrcamentoStatus),
           total_itens: itens.length,
           total_valor: totalItens,
