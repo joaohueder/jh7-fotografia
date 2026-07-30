@@ -62,13 +62,32 @@ function hojeISO() {
   return `${agora.getFullYear()}-${mes}-${dia}`;
 }
 
-function emDias(dias: number) {
-  const d = new Date();
-  d.setDate(d.getDate() + dias);
+function dataISO(d: Date) {
   const mes = String(d.getMonth() + 1).padStart(2, "0");
   const dia = String(d.getDate()).padStart(2, "0");
   return `${d.getFullYear()}-${mes}-${dia}`;
 }
+
+function emDias(dias: number) {
+  const d = new Date();
+  d.setDate(d.getDate() + dias);
+  return dataISO(d);
+}
+
+function diasEntre(inicio: string, fim: string) {
+  const a = new Date(`${inicio}T00:00:00`);
+  const b = new Date(`${fim}T00:00:00`);
+  const diff = Math.round((b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24));
+  return diff;
+}
+
+function calcularValidade(dataOrcamento: string, dias: number | "") {
+  if (!dataOrcamento || dias === "" || dias < 0) return null;
+  const d = new Date(`${dataOrcamento}T00:00:00`);
+  d.setDate(d.getDate() + Number(dias));
+  return dataISO(d);
+}
+
 
 /** Item da proposta na tela: cópia editável + identificador só para arrastar. */
 interface ItemLinha extends OrcamentoItem {
