@@ -130,8 +130,10 @@ export function useServicoProdutos(servicoId?: string) {
     queryFn: async (): Promise<ServicoProdutoDetalhe[]> => {
       const { data, error } = await db
         .from("servico_produtos")
-        .select("id, produto_id, quantidade, produtos ( nome, valor_custo )")
-        .eq("servico_id", servicoId!);
+        .select("id, produto_id, quantidade, ordem, produtos ( nome, valor_custo )")
+        .eq("servico_id", servicoId!)
+        .order("ordem", { ascending: true })
+        .order("created_at", { ascending: true });
       if (error) throw error;
 
       return ((data ?? []) as any[]).map((item) => ({
@@ -193,11 +195,12 @@ export function useSalvarServico() {
 
       if (dados.produtos.length > 0) {
         const { error: erroItens } = await db.from("servico_produtos").insert(
-          dados.produtos.map((p) => ({
+          dados.produtos.map((p, indice) => ({
             empresa_id: empresaDoServico,
             servico_id: servicoId,
             produto_id: p.produto_id,
             quantidade: p.quantidade,
+            ordem: indice,
           })),
         );
         if (erroItens) throw erroItens;

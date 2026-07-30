@@ -18,6 +18,7 @@ create table if not exists public.servico_produtos (
   servico_id uuid not null references public.servicos (id) on delete cascade,
   produto_id uuid not null references public.produtos (id) on delete restrict,
   quantidade numeric(12, 3) not null default 1,
+  ordem integer not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -34,6 +35,9 @@ create unique index if not exists servico_produtos_uidx
 
 create index if not exists servico_produtos_empresa_idx
   on public.servico_produtos (empresa_id, servico_id);
+
+create index if not exists servico_produtos_ordem_idx
+  on public.servico_produtos (servico_id, ordem);
 
 -- updated_at automático ------------------------------------------------
 drop trigger if exists servico_produtos_updated_at on public.servico_produtos;
