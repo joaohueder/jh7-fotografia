@@ -264,19 +264,34 @@ export default function Orcamentos() {
             />
           </div>
           <div className="flex flex-wrap gap-2">
-            {([["todos", "Todos"]] as [Filtro, string][])
-              .concat(ORCAMENTO_STATUS.map((s) => [s.valor, s.rotulo] as [Filtro, string]))
-              .map(([valor, rotulo]) => (
-                <Button
-                  key={valor}
-                  type="button"
-                  size="sm"
-                  variant={filtro === valor ? "default" : "outline"}
-                  onClick={() => setFiltro(valor)}
+            {([
+              ["todos", "Todos", totais.total] as [Filtro, string, number],
+            ] as [Filtro, string, number][]).concat(
+              ORCAMENTO_STATUS.map(
+                (s) => [s.valor, s.rotulo, totais.contagemPorStatus[s.valor]] as [Filtro, string, number],
+              ),
+            ).map(([valor, rotulo, contagem]) => (
+              <Button
+                key={valor}
+                type="button"
+                size="sm"
+                variant={filtro === valor ? "default" : "outline"}
+                onClick={() => setFiltro(valor)}
+                className="gap-1.5"
+              >
+                {rotulo}
+                <span
+                  className={cn(
+                    "inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1.5 text-[10px] font-bold",
+                    filtro === valor
+                      ? "bg-primary-foreground text-primary"
+                      : "bg-muted text-muted-foreground",
+                  )}
                 >
-                  {rotulo}
-                </Button>
-              ))}
+                  {contagem}
+                </span>
+              </Button>
+            ))}
           </div>
         </div>
 
