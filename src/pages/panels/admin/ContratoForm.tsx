@@ -737,11 +737,13 @@ export default function ContratoForm() {
                 }}
               />
             </div>
-
           </div>
         </section>
+          </TabsContent>
 
+          <TabsContent value="servicos" className="mt-0">
         <section className="space-y-4 rounded-xl border border-border bg-card p-4">
+
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               <Wrench className="h-4 w-4" /> Serviços do contrato
