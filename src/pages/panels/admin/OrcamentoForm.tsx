@@ -146,6 +146,8 @@ export default function OrcamentoForm() {
   const [validade, setValidade] = useState(emDias(15));
   const [itens, setItens] = useState<ItemLinha[]>([]);
   const [escolhido, setEscolhido] = useState("");
+  // Produto selecionado no combo de cada item (chave do item -> id do produto).
+  const [produtoEscolhido, setProdutoEscolhido] = useState<Record<string, string>>({});
   const [carregado, setCarregado] = useState(false);
 
   const sensors = useSensors(
