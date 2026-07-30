@@ -298,11 +298,16 @@ export default function Orcamentos() {
                               maximumFractionDigits: 2,
                             })}`}
                       </strong>
-                      {o.ajuste_tipo !== "NENHUM" && o.ajuste_valor != null
-                        ? ` · ${o.ajuste_tipo === "DESCONTO" ? "Desconto" : "Acréscimo"} de R$ ${o.ajuste_valor.toLocaleString(
-                            "pt-BR",
-                            { minimumFractionDigits: 2, maximumFractionDigits: 2 },
-                          )}${o.ajuste_descricao ? ` (${o.ajuste_descricao})` : ""}`
+                      {o.ajustes.length > 0
+                        ? ` · ${o.ajustes
+                            .map(
+                              (a) =>
+                                `${a.tipo === "DESCONTO" ? "Desconto" : "Acréscimo"} de R$ ${a.valor.toLocaleString(
+                                  "pt-BR",
+                                  { minimumFractionDigits: 2, maximumFractionDigits: 2 },
+                                )}${a.descricao ? ` (${a.descricao})` : ""}`,
+                            )
+                            .join(" · ")}`
                         : ""}
                     </p>
                     {o.observacoes ? (
