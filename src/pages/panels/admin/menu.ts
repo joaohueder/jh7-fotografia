@@ -14,6 +14,7 @@ export const ADMIN_MENU = [
     children: [
       { label: "Produtos", to: "/admin/produtos" },
       { label: "Serviços", to: "/admin/servicos" },
+      { label: "Agrupamento de serviços", to: "/admin/agrupamento-servicos" },
     ],
   },
 
