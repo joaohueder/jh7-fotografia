@@ -914,6 +914,178 @@ export default function ContratoForm() {
           )}
         </section>
 
+        {/* Descontos e acréscimos (vários por contrato) */}
+        <section className="space-y-4 rounded-xl border border-border bg-card p-4">
+          <div className="space-y-1">
+            <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              <Wrench className="h-4 w-4" /> Descontos e acréscimos
+              <HelpTip text="São itens adicionais do contrato. Você pode lançar quantos quiser: cada desconto diminui e cada acréscimo aumenta o valor final. Quando o contrato vem de um orçamento aprovado, os descontos e acréscimos da proposta já vêm copiados." />
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Opcional. Lance quantos descontos e acréscimos precisar, cada um com valor e motivo —
+              assim o cliente entende como chegou no valor final do contrato.
+            </p>
+          </div>
+
+          {somenteLeitura ? null : (
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="gap-2"
+                onClick={() => adicionarAjuste("DESCONTO")}
+              >
+                <Plus className="h-4 w-4" />
+                Adicionar desconto
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="gap-2"
+                onClick={() => adicionarAjuste("ACRESCIMO")}
+              >
+                <Plus className="h-4 w-4" />
+                Adicionar acréscimo
+              </Button>
+            </div>
+          )}
+
+          {ajustes.length === 0 ? (
+            <InlineNote>
+              Nenhum desconto ou acréscimo lançado: o valor final é a soma dos serviços.
+            </InlineNote>
+          ) : (
+            <div className="space-y-3">
+              {ajustes.map((a) => (
+                <div
+                  key={a.chave}
+                  className="space-y-3 rounded-lg border border-border bg-muted/30 p-3 sm:p-4"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={somenteLeitura}
+                        variant={a.tipo === "DESCONTO" ? "default" : "outline"}
+                        onClick={() => atualizarAjuste(a.chave, { tipo: "DESCONTO" })}
+                      >
+                        Desconto (diminui)
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={somenteLeitura}
+                        variant={a.tipo === "ACRESCIMO" ? "default" : "outline"}
+                        onClick={() => atualizarAjuste(a.chave, { tipo: "ACRESCIMO" })}
+                      >
+                        Acréscimo (aumenta)
+                      </Button>
+                    </div>
+                    {somenteLeitura ? null : (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="gap-2 text-destructive"
+                        onClick={() => removerAjuste(a.chave)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Remover
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor={`ajuste-valor-${a.chave}`} className="flex items-center gap-1.5">
+                        {a.tipo === "DESCONTO"
+                          ? "Valor do desconto (R$) *"
+                          : "Valor do acréscimo (R$) *"}
+                        <HelpTip
+                          text={
+                            a.tipo === "DESCONTO"
+                              ? "Quanto será abatido do total dos serviços."
+                              : "Quanto será somado ao total dos serviços (por exemplo, deslocamento ou hora extra)."
+                          }
+                        />
+                      </Label>
+                      <Input
+                        id={`ajuste-valor-${a.chave}`}
+                        inputMode="numeric"
+                        placeholder="0,00"
+                        readOnly={somenteLeitura}
+                        value={a.valorTexto}
+                        onChange={(e) =>
+                          atualizarAjuste(a.chave, { valorTexto: maskMoney(e.target.value) })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor={`ajuste-descricao-${a.chave}`}
+                        className="flex items-center gap-1.5"
+                      >
+                        Motivo *
+                        <HelpTip text="Explique em poucas palavras, por exemplo: “Desconto para pagamento à vista” ou “Acréscimo por deslocamento”." />
+                      </Label>
+                      <Input
+                        id={`ajuste-descricao-${a.chave}`}
+                        maxLength={200}
+                        readOnly={somenteLeitura}
+                        value={a.descricao}
+                        onChange={(e) => atualizarAjuste(a.chave, { descricao: e.target.value })}
+                        placeholder={
+                          a.tipo === "DESCONTO"
+                            ? "Ex.: Desconto para pagamento à vista"
+                            : "Ex.: Acréscimo por deslocamento"
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="space-y-1 rounded-lg border border-border bg-muted/40 px-4 py-3">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>Total dos serviços</span>
+              <span>{totalItens == null ? "—" : `R$ ${formatMoney(totalItens)}`}</span>
+            </div>
+            {ajustesAplicados
+              .filter((a) => a.valor > 0)
+              .map((a, indice) => (
+                <div
+                  key={`resumo-${indice}`}
+                  className="flex items-center justify-between gap-3 text-sm text-muted-foreground"
+                >
+                  <span className="truncate">
+                    {a.tipo === "DESCONTO" ? "Desconto" : "Acréscimo"}
+                    {a.descricao.trim() ? ` · ${a.descricao.trim()}` : ""}
+                  </span>
+                  <span className="whitespace-nowrap">
+                    {a.tipo === "DESCONTO" ? "− " : "+ "}
+                    R$ {formatMoney(a.valor)}
+                  </span>
+                </div>
+              ))}
+            <div className="flex items-center justify-between border-t border-border pt-2">
+              <span className="flex items-center gap-1.5 text-sm font-medium">
+                Valor final do contrato
+                <HelpTip text="É o total dos serviços já com todos os descontos abatidos e os acréscimos somados. Esse é o valor que o cliente vai pagar." />
+              </span>
+              <strong className="text-lg">
+                {totalFinal == null ? "Sem valores informados" : `R$ ${formatMoney(totalFinal)}`}
+              </strong>
+            </div>
+          </div>
+        </section>
+
+
+
         <section className="space-y-2 rounded-xl border border-border bg-card p-4">
           <Label htmlFor="obs" className="flex items-center gap-1.5">
             Observações do contrato
