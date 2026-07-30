@@ -87,6 +87,10 @@ export default function Produtos() {
   const tabelaAusente = /produtos/i.test(detalheErro)
     ? /does not exist|schema cache|relation|not find the table|404/i.test(detalheErro)
     : /schema cache|does not exist/i.test(detalheErro);
+  // Permissões antigas do módulo (política que exigia empresa no perfil).
+  const permissaoDesatualizada =
+    /não está vinculado a uma empresa|P0001|permission denied/i.test(detalheErro);
+
   const salvar = useSalvarProduto();
   const setStatus = useSetProdutoStatus();
   const remover = useDeleteProduto();
@@ -284,13 +288,18 @@ export default function Produtos() {
               <p className="text-sm font-semibold text-destructive">
                 {tabelaAusente
                   ? "O módulo de Produtos ainda não foi instalado no banco de dados"
-                  : "Não conseguimos carregar os produtos agora"}
+                  : permissaoDesatualizada
+                    ? "As permissões do módulo de Produtos precisam ser atualizadas"
+                    : "Não conseguimos carregar os produtos agora"}
               </p>
               <p className="text-sm text-muted-foreground">
                 {tabelaAusente
                   ? "Peça ao responsável técnico para executar o script sql/36_produtos.sql no banco de dados do sistema. Ele cria a tabela de produtos com as permissões corretas. Depois disso, recarregue esta página."
-                  : "Verifique sua conexão e tente novamente em alguns instantes. Se o erro continuar, avise o administrador do sistema."}
+                  : permissaoDesatualizada
+                    ? "Peça ao responsável técnico para executar o script sql/37_fix_produtos_rls_sa.sql no banco de dados. Ele libera o acesso aos produtos também quando o super administrador entra no painel de uma empresa. Depois disso, recarregue esta página."
+                    : "Verifique sua conexão e tente novamente em alguns instantes. Se o erro continuar, avise o administrador do sistema."}
               </p>
+
               <p className="text-xs text-muted-foreground/80">Detalhe técnico: {detalheErro}</p>
             </div>
           </div>
