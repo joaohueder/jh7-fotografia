@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   ArrowRight,
   ClipboardCheck,
+  FileText,
 
   Loader2,
   MapPin,
@@ -21,6 +22,7 @@ import { useLimitesEmpresa } from "@/hooks/use-limites";
 import { PanelLayout } from "@/components/panel-layout";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
 import { ClienteNotas } from "@/components/cliente-notas";
+import { ClienteOrcamentos } from "@/components/cliente-orcamentos";
 import { HelpTip } from "@/components/page-help";
 
 import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
@@ -775,6 +777,21 @@ export default function ClienteForm() {
               titulo="Histórico de notas"
               placeholder="Ex.: prefere atendimento aos sábados; indicou uma amiga."
             />
+          </div>
+        </Section>
+      ),
+    });
+  }
+
+  // Orçamentos só fazem sentido para clientes já salvos.
+  if (editando && registroId) {
+    secoes.push({
+      value: "orcamentos",
+      label: "Orçamentos",
+      node: (
+        <Section title="Orçamentos do cliente" icon={FileText}>
+          <div className="col-span-full">
+            <ClienteOrcamentos clienteId={registroId} />
           </div>
         </Section>
       ),
