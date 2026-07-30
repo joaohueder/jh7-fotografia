@@ -498,10 +498,10 @@ export default function OrcamentoForm() {
             variant="ghost"
             size="sm"
             className="gap-2 px-2"
-            onClick={() => navigate("/admin/orcamentos")}
+            onClick={() => navigate(voltarPara)}
           >
             <ArrowLeft className="h-4 w-4" />
-            Voltar para a lista
+            {clienteFixo ? "Voltar para o cliente" : "Voltar para a lista"}
           </Button>
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
