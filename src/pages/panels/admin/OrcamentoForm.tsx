@@ -482,7 +482,6 @@ export default function OrcamentoForm() {
               </div>
 
               <div className="space-y-2">
-              <div className="space-y-2">
                 <Label className="flex items-center gap-1.5">
                   Situação (somente leitura)
                   <HelpTip text="A situação mostra em que ponto a proposta está. Ela não é alterada por aqui: para mudar, use o botão de situação na lista de orçamentos." />
