@@ -207,7 +207,7 @@ export default function ClienteForm() {
   );
 
   const { data: empresaId } = useEmpresaAtual();
-  const { data: limites } = useLimitesEmpresa();
+  const { data: limites, refetch: recarregarLimites } = useLimitesEmpresa();
 
   // Regra de limite: novos cadastros (inclusive conversão de lead) consomem a
   // cota de clientes do plano. Edição de cliente existente nunca é bloqueada.
@@ -381,6 +381,18 @@ export default function ClienteForm() {
     if (!empresaId) {
       notifyValidation("Empresa não identificada para vincular o cliente.");
       return;
+    }
+    if (!editando && !mesclarId) {
+      // Revalida o limite direto no banco antes de gravar (tempo real).
+      const atual = (await recarregarLimites()).data;
+      const lim = atual?.limite_clientes ?? null;
+      const uso = atual?.usado_clientes ?? 0;
+      if (lim !== null && uso >= lim) {
+        toast.error(
+          `Limite de clientes do plano atingido (${uso} de ${lim}). Contrate um plano maior para cadastrar novos clientes.`,
+        );
+        return;
+      }
     }
     if (limiteAtingido && !mesclarId) {
       notifyValidation(
