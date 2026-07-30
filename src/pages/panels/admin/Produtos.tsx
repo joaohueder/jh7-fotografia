@@ -15,7 +15,12 @@ import { PanelLayout } from "@/components/panel-layout";
 import { IconAction } from "@/components/icon-action";
 import { HelpTip } from "@/components/page-help";
 import { ADMIN_MENU } from "@/pages/panels/admin/menu";
-import { notifyError, notifySuccess, notifyValidation } from "@/lib/system-message";
+import {
+  notifyError,
+  notifySuccess,
+  notifyValidation,
+  rawErrorMessage,
+} from "@/lib/system-message";
 import { formatMoney, maskMoney, parseMoney } from "@/lib/br-masks";
 import {
   useDeleteProduto,
@@ -76,6 +81,12 @@ export default function Produtos() {
   );
 
   const { data: produtos, isLoading, error } = useProdutos();
+  // Diagnóstico amigável: se a tabela ainda não existe no banco, explicamos o
+  // que precisa ser feito em vez de mostrar um erro genérico de conexão.
+  const detalheErro = error ? rawErrorMessage(error) : "";
+  const tabelaAusente = /produtos/i.test(detalheErro)
+    ? /does not exist|schema cache|relation|not find the table|404/i.test(detalheErro)
+    : /schema cache|does not exist/i.test(detalheErro);
   const salvar = useSalvarProduto();
   const setStatus = useSetProdutoStatus();
   const remover = useDeleteProduto();
@@ -269,12 +280,22 @@ export default function Produtos() {
         {error ? (
           <div className="flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/10 p-4">
             <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
-            <p className="text-sm text-muted-foreground">
-              Não conseguimos carregar os produtos agora. Verifique sua conexão e tente novamente em
-              alguns instantes.
-            </p>
+            <div className="min-w-0 space-y-1">
+              <p className="text-sm font-semibold text-destructive">
+                {tabelaAusente
+                  ? "O módulo de Produtos ainda não foi instalado no banco de dados"
+                  : "Não conseguimos carregar os produtos agora"}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {tabelaAusente
+                  ? "Peça ao responsável técnico para executar o script sql/36_produtos.sql no banco de dados do sistema. Ele cria a tabela de produtos com as permissões corretas. Depois disso, recarregue esta página."
+                  : "Verifique sua conexão e tente novamente em alguns instantes. Se o erro continuar, avise o administrador do sistema."}
+              </p>
+              <p className="text-xs text-muted-foreground/80">Detalhe técnico: {detalheErro}</p>
+            </div>
           </div>
         ) : null}
+
 
         <div className="overflow-hidden rounded-xl border border-border bg-card">
           {isLoading ? (
