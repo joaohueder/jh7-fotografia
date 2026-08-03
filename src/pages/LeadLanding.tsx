@@ -68,9 +68,15 @@ export default function LeadLanding() {
         if (leadData.documento) {
           setJaExiste(true);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Erro ao carregar lead:", err);
-        navigate("/404");
+        // Só redireciona se for erro de "não encontrado" (404 ou erro do Postgres)
+        // Se for erro de rede ou outro, exibe mensagem
+        if (err?.code === "PGRST116" || err?.message?.includes("not found")) {
+          navigate("/404");
+        } else {
+          notifyError(err, { title: "Erro ao carregar link" });
+        }
       } finally {
         setLoading(false);
       }
