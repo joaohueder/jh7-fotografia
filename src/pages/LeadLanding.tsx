@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { notifyError, notifyValidation } from "@/lib/system-message";
-import { maskCpfCnpj, maskPhone, maskCep } from "@/lib/br-masks";
+import { maskCpfCnpj, maskPhone, maskCep, isValidCpfCnpj } from "@/lib/br-masks";
 import { fetchAddressByCep } from "@/lib/viacep";
 
 const db = supabase as any;
@@ -90,6 +90,11 @@ export default function LeadLanding() {
   async function checkDocumento(doc: string) {
     const limpo = doc.replace(/\D/g, "");
     if (limpo.length < 11 || !lead) return;
+
+    if (!isValidCpfCnpj(limpo)) {
+      notifyValidation("Documento inválido. Por favor, verifique.");
+      return;
+    }
     
     // Evita buscas duplicadas se já validado e o documento não mudou
     if (checkingDocumento) return;
