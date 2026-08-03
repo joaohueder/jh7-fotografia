@@ -326,7 +326,7 @@ export default function LeadsList() {
   }
 
   async function enviarLinkLead(lead: Lead) {
-    const url = \`\${window.location.origin}/completar-cadastro/\${lead.id}\`;
+    const url = `${window.location.origin}/completar-cadastro/${lead.id}`;
     try {
       await navigator.clipboard.writeText(url);
       notifySuccess("Link de cadastro copiado! Envie para o lead finalizar o preenchimento.");
@@ -674,6 +674,17 @@ export default function LeadsList() {
                           Transformar em cliente
                         </Button>
                       </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="tap-target gap-2"
+                        title="Enviar link para o lead terminar de preencher os dados cadastrais."
+                        aria-label={`Enviar link de cadastro para ${l.nome}`}
+                        onClick={() => enviarLinkLead(l)}
+                      >
+                        <Send className="h-4 w-4" />
+                        Enviar cadastro
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
