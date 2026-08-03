@@ -360,6 +360,8 @@ export default function LeadLanding() {
             </form>
           </CardContent>
         </Card>
+      </div>
+      
       <div className="mx-auto mt-12 max-w-4xl border-t border-white/5 pt-8 text-center text-xs text-zinc-600">
         <div className="flex flex-col items-center justify-center gap-1.5 sm:flex-row sm:gap-3">
           <span>© {new Date().getFullYear()} {empresa?.nome_fantasia || "JH7 Gestão de Estúdios"}. Todos os direitos reservados.</span>
