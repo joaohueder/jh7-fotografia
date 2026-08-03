@@ -1000,6 +1000,14 @@ export default function LeadsList() {
         rotuloInativar="Marcar como desistiu"
       />
 
+      <div className="mx-auto mt-12 max-w-[var(--app-max-w)] border-t border-border pt-8 text-center text-xs text-muted-foreground">
+        <div className="flex flex-col items-center justify-center gap-1.5 sm:flex-row sm:gap-3">
+          <span>© {new Date().getFullYear()} JH7 Gestão de Estúdios Fotográficos.</span>
+          <span className="hidden opacity-40 sm:inline">•</span>
+          <span className="font-mono text-[10px] tracking-tight opacity-60">Versão 2026.08.003</span>
+        </div>
+      </div>
+
     </PanelLayout>
   );
 }

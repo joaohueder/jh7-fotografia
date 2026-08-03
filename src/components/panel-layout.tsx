@@ -418,7 +418,7 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
           <div className="flex min-w-0 items-center gap-3">
             <span className="truncate">© {new Date().getFullYear()} JH7 Gestão de Estúdios Fotográficos</span>
             <span className="shrink-0 font-medium text-muted-foreground/60">•</span>
-            <span className="shrink-0 font-mono text-[10px] tracking-tight opacity-70">Versão 2026.08.002</span>
+            <span className="shrink-0 font-mono text-[10px] tracking-tight opacity-70">Versão 2026.08.003</span>
           </div>
           <span className="hidden truncate sm:inline" style={{ color: "var(--panel-accent)" }}>
             {theme.label}
