@@ -173,12 +173,20 @@ export function SystemMessageDialog() {
             </div>
 
             <div className="mt-5 space-y-3">
-              <Field label="O que aconteceu" value={message.description} />
-              {message.original && <Field label="Erro original" value={message.original} mono />}
-              {message.context &&
-                Object.entries(message.context)
-                  .filter(([, v]) => v)
-                  .map(([k, v]) => <Field key={k} label={k} value={String(v)} mono />)}
+              {message.variant === "error" ? (
+                <>
+                  <Field label="O que aconteceu" value={message.description} />
+                  {message.original && <Field label="Erro original" value={message.original} mono />}
+                  {message.context &&
+                    Object.entries(message.context)
+                      .filter(([, v]) => v)
+                      .map(([k, v]) => <Field key={k} label={k} value={String(v)} mono />)}
+                </>
+              ) : (
+                <p className="text-[0.9375rem] leading-relaxed text-foreground/85">
+                  {message.description}
+                </p>
+              )}
             </div>
 
             <div
