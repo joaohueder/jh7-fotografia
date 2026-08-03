@@ -192,9 +192,11 @@ function AuthPage() {
 
           <div className="flex items-center gap-3 animate-fade-in">
             <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand-green" />
-            <p className="text-xs tracking-wide text-muted-foreground/70">
-              © {new Date().getFullYear()} JH7 Gestão de Estúdios Fotográficos
-            </p>
+            <div className="flex items-center gap-3 text-xs tracking-wide text-muted-foreground/70">
+              <span>© {new Date().getFullYear()} JH7 Gestão de Estúdios Fotográficos</span>
+              <span className="font-medium opacity-40">•</span>
+              <span className="font-mono text-[10px] tracking-tight opacity-60">Versão 2026.08.001</span>
+            </div>
           </div>
         </section>
 
