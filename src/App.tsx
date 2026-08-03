@@ -30,6 +30,7 @@ import OrcamentosList from "@/pages/panels/admin/Orcamentos";
 import OrcamentoForm from "@/pages/panels/admin/OrcamentoForm";
 import ContratosList from "@/pages/panels/admin/Contratos";
 import ContratoForm from "@/pages/panels/admin/ContratoForm";
+import LeadLanding from "@/pages/LeadLanding";
 
 
 
@@ -127,6 +128,7 @@ export default function App() {
           <AuthEvents />
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/completar-cadastro/:leadId" element={<LeadLanding />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route
               path="/assinatura"
