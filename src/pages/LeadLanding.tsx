@@ -361,6 +361,14 @@ export default function LeadLanding() {
           </CardContent>
         </Card>
       </div>
+      
+      <div className="mx-auto mt-12 max-w-4xl border-t border-white/5 pt-8 text-center text-xs text-zinc-600">
+        <div className="flex flex-col items-center justify-center gap-1.5 sm:flex-row sm:gap-3">
+          <span>© {new Date().getFullYear()} {empresa?.nome_fantasia || "JH7 Gestão de Estúdios"}. Todos os direitos reservados.</span>
+          <span className="hidden opacity-30 sm:inline">•</span>
+          <span className="font-mono text-[9px] tracking-tight opacity-50">Versão 2026.08.001</span>
+        </div>
+      </div>
     </div>
   );
 }
