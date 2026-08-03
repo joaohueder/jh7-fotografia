@@ -191,9 +191,12 @@ export function SystemMessageDialog() {
 
             <div
               data-screenshot-hide
-              className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between"
+              className={cn(
+                "mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end",
+                message.variant === "error" && "sm:justify-between"
+              )}
             >
-              <div className="flex flex-wrap gap-2">
+              <div className={cn("flex flex-wrap gap-2", message.variant !== "error" && "hidden")}>
                 <Button type="button" variant="outline" size="sm" onClick={copyScreenshot}>
                   <Camera className="h-4 w-4" />
                   {shotState === "working"
