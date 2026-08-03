@@ -19,6 +19,7 @@ export default function LeadLanding() {
   const [saving, setSaving] = useState(false);
   const [lead, setLead] = useState<any>(null);
   const [empresa, setEmpresa] = useState<any>(null);
+  const [checkingDocumento, setCheckingDocumento] = useState(false);
   const [jaExiste, setJaExiste] = useState(false);
   const [documentoValidado, setDocumentoValidado] = useState(false);
   const [sucesso, setSucesso] = useState(false);
@@ -89,7 +90,11 @@ export default function LeadLanding() {
   async function checkDocumento(doc: string) {
     const limpo = doc.replace(/\D/g, "");
     if (limpo.length < 11 || !lead) return;
+    
+    // Evita buscas duplicadas se já validado e o documento não mudou
+    if (checkingDocumento) return;
 
+    setCheckingDocumento(true);
     try {
       const { data, error } = await db
         .from("clientes")
@@ -117,13 +122,15 @@ export default function LeadLanding() {
           uf: d.endereco_uf || "",
         }));
         setDocumentoValidado(true);
-        notifyValidation("Identificamos que você já possui cadastro conosco. Seus dados foram carregados para conferência.");
+        notifyValidation("Identificamos que você já possui cadastro conosco. Seus dados foram carregados para conferência. Está tudo certo!");
       } else {
         setDocumentoValidado(true);
         setJaExiste(false);
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setCheckingDocumento(false);
     }
   }
 
@@ -263,16 +270,24 @@ export default function LeadLanding() {
                       onChange={e => {
                         const val = maskCpfCnpj(e.target.value);
                         setFormData(prev => ({ ...prev, documento: val }));
-                        // Só valida se tiver 14 (CPF) ou 18 (CNPJ) caracteres formatados
+                        // Só valida automaticamente se tiver 14 (CPF) ou 18 (CNPJ) caracteres formatados
                         if (val.length === 14 || val.length === 18) {
                           checkDocumento(val);
                         } else {
                           setDocumentoValidado(false);
                         }
                       }}
-                      className="bg-white/[0.03] border-white/10 pl-10 focus:ring-amber-500/20" 
+                      onBlur={() => {
+                        if (formData.documento.length >= 11 && !documentoValidado) {
+                          checkDocumento(formData.documento);
+                        }
+                      }}
+                      className="bg-white/[0.03] border-white/10 pl-10 pr-10 focus:ring-amber-500/20" 
                       placeholder="000.000.000-00"
                     />
+                    {checkingDocumento && (
+                      <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-amber-500" />
+                    )}
                   </div>
                   {!documentoValidado && (
                     <p className="text-[10px] text-zinc-500">Informe o documento para liberar os demais campos.</p>
