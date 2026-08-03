@@ -415,7 +415,11 @@ export function PanelLayout({ accent, menu, children }: PanelLayoutProps) {
       {/* Rodapé fixo — a etiqueta do painel some em telas muito estreitas */}
       <footer className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/90 backdrop-blur">
         <div className="container-page flex h-[var(--app-footer-h)] items-center justify-between gap-3 text-xs text-muted-foreground">
-          <span className="truncate">© {new Date().getFullYear()} JH7 Gestão de Estúdios Fotográficos</span>
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="truncate">© {new Date().getFullYear()} JH7 Gestão de Estúdios Fotográficos</span>
+            <span className="shrink-0 font-medium text-muted-foreground/60">•</span>
+            <span className="shrink-0 font-mono text-[10px] tracking-tight opacity-70">Versão 2026.08.001</span>
+          </div>
           <span className="hidden truncate sm:inline" style={{ color: "var(--panel-accent)" }}>
             {theme.label}
           </span>
