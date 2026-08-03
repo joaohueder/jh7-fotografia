@@ -38,8 +38,9 @@ export default function LeadLanding() {
     async function carregarDados() {
       if (!leadId) return;
       try {
+        // No Supabase autohospedado, buscamos na tabela clientes e fazemos o join com empresas
         const { data: leadData, error: leadError } = await supabase
-          .from("clientes")
+          .from("clientes" as any)
           .select("*, empresas(*)")
           .eq("id", leadId)
           .single();
@@ -47,26 +48,26 @@ export default function LeadLanding() {
         if (leadError || !leadData) throw leadError;
 
         setLead(leadData);
-        setEmpresa(leadData.empresas);
+        setEmpresa((leadData as any).empresas);
         setFormData({
           nome: leadData.nome || "",
-          documento: leadData.documento || "",
+          documento: (leadData as any).documento ? maskCpfCnpj((leadData as any).documento) : "",
           contato_whatsapp: maskPhone(leadData.contato_whatsapp || ""),
-          contato_email: leadData.contato_email || "",
-          cep: maskCep(leadData.endereco_cep || ""),
-          logradouro: leadData.endereco_logradouro || "",
-          numero: leadData.endereco_numero || "",
-          complemento: leadData.endereco_complemento || "",
-          bairro: leadData.endereco_bairro || "",
-          cidade: leadData.endereco_cidade || "",
-          uf: leadData.endereco_uf || "",
+          contato_email: (leadData as any).contato_email || "",
+          cep: maskCep((leadData as any).endereco_cep || ""),
+          logradouro: (leadData as any).endereco_logradouro || "",
+          numero: (leadData as any).endereco_numero || "",
+          complemento: (leadData as any).endereco_complemento || "",
+          bairro: (leadData as any).endereco_bairro || "",
+          cidade: (leadData as any).endereco_cidade || "",
+          uf: (leadData as any).endereco_uf || "",
         });
 
-        if (leadData.documento) {
+        if ((leadData as any).documento) {
           setJaExiste(true);
         }
       } catch (err) {
-        console.error(err);
+        console.error("Erro ao carregar lead:", err);
         navigate("/404");
       } finally {
         setLoading(false);
@@ -81,7 +82,7 @@ export default function LeadLanding() {
 
     try {
       const { data, error } = await supabase
-        .from("clientes")
+        .from("clientes" as any)
         .select("*")
         .eq("empresa_id", lead.empresa_id)
         .eq("documento", limpo)
@@ -93,6 +94,7 @@ export default function LeadLanding() {
         setFormData(prev => ({
           ...prev,
           nome: data.nome,
+          documento: maskCpfCnpj(data.documento),
           contato_whatsapp: maskPhone(data.contato_whatsapp || ""),
           contato_email: data.contato_email || "",
           cep: maskCep(data.endereco_cep || ""),
@@ -141,7 +143,7 @@ export default function LeadLanding() {
     setSaving(true);
     try {
       const { error } = await supabase
-        .from("clientes")
+        .from("clientes" as any)
         .update({
           nome: formData.nome,
           documento: formData.documento.replace(/\D/g, ""),
@@ -155,8 +157,8 @@ export default function LeadLanding() {
           endereco_cidade: formData.cidade,
           endereco_uf: formData.uf,
           status: "ATIVO"
-        })
-        .eq("id", leadId);
+        } as any)
+        .eq("id", leadId!);
 
       if (error) throw error;
       setSucesso(true);

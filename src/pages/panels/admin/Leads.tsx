@@ -19,6 +19,7 @@ import {
   BadgeCheck,
   RotateCcw,
   UserX,
+  Send,
 } from "lucide-react";
 
 
@@ -321,6 +322,16 @@ export default function LeadsList() {
       notifyError(err, { title: "Não foi possível excluir o lead" });
     } finally {
       setAlvoExclusao(null);
+    }
+  }
+
+  async function enviarLinkLead(lead: Lead) {
+    const url = \`\${window.location.origin}/completar-cadastro/\${lead.id}\`;
+    try {
+      await navigator.clipboard.writeText(url);
+      notifySuccess("Link de cadastro copiado! Envie para o lead finalizar o preenchimento.");
+    } catch (err) {
+      notifyError("Não foi possível copiar o link. Tente manualmente.");
     }
   }
 
