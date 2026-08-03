@@ -20,6 +20,7 @@ export default function LeadLanding() {
   const [lead, setLead] = useState<any>(null);
   const [empresa, setEmpresa] = useState<any>(null);
   const [jaExiste, setJaExiste] = useState(false);
+  const [documentoValidado, setDocumentoValidado] = useState(false);
   const [sucesso, setSucesso] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -67,6 +68,7 @@ export default function LeadLanding() {
 
         if (leadData.documento) {
           setJaExiste(true);
+          setDocumentoValidado(true);
         }
       } catch (err: any) {
         console.error("Erro ao carregar lead:", err);
@@ -114,7 +116,11 @@ export default function LeadLanding() {
           cidade: d.endereco_cidade || "",
           uf: d.endereco_uf || "",
         }));
+        setDocumentoValidado(true);
         notifyValidation("Identificamos que você já possui cadastro conosco. Seus dados foram carregados para conferência.");
+      } else {
+        setDocumentoValidado(true);
+        setJaExiste(false);
       }
     } catch (err) {
       console.error(err);
@@ -247,102 +253,114 @@ export default function LeadLanding() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2 md:col-span-2">
-                  <Label className="text-zinc-400">Nome Completo *</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-2.5 h-4 w-4 text-zinc-600" />
-                    <Input 
-                      required
-                      disabled={jaExiste}
-                      value={formData.nome}
-                      onChange={e => setFormData(prev => ({ ...prev, nome: e.target.value }))}
-                      className="bg-white/[0.03] border-white/10 pl-10 focus:ring-amber-500/20" 
-                      placeholder="Como no documento..."
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
                   <Label className="text-zinc-400">CPF / CNPJ *</Label>
                   <div className="relative">
                     <Fingerprint className="absolute left-3 top-2.5 h-4 w-4 text-zinc-600" />
                     <Input 
                       required
-                      disabled={jaExiste}
+                      disabled={jaExiste && documentoValidado}
                       value={formData.documento}
                       onChange={e => {
                         const val = maskCpfCnpj(e.target.value);
                         setFormData(prev => ({ ...prev, documento: val }));
-                        if (val.length >= 14) checkDocumento(val);
+                        // Só valida se tiver 14 (CPF) ou 18 (CNPJ) caracteres formatados
+                        if (val.length === 14 || val.length === 18) {
+                          checkDocumento(val);
+                        } else {
+                          setDocumentoValidado(false);
+                        }
                       }}
                       className="bg-white/[0.03] border-white/10 pl-10 focus:ring-amber-500/20" 
                       placeholder="000.000.000-00"
                     />
                   </div>
+                  {!documentoValidado && (
+                    <p className="text-[10px] text-zinc-500">Informe o documento para liberar os demais campos.</p>
+                  )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-zinc-400">WhatsApp *</Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-2.5 h-4 w-4 text-zinc-600" />
-                    <Input 
-                      required
-                      disabled={jaExiste}
-                      value={formData.contato_whatsapp}
-                      onChange={e => setFormData(prev => ({ ...prev, contato_whatsapp: maskPhone(e.target.value) }))}
-                      className="bg-white/[0.03] border-white/10 pl-10 focus:ring-amber-500/20" 
-                      placeholder="(00) 0 0000-0000"
-                    />
-                  </div>
-                </div>
+                {documentoValidado && (
+                  <>
+                    <div className="space-y-2 md:col-span-2">
+                      <Label className="text-zinc-400">Nome Completo *</Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-2.5 h-4 w-4 text-zinc-600" />
+                        <Input 
+                          required
+                          disabled={jaExiste}
+                          value={formData.nome}
+                          onChange={e => setFormData(prev => ({ ...prev, nome: e.target.value }))}
+                          className="bg-white/[0.03] border-white/10 pl-10 focus:ring-amber-500/20" 
+                          placeholder="Como no documento..."
+                        />
+                      </div>
+                    </div>
 
-                <div className="space-y-2 md:col-span-2">
-                  <Label className="text-zinc-400">E-mail</Label>
-                  <Input 
-                    type="email"
-                    disabled={jaExiste}
-                    value={formData.contato_email}
-                    onChange={e => setFormData(prev => ({ ...prev, contato_email: e.target.value }))}
-                    className="bg-white/[0.03] border-white/10 focus:ring-amber-500/20" 
-                    placeholder="exemplo@email.com"
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label className="text-zinc-400">WhatsApp *</Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-2.5 h-4 w-4 text-zinc-600" />
+                        <Input 
+                          required
+                          disabled={jaExiste}
+                          value={formData.contato_whatsapp}
+                          onChange={e => setFormData(prev => ({ ...prev, contato_whatsapp: maskPhone(e.target.value) }))}
+                          className="bg-white/[0.03] border-white/10 pl-10 focus:ring-amber-500/20" 
+                          placeholder="(00) 0 0000-0000"
+                        />
+                      </div>
+                    </div>
 
-                <div className="space-y-2">
-                  <Label className="text-zinc-400">CEP *</Label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-zinc-600" />
-                    <Input 
-                      required
-                      disabled={jaExiste}
-                      value={formData.cep}
-                      onChange={e => handleCep(e.target.value)}
-                      className="bg-white/[0.03] border-white/10 pl-10 focus:ring-amber-500/20" 
-                      placeholder="00000-000"
-                    />
-                  </div>
-                </div>
+                    <div className="space-y-2">
+                      <Label className="text-zinc-400">E-mail</Label>
+                      <Input 
+                        type="email"
+                        disabled={jaExiste}
+                        value={formData.contato_email}
+                        onChange={e => setFormData(prev => ({ ...prev, contato_email: e.target.value }))}
+                        className="bg-white/[0.03] border-white/10 focus:ring-amber-500/20" 
+                        placeholder="exemplo@email.com"
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label className="text-zinc-400">Número *</Label>
-                  <Input 
-                    required
-                    disabled={jaExiste}
-                    value={formData.numero}
-                    onChange={e => setFormData(prev => ({ ...prev, numero: e.target.value }))}
-                    className="bg-white/[0.03] border-white/10 focus:ring-amber-500/20" 
-                    placeholder="S/N"
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label className="text-zinc-400">CEP *</Label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-zinc-600" />
+                        <Input 
+                          required
+                          disabled={jaExiste}
+                          value={formData.cep}
+                          onChange={e => handleCep(e.target.value)}
+                          className="bg-white/[0.03] border-white/10 pl-10 focus:ring-amber-500/20" 
+                          placeholder="00000-000"
+                        />
+                      </div>
+                    </div>
 
-                <div className="space-y-2 md:col-span-2">
-                  <Label className="text-zinc-400">Endereço Completo</Label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input disabled value={formData.logradouro} className="bg-white/[0.01] border-white/5 opacity-50" placeholder="Logradouro" />
-                    <Input disabled value={formData.bairro} className="bg-white/[0.01] border-white/5 opacity-50" placeholder="Bairro" />
-                    <Input disabled value={formData.cidade} className="bg-white/[0.01] border-white/5 opacity-50" placeholder="Cidade" />
-                    <Input disabled value={formData.uf} className="bg-white/[0.01] border-white/5 opacity-50" placeholder="UF" />
-                  </div>
-                </div>
+                    <div className="space-y-2">
+                      <Label className="text-zinc-400">Número *</Label>
+                      <Input 
+                        required
+                        disabled={jaExiste}
+                        value={formData.numero}
+                        onChange={e => setFormData(prev => ({ ...prev, numero: e.target.value }))}
+                        className="bg-white/[0.03] border-white/10 focus:ring-amber-500/20" 
+                        placeholder="S/N"
+                      />
+                    </div>
+
+                    <div className="space-y-2 md:col-span-2">
+                      <Label className="text-zinc-400">Endereço Completo</Label>
+                      <div className="grid grid-cols-2 gap-4">
+                        <Input disabled value={formData.logradouro} className="bg-white/[0.01] border-white/5 opacity-50 text-xs" placeholder="Logradouro" />
+                        <Input disabled value={formData.bairro} className="bg-white/[0.01] border-white/5 opacity-50 text-xs" placeholder="Bairro" />
+                        <Input disabled value={formData.cidade} className="bg-white/[0.01] border-white/5 opacity-50 text-xs" placeholder="Cidade" />
+                        <Input disabled value={formData.uf} className="bg-white/[0.01] border-white/5 opacity-50 text-xs" placeholder="UF" />
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
 
               {jaExiste && (
@@ -351,18 +369,20 @@ export default function LeadLanding() {
                 </div>
               )}
 
-              <Button 
-                type="submit" 
-                disabled={saving}
-                className="w-full bg-amber-500 text-black hover:bg-amber-600 h-12 text-base font-bold shadow-[0_0_20px_rgba(245,158,11,0.2)]"
-              >
-                {saving ? (
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                ) : (
-                  <Send className="mr-2 h-4 w-4" />
-                )}
-                {jaExiste ? "Confirmar Dados" : "Enviar Cadastro"}
-              </Button>
+              {documentoValidado && (
+                <Button 
+                  type="submit" 
+                  disabled={saving}
+                  className="w-full bg-amber-500 text-black hover:bg-amber-600 h-12 text-base font-bold shadow-[0_0_20px_rgba(245,158,11,0.2)]"
+                >
+                  {saving ? (
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  ) : (
+                    <Send className="mr-2 h-4 w-4" />
+                  )}
+                  {jaExiste ? "Confirmar Dados" : "Enviar Cadastro"}
+                </Button>
+              )}
             </form>
           </CardContent>
         </Card>
