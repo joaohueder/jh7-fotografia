@@ -10,6 +10,8 @@ import { notifyError, notifyValidation } from "@/lib/system-message";
 import { maskCpfCnpj, maskPhone, maskCep } from "@/lib/br-masks";
 import { fetchAddressByCep } from "@/lib/viacep";
 
+const db = supabase as any;
+
 export default function LeadLanding() {
   const { leadId } = useParams();
   const navigate = useNavigate();
@@ -38,7 +40,7 @@ export default function LeadLanding() {
     async function carregarDados() {
       if (!leadId) return;
       try {
-        const { data, error } = await supabase
+        const { data, error } = await db
           .from("clientes")
           .select("*, empresas(*)")
           .eq("id", leadId)
@@ -81,7 +83,7 @@ export default function LeadLanding() {
     if (limpo.length < 11 || !lead) return;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("clientes")
         .select("*")
         .eq("empresa_id", lead.empresa_id)
@@ -143,7 +145,7 @@ export default function LeadLanding() {
 
     setSaving(true);
     try {
-      const { error } = await supabase
+      const { error } = await db
         .from("clientes")
         .update({
           nome: formData.nome,
@@ -158,7 +160,7 @@ export default function LeadLanding() {
           endereco_cidade: formData.cidade,
           endereco_uf: formData.uf,
           status: "ATIVO"
-        } as any)
+        })
         .eq("id", leadId!);
 
       if (error) throw error;
