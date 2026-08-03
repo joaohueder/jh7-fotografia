@@ -414,7 +414,7 @@ export default function LeadLanding() {
         <div className="flex flex-col items-center justify-center gap-1.5 sm:flex-row sm:gap-3">
           <span>© {new Date().getFullYear()} {empresa?.nome_fantasia || "JH7 Gestão de Estúdios"}. Todos os direitos reservados.</span>
           <span className="hidden opacity-30 sm:inline">•</span>
-          <span className="font-mono text-[9px] tracking-tight opacity-50">Versão 2026.08.001</span>
+          <span className="font-mono text-[9px] tracking-tight opacity-50">Versão 2026.08.002</span>
         </div>
       </div>
     </div>

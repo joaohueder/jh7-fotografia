@@ -76,7 +76,7 @@ function LandingPage() {
         <div className="flex flex-col items-center justify-center gap-1.5 sm:flex-row sm:gap-3">
           <span>© {new Date().getFullYear()} JH7 Gestão de Estúdios Fotográficos.</span>
           <span className="hidden opacity-40 sm:inline">•</span>
-          <span className="font-mono text-[10px] tracking-tight opacity-60">Versão 2026.08.001</span>
+          <span className="font-mono text-[10px] tracking-tight opacity-60">Versão 2026.08.002</span>
         </div>
       </footer>
     </div>
