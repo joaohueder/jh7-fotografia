@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { notifySuccess, notifyError, notifyValidation } from "@/lib/system-message";
+import { notifyError, notifyValidation } from "@/lib/system-message";
 import { maskCpfCnpj, maskPhone, maskCep } from "@/lib/br-masks";
 import { fetchAddressByCep } from "@/lib/viacep";
 
@@ -38,32 +38,32 @@ export default function LeadLanding() {
     async function carregarDados() {
       if (!leadId) return;
       try {
-        // No Supabase autohospedado, buscamos na tabela clientes e fazemos o join com empresas
-        const { data: leadData, error: leadError } = await supabase
-          .from("clientes" as any)
+        const { data, error } = await supabase
+          .from("clientes")
           .select("*, empresas(*)")
           .eq("id", leadId)
           .single();
 
-        if (leadError || !leadData) throw leadError;
+        if (error || !data) throw error;
 
+        const leadData = data as any;
         setLead(leadData);
-        setEmpresa((leadData as any).empresas);
+        setEmpresa(leadData.empresas);
         setFormData({
           nome: leadData.nome || "",
-          documento: (leadData as any).documento ? maskCpfCnpj((leadData as any).documento) : "",
+          documento: leadData.documento ? maskCpfCnpj(leadData.documento) : "",
           contato_whatsapp: maskPhone(leadData.contato_whatsapp || ""),
-          contato_email: (leadData as any).contato_email || "",
-          cep: maskCep((leadData as any).endereco_cep || ""),
-          logradouro: (leadData as any).endereco_logradouro || "",
-          numero: (leadData as any).endereco_numero || "",
-          complemento: (leadData as any).endereco_complemento || "",
-          bairro: (leadData as any).endereco_bairro || "",
-          cidade: (leadData as any).endereco_cidade || "",
-          uf: (leadData as any).endereco_uf || "",
+          contato_email: leadData.contato_email || "",
+          cep: maskCep(leadData.endereco_cep || ""),
+          logradouro: leadData.endereco_logradouro || "",
+          numero: leadData.endereco_numero || "",
+          complemento: leadData.endereco_complemento || "",
+          bairro: leadData.endereco_bairro || "",
+          cidade: leadData.endereco_cidade || "",
+          uf: leadData.endereco_uf || "",
         });
 
-        if ((leadData as any).documento) {
+        if (leadData.documento) {
           setJaExiste(true);
         }
       } catch (err) {
@@ -82,7 +82,7 @@ export default function LeadLanding() {
 
     try {
       const { data, error } = await supabase
-        .from("clientes" as any)
+        .from("clientes")
         .select("*")
         .eq("empresa_id", lead.empresa_id)
         .eq("documento", limpo)
@@ -90,20 +90,21 @@ export default function LeadLanding() {
         .maybeSingle();
 
       if (data) {
+        const d = data as any;
         setJaExiste(true);
         setFormData(prev => ({
           ...prev,
-          nome: data.nome,
-          documento: maskCpfCnpj(data.documento),
-          contato_whatsapp: maskPhone(data.contato_whatsapp || ""),
-          contato_email: data.contato_email || "",
-          cep: maskCep(data.endereco_cep || ""),
-          logradouro: data.endereco_logradouro || "",
-          numero: data.endereco_numero || "",
-          complemento: data.endereco_complemento || "",
-          bairro: data.endereco_bairro || "",
-          cidade: data.endereco_cidade || "",
-          uf: data.endereco_uf || "",
+          nome: d.nome,
+          documento: maskCpfCnpj(d.documento),
+          contato_whatsapp: maskPhone(d.contato_whatsapp || ""),
+          contato_email: d.contato_email || "",
+          cep: maskCep(d.endereco_cep || ""),
+          logradouro: d.endereco_logradouro || "",
+          numero: d.endereco_numero || "",
+          complemento: d.endereco_complemento || "",
+          bairro: d.endereco_bairro || "",
+          cidade: d.endereco_cidade || "",
+          uf: d.endereco_uf || "",
         }));
         notifyValidation("Identificamos que você já possui cadastro conosco. Seus dados foram carregados para conferência.");
       }
@@ -143,7 +144,7 @@ export default function LeadLanding() {
     setSaving(true);
     try {
       const { error } = await supabase
-        .from("clientes" as any)
+        .from("clientes")
         .update({
           nome: formData.nome,
           documento: formData.documento.replace(/\D/g, ""),
