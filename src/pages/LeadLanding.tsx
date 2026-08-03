@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { notifyError, notifyValidation } from "@/lib/system-message";
 import { maskCpfCnpj, maskPhone, maskCep, isValidCpfCnpj } from "@/lib/br-masks";
 import { fetchAddressByCep } from "@/lib/viacep";
+import { ModalCadastroExistente } from "@/components/ModalCadastroExistente";
 
 const db = supabase as any;
 
@@ -23,6 +24,7 @@ export default function LeadLanding() {
   const [jaExiste, setJaExiste] = useState(false);
   const [documentoValidado, setDocumentoValidado] = useState(false);
   const [sucesso, setSucesso] = useState(false);
+  const [showModalExistente, setShowModalExistente] = useState(false);
 
   const [formData, setFormData] = useState({
     nome: "",
@@ -128,6 +130,7 @@ export default function LeadLanding() {
         }));
         setDocumentoValidado(true);
         notifyValidation("Identificamos que você já possui cadastro conosco. Seus dados foram carregados para conferência. Está tudo certo!");
+        setShowModalExistente(true);
       } else {
         setDocumentoValidado(true);
         setJaExiste(false);
@@ -415,8 +418,14 @@ export default function LeadLanding() {
           <span>© {new Date().getFullYear()} {empresa?.nome_fantasia || "JH7 Gestão de Estúdios"}. Todos os direitos reservados.</span>
           <span className="hidden opacity-30 sm:inline">•</span>
           <span className="font-mono text-[9px] tracking-tight opacity-50">Versão 2026.08.002</span>
-        </div>
       </div>
+      
+      <ModalCadastroExistente 
+        open={showModalExistente} 
+        onClose={() => setShowModalExistente(false)} 
+        empresaNome={empresa?.nome_fantasia}
+      />
+    </div>
     </div>
   );
 }
