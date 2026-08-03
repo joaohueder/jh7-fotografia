@@ -283,11 +283,13 @@ export default function LeadLanding() {
                         }
                       }}
                       onBlur={() => {
-                        if (formData.documento.length >= 11 && !documentoValidado) {
+                        const limpo = formData.documento.replace(/\D/g, "");
+                        if (limpo.length >= 11) {
                           checkDocumento(formData.documento);
                         }
                       }}
                       className="bg-white/[0.03] border-white/10 pl-10 pr-10 focus:ring-amber-500/20" 
+
                       placeholder="000.000.000-00"
                     />
                     {checkingDocumento && (
